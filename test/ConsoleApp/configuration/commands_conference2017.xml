@@ -1,0 +1,16 @@
+﻿<commands>
+  <command name="messages" commandType="Text" database="sqlserver">
+    <commandText>
+      <![CDATA[
+      SELECT a.Id, a.SendTo, a.SendFrom, a.CreateTime, a.[Type], a.Content, a.PictureUrl, a.MediaId
+           , b.Nickname AS 'User_Nickname', b.HeadImageUrl AS 'User_HeadImageUrl', b.Remark as 'User_Remark'
+      FROM conference2017.dbo.[Message] (NOLOCK) a LEFT JOIN conference2017.dbo.UserInfo (NOLOCK) b ON a.SendFrom = b.OpenId
+      WHERE [Type] = @Type
+      ORDER BY CreateTime DESC
+      ]]>
+    </commandText>
+    <params>
+      <param name="@Type" type="String" direction="Input" size="10" />
+    </params>
+  </command>
+</commands>
