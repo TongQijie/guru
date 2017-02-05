@@ -62,5 +62,20 @@ namespace Guru.Middleware.RESTfulService
                 return _QueryString;
             }
         }
+
+        private Dictionary<string, string> _Headers;
+
+        public Dictionary<string, string> Headers
+        {
+            get
+            {
+                if (_Headers == null)
+                {
+                    _Headers = Context.Request.Headers.ToDictionary(x => x.Key.ToLower(), x => x.Value[0]);
+                }
+
+                return _Headers;
+            }
+        }
     }
 }

@@ -32,10 +32,22 @@ namespace Guru.Network
         {
             _Uri = QueryHelpers.AddQueryString(uri, queryString);
         }
+        
+        public HttpBroker SetHeader(string name, string value)
+        {
+            _Client.DefaultRequestHeaders.Add(name, new string[] { value });
+            return this;
+        }
+
+        public HttpBroker SetTimeout(TimeSpan timeout)
+        {
+            _Client.Timeout = timeout;
+            return this;
+        }
 
         public async Task<int> GetAsync()
         {
-            var response = await _Client.GetAsync(_Uri);
+            var response = await _Client.GetAsync(_Uri, HttpCompletionOption.ResponseHeadersRead);
 
             _ResponseContent = response.Content;
 
@@ -50,7 +62,10 @@ namespace Guru.Network
             {
                 content.Headers.ContentLength = bytes.Length;
 
-                var response = await _Client.PostAsync(_Uri, content);
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, _Uri);
+                requestMessage.Content = content;
+
+                var response = await _Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
 
                  _ResponseContent = response.Content;
 
@@ -63,6 +78,20 @@ namespace Guru.Network
             using (var stream = await _ResponseContent.ReadAsStreamAsync())
             {
                 return await ContainerEntry.Resolve<TFormatter>().ReadObjectAsync<TBody>(stream);
+            }
+        }
+
+        public async Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4 * 1024)
+        {
+            var buffer = new byte[bufferSize];
+            int count = 0;
+
+            using (var stream = await _ResponseContent.ReadAsStreamAsync())
+            {
+                while ((count = stream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    await handler(buffer, 0, count);
+                }
             }
         }
 
