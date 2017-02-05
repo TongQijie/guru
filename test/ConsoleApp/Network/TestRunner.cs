@@ -17,8 +17,7 @@ namespace ConsoleApp.Network
 
         private async Task HttpBrokerTest()
         {
-            //var host = "http://192.168.0.105:8090";
-            var host = "http://localhost:49357";
+            var host = "http://localhost:5000";
 
             using (var broker = new HttpBroker($"{host}/test/hi1"))
             {

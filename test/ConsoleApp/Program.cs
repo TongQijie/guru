@@ -1,6 +1,7 @@
-﻿using Guru.DependencyInjection;
-using System;
+﻿using System;
 using System.Diagnostics;
+
+using Guru.DependencyInjection;
 
 namespace ConsoleApp
 {
@@ -8,16 +9,7 @@ namespace ConsoleApp
     {
         static Program()
         {
-            try
-            {
-                ContainerEntry.Init(new DefaultAssemblyLoader());
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            // init dependency injection
-            //ContainerEntry.Init(new DefaultAssemblyLoader());
+            ContainerEntry.Init(new DefaultAssemblyLoader());
         }
 
         public static void Main(string[] args)
@@ -25,13 +17,13 @@ namespace ConsoleApp
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            //new DependencyInjection.TestRunner().Run();
+            // new DependencyInjection.TestRunner().Run();
 
-            //new Formatter.TestRunner().Run();
+            // new Formatter.TestRunner().Run();
 
-            //new Network.TestRunner().Run();
+            new Network.TestRunner().Run();
 
-            new EntityFramework.TestRunner().Run();
+            // new EntityFramework.TestRunner().Run();
 
             stopwatch.Stop();
             Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");

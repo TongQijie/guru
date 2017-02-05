@@ -6,8 +6,7 @@
     },
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.1",
-    "Guru": "1.0.0-*",
-    "ConsoleApp": "1.0.0-*"
+    "Guru": "1.0.1"
   },
 
   "tools": {
