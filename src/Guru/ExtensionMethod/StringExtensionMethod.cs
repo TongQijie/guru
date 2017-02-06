@@ -116,12 +116,12 @@ namespace Guru.ExtensionMethod
 
         public static bool IsFile(this string stringValue)
         {
-            return File.Exists(stringValue);
+            return File.Exists(stringValue.FullPath());
         }
 
         public static bool IsFolder(this string stringValue)
         {
-            return Directory.Exists(stringValue);
+            return Directory.Exists(stringValue.FullPath());
         }
 
         public static bool EqualsWith(this string stringValue, string another)

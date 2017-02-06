@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.WebUtilities;
 
+using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
 
@@ -93,6 +94,39 @@ namespace Guru.Network
                     await handler(buffer, 0, count);
                 }
             }
+        }
+
+        private Dictionary<string, string> _ResponseHeaders;
+
+        public IReadOnlyDictionary<string, string> ResponseHeaders
+        {
+            get
+            {
+                if (_ResponseContent != null && _ResponseHeaders == null)
+                {
+                    _ResponseHeaders = new Dictionary<string, string>();
+
+                    foreach (var header in _ResponseContent.Headers)
+                    {
+                        foreach (var value in header.Value)
+                        {
+                            _ResponseHeaders.Add(header.Key.ToLower(), value);
+                        }
+                    }
+                }
+
+                return _ResponseHeaders;
+            }
+        }
+
+        public T GetResponseHeader<T>(string name)
+        {
+            if (ResponseHeaders != null && ResponseHeaders.ContainsKey(name.ToLower()))
+            {
+                return ResponseHeaders[name.ToLower()].ConvertTo<T>();
+            }
+
+            return default(T);
         }
 
         public void Dispose()

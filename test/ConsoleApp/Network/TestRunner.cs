@@ -1,10 +1,8 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using Guru.Network;
-using Guru.ExtensionMethod;
 using Guru.Formatter.Abstractions;
 
 using ConsoleApp.Middleware;
@@ -20,28 +18,6 @@ namespace ConsoleApp.Network
 
         private async Task HttpBrokerTest()
         {
-            using (var outputStream = new FileStream("./N_3CHNdliVs.jpg".FullPath(), FileMode.Create, FileAccess.Write))
-            {
-                using (var broker = new HttpBroker("https://images.unsplash.com/photo-1485809876425-9c96ea4132fe?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&s=98bb75f1c508abe5f8cc2bfff437aefa")
-                .SetTimeout(TimeSpan.FromSeconds(120)))
-                {
-                    if (await broker.GetAsync() == 200)
-                    {
-                        var total = 0;
-                    
-                        await broker.GetBodyAsync(async (b, o, c) =>
-                        {
-                            await outputStream.WriteAsync(b, 0, c);
-
-                            total += c;
-                            Console.WriteLine($"{DateTime.Now.ToString("HH:mm:ss.fff")}{total}bytes");
-                        }, 50 * 1024);
-                    }
-                }
-            }
-
-            return;
-
             var host = "http://localhost:5000";
 
             using (var broker = new HttpBroker($"{host}/test/hi1"))
@@ -122,7 +98,7 @@ namespace ConsoleApp.Network
                 }
             }
 
-            
+
         }
     }
 }
