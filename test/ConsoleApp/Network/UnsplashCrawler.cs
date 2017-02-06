@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Guru.Network;
 using Guru.Formatter.Json;
 using Guru.ExtensionMethod;
+using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
 
 namespace ConsoleApp.Network
@@ -16,7 +17,18 @@ namespace ConsoleApp.Network
             InternalRun().GetAwaiter().GetResult();
         }
 
-        public async Task InternalRun()
+        private void WriteDoneItems(string path)
+        {
+            var doneItems = new DirectoryInfo(path).GetFiles().Select(x => new Photo() { Id = x.Name.Replace(".jpg", "") });
+            ContainerEntry.Resolve<IJsonFormatter>().WriteObject(doneItems, "./doneitems.json".FullPath());
+        }
+
+        private Photo[] ReadDoneItems()
+        {
+            return ContainerEntry.Resolve<IJsonFormatter>().ReadObject<Photo[]>("./doneitems.json".FullPath());
+        }
+
+        private async Task InternalRun()
         {
             for (int i = 1; i <= 100; i++)
             {

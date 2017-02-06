@@ -31,7 +31,7 @@ namespace Guru.DependencyInjection
 
                 // load from base directory
                 var directoryInfo = new DirectoryInfo("./".FullPath());
-                foreach (var fileInfo in directoryInfo.GetFiles("*.dll", SearchOption.TopDirectoryOnly))
+                foreach (var fileInfo in directoryInfo.GetFiles("*.dll", SearchOption.TopDirectoryOnly).Where(x => !x.Name.StartsWith("runtime") && !x.Name.StartsWith("System") && !x.Name.StartsWith("Microsoft") && !x.Name.StartsWith("NETStandard") && x.Name != "Libuv" && !x.Name.StartsWith("Newtonsoft")))
                 {
                     var assemblyName = AssemblyLoadContext.GetAssemblyName(fileInfo.FullName);
 
