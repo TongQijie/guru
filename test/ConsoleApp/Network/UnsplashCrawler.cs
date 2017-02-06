@@ -14,7 +14,7 @@ namespace ConsoleApp.Network
     {
         public void Run()
         {
-            InternalRun().GetAwaiter().GetResult();
+            InternalRun("/Users/Jerry/Pictures/wallpapers".FullPath()).GetAwaiter().GetResult();
         }
 
         private void WriteDoneItems(string path)
@@ -28,9 +28,9 @@ namespace ConsoleApp.Network
             return ContainerEntry.Resolve<IJsonFormatter>().ReadObject<Photo[]>("./doneitems.json".FullPath());
         }
 
-        private async Task InternalRun()
+        private async Task InternalRun(string folder)
         {
-            for (int i = 1; i <= 100; i++)
+            for (int i = 1; i <= 200; i++)
             {
                 Photo[] photos = null;
                 var retryTimes = 0;
@@ -40,25 +40,27 @@ namespace ConsoleApp.Network
                 }
                 if (photos == null || photos.Length == 0)
                 {
-                    return;
+                    Console.WriteLine($"exit at page {i}.");
+                    break;
                 }
 
-                if (!"./downloads".IsFolder())
+                if (!Directory.Exists(folder))
                 {
-                    Directory.CreateDirectory("./downloads".FullPath());
+                    Directory.CreateDirectory(folder);
                 }
 
                 foreach (var photo in photos.Subset(x => x.Links != null && x.Links.Download != null))
                 {
-                    if ($"./downloads/{photo.Id}.jpg".IsFile())
+                    var path = Path.Combine(folder, $"{photo.Id}.jpg");
+                    if (File.Exists(path))
                     {
                         continue;
                     }
 
                     retryTimes = 0;
-                    while (retryTimes < 3 && !await DownloadImage(photo.Links.Download, $"./downloads/{photo.Id}.jpg".FullPath()))
+                    while (retryTimes < 3 && !await DownloadImage(photo.Links.Download, path))
                     {
-                        File.Delete($"./downloads/{photo.Id}.jpg".FullPath());
+                        File.Delete(path);
                         retryTimes++;
                     }
                 }

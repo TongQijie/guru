@@ -25,8 +25,6 @@ namespace Guru.DependencyInjection
                 foreach (var library in dependencies.Where(x => !x.Name.StartsWith("runtime") && !x.Name.StartsWith("System") && !x.Name.StartsWith("Microsoft") && !x.Name.StartsWith("NETStandard") && x.Name != "Libuv" && !x.Name.StartsWith("Newtonsoft")))
                 {
                     assemblyNames = assemblyNames.Append(new AssemblyName(library.Name));
-
-                    System.Console.WriteLine($":) load from runtime libraries: {library.Name}");
                 }
 
                 // load from base directory
@@ -38,8 +36,6 @@ namespace Guru.DependencyInjection
                     if (!assemblyNames.Exists(x => x.Name == assemblyName.Name))
                     {
                         assemblyNames = assemblyNames.Append(assemblyName);
-
-                        System.Console.WriteLine($":) load from base directory: {fileInfo.FullName}");
                     }
                 }
 
