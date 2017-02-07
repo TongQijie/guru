@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
+using System.Net;
 
 namespace Guru.Network
 {
@@ -29,9 +30,29 @@ namespace Guru.Network
             _Uri = uri;
         }
 
-        public HttpBroker(string uri, IDictionary<string, string> queryString) : this(uri)
+        public HttpBroker(string uri, IDictionary<string, string> queryString, params object[] parameters)
         {
-            _Uri = QueryHelpers.AddQueryString(uri, queryString);
+            _Uri = uri;
+
+            if (queryString != null)
+            {
+                _Uri = QueryHelpers.AddQueryString(uri, queryString);
+            }
+
+            var handler = new HttpClientHandler();
+            if (parameters.HasLength())
+            {
+                foreach (var item in parameters)
+                {
+                    if (item is IWebProxy)
+                    {
+                        var proxy = item as IWebProxy;
+                        handler.Proxy = proxy;
+                        handler.Credentials = proxy.Credentials;
+                    }
+                }
+            }
+            _Client = new HttpClient(handler);
         }
         
         public HttpBroker SetHeader(string name, string value)

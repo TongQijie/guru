@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 using Guru.Network;
@@ -12,9 +13,14 @@ namespace ConsoleApp.Network
 {
     public class UnsplashCrawler
     {
+        private IWebProxy GetProxy()
+        {
+            return new DefaultWebProxy("s1firewall", 8080, "jt69", "Newegg@12345", "buyabs.corp");
+        }
+
         public void Run()
         {
-            InternalRun("/Users/Jerry/Pictures/wallpapers".FullPath()).GetAwaiter().GetResult();
+            InternalRun("D:\\demo\\crawler\\unsplash.com\\Unsplash.ConsoleApp\\bin\\Debug\\images".FullPath()).GetAwaiter().GetResult();
         }
 
         private void WriteDoneItems(string path)
@@ -71,13 +77,14 @@ namespace ConsoleApp.Network
         {
             var uri = string.Format("https://unsplash.com/napi/photos/curated?page={0}&order_by=latest", page);
 
-            using (var broker = new HttpBroker(uri))
+            using (var broker = new HttpBroker(uri, null, GetProxy()))
             {
                 broker.SetHeader("authorization", "Client-ID d69927c7ea5c770fa2ce9a2f1e3589bd896454f7068f689d8e41a25b54fa6042");
 
                 Console.Write($":) start to fetch page {page}... ");
 
-                if (await broker.GetAsync() == 200)
+                var statusCode = await broker.GetAsync();
+                if (statusCode == 200)
                 {
                     Console.WriteLine("succeeded");
 
@@ -85,7 +92,7 @@ namespace ConsoleApp.Network
                 }
                 else
                 {
-                    Console.WriteLine("failed");
+                    Console.WriteLine($"failed, status code: {statusCode}");
                 }
             }
 
@@ -94,7 +101,7 @@ namespace ConsoleApp.Network
 
         private async Task<bool> DownloadImage(string uri, string path)
         {
-            using (var broker = new HttpBroker(uri))
+            using (var broker = new HttpBroker(uri, null, GetProxy()))
             {
                 Console.Write($":) start to download from {uri}... ");
 

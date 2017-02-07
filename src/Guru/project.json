@@ -2,7 +2,8 @@
   "version": "1.0.1",
 
   "buildOptions": {
-    "outputName": "Guru"
+    "outputName": "Guru",
+    "debugType": "portable"
   },
 
   "dependencies": {
