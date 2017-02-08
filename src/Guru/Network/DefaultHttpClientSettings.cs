@@ -1,9 +1,9 @@
 using System;
 using System.Net;
+using System.Text;
 using System.Collections.Generic;
 
 using Guru.ExtensionMethod;
-using System.Text;
 
 namespace Guru.Network
 {

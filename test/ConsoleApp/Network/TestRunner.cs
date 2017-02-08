@@ -1,16 +1,30 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-using Guru.Network;
-using Guru.Formatter.Abstractions;
-
 using ConsoleApp.Middleware;
+
+using Guru.Network;
+using Guru.DependencyInjection;
+using Guru.Formatter.Abstractions;
 
 namespace ConsoleApp.Network
 {
     public class TestRunner
     {
+        private readonly IHttpClientBroker _Broker;
+
+        private IWebProxy GetProxy()
+        {
+            return new DefaultWebProxy("stfirewall", 8080, "jt69", "Newegg@12345", "buyabs.corp");
+        }
+
+        public TestRunner()
+        {
+            _Broker = ContainerEntry.Resolve<IHttpClientBroker>();
+        }
+
         public void Run()
         {
             HttpBrokerTest().GetAwaiter().GetResult();
@@ -18,6 +32,19 @@ namespace ConsoleApp.Network
 
         private async Task HttpBrokerTest()
         {
+            var settings = new DefaultHttpClientSettings("default", null, GetProxy(), null);
+
+            var request = _Broker.Get(settings);
+            using (var response = await request.GetAsync("http://www.baidu.com", null))
+            {
+                if (response.StatusCode == 200)
+                {
+                    Console.WriteLine(await response.GetBodyAsync<string, ITextFormatter>());
+                }
+            }
+
+            return;
+
             var host = "http://localhost:5000";
 
             using (var broker = new HttpBroker($"{host}/test/hi1"))
