@@ -43,8 +43,6 @@ namespace ConsoleApp.Network
                 }
             }
 
-            return;
-
             var host = "http://localhost:5000";
 
             using (var broker = new HttpBroker($"{host}/test/hi1"))

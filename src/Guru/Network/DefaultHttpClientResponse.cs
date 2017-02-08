@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -19,11 +20,34 @@ namespace Guru.Network
 
         public int StatusCode => (int)_Response?.StatusCode;
 
+        private Dictionary<string, string[]> _Headers;
+
         public IReadOnlyDictionary<string, string[]> Headers
         {
             get
             {
-                throw new NotImplementedException();
+                if (_Headers == null)
+                {
+                    _Headers = new Dictionary<string, string[]>();
+
+                    if (_Response.Headers != null)
+                    {
+                        foreach (var header in _Response.Headers)
+                        {
+                            _Headers.Add(header.Key, header.Value.ToArray());
+                        }
+                    }
+
+                    if (_Response.Content != null && _Response.Content.Headers != null)
+                    {
+                        foreach (var header in _Response.Content.Headers)
+                        {
+                            _Headers.Add(header.Key, header.Value.ToArray());
+                        }
+                    }
+                }
+
+                return _Headers;
             }
         }
         

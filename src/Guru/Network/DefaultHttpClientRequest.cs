@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.WebUtilities;
 
-using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection;
+using Guru.Formatter.Abstractions;
 
 namespace Guru.Network
 {
@@ -21,20 +21,27 @@ namespace Guru.Network
             _Settings = settings;
 
             var handler = new HttpClientHandler();
-
-            // set values
+            
             if (_Settings.Proxy != null)
             {
                 handler.Proxy = _Settings.Proxy;
                 handler.Credentials = _Settings.Proxy.Credentials;
             }
+            
+            _Client = new HttpClient(handler);
 
             if (_Settings.Timeout != null)
             {
                 _Client.Timeout = (TimeSpan)_Settings.Timeout;
             }
 
-            _Client = new HttpClient(handler);
+            if (settings.Headers != null)
+            {
+                foreach (var header in settings.Headers)
+                {
+                    _Client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                }
+            }
         }
 
         public async Task<IHttpClientResponse> GetAsync(string uri, IDictionary<string, string> queryString)
