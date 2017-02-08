@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.WebUtilities;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
-using System.Net;
 
 namespace Guru.Network
 {
