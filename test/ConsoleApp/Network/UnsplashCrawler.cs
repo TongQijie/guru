@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using Guru.Network;
 using Guru.Formatter.Json;
@@ -13,25 +13,27 @@ namespace ConsoleApp.Network
 {
     public class UnsplashCrawler
     {
-        private IWebProxy GetProxy()
+        private readonly IHttpClientBroker _Broker;
+
+        private readonly IHttpClientRequest _Request;
+
+        public UnsplashCrawler()
         {
-            return new DefaultWebProxy("s1firewall", 8080, "jt69", "Newegg@12345", "buyabs.corp");
+            _Broker = ContainerEntry.Resolve<IHttpClientBroker>();
+
+            _Request = _Broker.Get(new DefaultHttpClientSettings(
+                "unsplash",
+                new Dictionary<string, string[]>()
+                {
+                    { "authorization", new string[] { "Client-ID d69927c7ea5c770fa2ce9a2f1e3589bd896454f7068f689d8e41a25b54fa6042" } }
+                },
+                new DefaultWebProxy("s1firewall", 8080, "jt69", "Newegg@12345", "buyabs.corp"),
+                null));
         }
 
         public void Run()
         {
             InternalRun("D:\\demo\\crawler\\unsplash.com\\Unsplash.ConsoleApp\\bin\\Debug\\images".FullPath()).GetAwaiter().GetResult();
-        }
-
-        private void WriteDoneItems(string path)
-        {
-            var doneItems = new DirectoryInfo(path).GetFiles().Select(x => new Photo() { Id = x.Name.Replace(".jpg", "") });
-            ContainerEntry.Resolve<IJsonFormatter>().WriteObject(doneItems, "./doneitems.json".FullPath());
-        }
-
-        private Photo[] ReadDoneItems()
-        {
-            return ContainerEntry.Resolve<IJsonFormatter>().ReadObject<Photo[]>("./doneitems.json".FullPath());
         }
 
         private async Task InternalRun(string folder)
@@ -77,22 +79,19 @@ namespace ConsoleApp.Network
         {
             var uri = string.Format("https://unsplash.com/napi/photos/curated?page={0}&order_by=latest", page);
 
-            using (var broker = new HttpBroker(uri, null, GetProxy()))
+            Console.Write($":) start to fetch page {page}... ");
+
+            using (var response = await _Request.GetAsync(uri))
             {
-                broker.SetHeader("authorization", "Client-ID d69927c7ea5c770fa2ce9a2f1e3589bd896454f7068f689d8e41a25b54fa6042");
-
-                Console.Write($":) start to fetch page {page}... ");
-
-                var statusCode = await broker.GetAsync();
-                if (statusCode == 200)
+                if (response.StatusCode == 200)
                 {
                     Console.WriteLine("succeeded");
 
-                    return await broker.GetBodyAsync<Photo[], IJsonFormatter>();
+                    return await response.GetBodyAsync<Photo[], IJsonFormatter>();
                 }
                 else
                 {
-                    Console.WriteLine($"failed, status code: {statusCode}");
+                    Console.WriteLine($"failed, status code: {response.StatusCode}");
                 }
             }
 
@@ -101,21 +100,21 @@ namespace ConsoleApp.Network
 
         private async Task<bool> DownloadImage(string uri, string path)
         {
-            using (var broker = new HttpBroker(uri, null, GetProxy()))
-            {
-                Console.Write($":) start to download from {uri}... ");
+            Console.Write($":) start to download from {uri}... ");
 
-                if (await broker.GetAsync() == 200)
+            using (var response = await _Request.GetAsync(uri))
+            {
+                if (response.StatusCode == 200)
                 {
                     Console.WriteLine("succeeded");
 
-                    var size = broker.GetResponseHeader<int>("Content-Length");
+                    var size = int.Parse(response.Headers["Content-Length"][0]);
 
                     using (var outputStream = new FileStream(path, FileMode.Create, FileAccess.Write))
                     {
                         var total = 0;
 
-                        await broker.GetBodyAsync(async (b, o, c) =>
+                        await response.GetBodyAsync(async (b, o, c) =>
                         {
                             await outputStream.WriteAsync(b, 0, c);
 
@@ -125,12 +124,6 @@ namespace ConsoleApp.Network
 
                         Console.WriteLine();
                     }
-
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine("failed");
                 }
             }
 

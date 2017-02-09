@@ -44,6 +44,11 @@ namespace Guru.Network
             }
         }
 
+        public async Task<IHttpClientResponse> GetAsync(string uri)
+        {
+            return new DefaultHttpClientResponse(await _Client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead));
+        }
+
         public async Task<IHttpClientResponse> GetAsync(string uri, IDictionary<string, string> queryString)
         {
             if (queryString != null)
@@ -54,6 +59,11 @@ namespace Guru.Network
             return new DefaultHttpClientResponse(await _Client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead));
         }
 
+        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body) where TFormatter : IFormatter
+        {
+            return await InternalPostAsync<TFormatter>(uri, body); 
+        }
+
         public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body) where TFormatter : IFormatter
         {
             if (queryString != null)
@@ -61,6 +71,11 @@ namespace Guru.Network
                 uri = QueryHelpers.AddQueryString(uri, queryString);
             }
 
+            return await InternalPostAsync<TFormatter>(uri, body);
+        }
+
+        private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body) where TFormatter : IFormatter
+        {
             var bytes = ContainerEntry.Resolve<TFormatter>().WriteBytes(body);
 
             using (var content = new ByteArrayContent(bytes))

@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -15,11 +14,6 @@ namespace ConsoleApp.Network
     {
         private readonly IHttpClientBroker _Broker;
 
-        private IWebProxy GetProxy()
-        {
-            return new DefaultWebProxy("stfirewall", 8080, "jt69", "Newegg@12345", "buyabs.corp");
-        }
-
         public TestRunner()
         {
             _Broker = ContainerEntry.Resolve<IHttpClientBroker>();
@@ -32,98 +26,112 @@ namespace ConsoleApp.Network
 
         private async Task HttpBrokerTest()
         {
-            var settings = new DefaultHttpClientSettings("default", null, GetProxy(), null);
-
-            var request = _Broker.Get(settings);
-            using (var response = await request.GetAsync("http://www.baidu.com", null))
-            {
-                if (response.StatusCode == 200)
-                {
-                    Console.WriteLine(await response.GetBodyAsync<string, ITextFormatter>());
-                }
-            }
+            var request = _Broker.Get();
 
             var host = "http://localhost:5000";
 
-            using (var broker = new HttpBroker($"{host}/test/hi1"))
+            using (var response = await request.GetAsync($"{host}/test/hi1"))
             {
-                if (await broker.GetAsync() == 200)
+                if (response.StatusCode == 200)
                 {
-                    var text = await broker.GetBodyAsync<string, ITextFormatter>();
+                    var text = await response.GetBodyAsync<string, ITextFormatter>();
 
                     Console.WriteLine(text);
                 }
             }
 
-            using (var broker = new HttpBroker($"{host}/test/hi2", new Dictionary<string, string>()
-            {
-                { "welcome", "abc" }
-            }))
-            {
-                if (await broker.GetAsync() == 200)
+            using (var response = await request.GetAsync(
+                $"{host}/test/hi2", 
+                new Dictionary<string, string>()
                 {
-                    var text = await broker.GetBodyAsync<string, ITextFormatter>();
+                    { "welcome", "abc" }
+                }))
+            {
+                if (response.StatusCode == 200)
+                {
+                    var text = await response.GetBodyAsync<string, ITextFormatter>();
 
                     Console.WriteLine(text);
                 }
             }
 
-            using (var broker = new HttpBroker($"{host}/test/hi3"))
+            using (var response = await request.PostAsync<IJsonFormatter>(
+                $"{host}/test/hi3", 
+                new Request() 
+                { 
+                    Data = "hello, world!" 
+                }))
             {
-                if (await broker.PostAsync<IJsonFormatter>(new Request() { Data = "hello, world!" }) == 200)
+                if (response.StatusCode == 200)
                 {
-                    var text = await broker.GetBodyAsync<string, ITextFormatter>();
+                    var text = await response.GetBodyAsync<string, ITextFormatter>();
 
                     Console.WriteLine(text);
                 }
             }
 
-            using (var broker = new HttpBroker($"{host}/test/hi4", new Dictionary<string, string>()
-            {
-                { "word", "abc" },
-                { "welcome", "def" }
-            }))
-            {
-                if (await broker.PostAsync<IJsonFormatter>(new Request() { Data = "hello, world!" }) == 200)
+            using (var response = await request.PostAsync<IJsonFormatter>(
+                $"{host}/test/hi4", 
+                new Dictionary<string, string>()
                 {
-                    var text = await broker.GetBodyAsync<string, ITextFormatter>();
+                    { "word", "abc" },
+                    { "welcome", "def" }
+                },
+                new Request() 
+                { 
+                    Data = "hello, world!" 
+                }))
+            {
+                if (response.StatusCode == 200)
+                {
+                    var text = await response.GetBodyAsync<string, ITextFormatter>();
 
                     Console.WriteLine(text);
                 }
             }
 
-            using (var broker = new HttpBroker($"{host}/test/hi5", new Dictionary<string, string>()
-            {
-                { "word", "abc" },
-                { "welcome", "def" },
-                { "number", "123" }
-            }))
-            {
-                if (await broker.PostAsync<IJsonFormatter>(new Request() { Data = "hello, world!" }) == 200)
+            using (var response = await request.PostAsync<IJsonFormatter>(
+                $"{host}/test/hi5", 
+                new Dictionary<string, string>()
                 {
-                    var response = await broker.GetBodyAsync<Response, IJsonFormatter>();
+                    { "word", "abc" },
+                    { "welcome", "def" },
+                    { "number", "123" }
+                },
+                new Request() 
+                { 
+                    Data = "hello, world!" 
+                }))
+            {
+                if (response.StatusCode == 200)
+                {
+                    var data = await response.GetBodyAsync<Response, IJsonFormatter>();
 
-                    Console.WriteLine(response.Result);
+                    Console.WriteLine(data.Result);
                 }
             }
 
-            using (var broker = new HttpBroker($"{host}/test/hi6", new Dictionary<string, string>()
-            {
-                { "word", "abc" },
-                { "welcome", "def" },
-                { "number", "123" },
-                { "price", "12.3" }
-            }))
-            {
-                if (await broker.PostAsync<IJsonFormatter>(new Request() { Data = "hello, world!" }) == 200)
+            using (var response = await request.PostAsync<IJsonFormatter>(
+                $"{host}/test/hi6", 
+                new Dictionary<string, string>()
                 {
-                    var response = await broker.GetBodyAsync<Response, IJsonFormatter>();
+                    { "word", "abc" },
+                    { "welcome", "def" },
+                    { "number", "123" },
+                    { "price", "12.3" }
+                },
+                new Request() 
+                { 
+                    Data = "hello, world!" 
+                }))
+            {
+                if (response.StatusCode == 200)
+                {
+                    var data = await response.GetBodyAsync<Response, IJsonFormatter>();
 
-                    Console.WriteLine(response.Result);
+                    Console.WriteLine(data.Result);
                 }
             }
-
-
         }
     }
 }
