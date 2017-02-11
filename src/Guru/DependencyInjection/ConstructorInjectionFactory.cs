@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Collections.Generic;
@@ -36,6 +37,11 @@ namespace Guru.DependencyInjection
             
             return constructorDelegate(paramaters);
         }
+
+        public object GetInstance(Type type, object[] constructorParameters, object[] instanceProperties)
+        {
+            throw new NotImplementedException();
+        }
         
         private Type[] GetConstructorParameterTypes(Type type)
         {
@@ -46,7 +52,7 @@ namespace Guru.DependencyInjection
         {
             Type[] result = null;
 
-            foreach (var ctor in type.GetConstructors())
+            foreach (var ctor in type.GetConstructors().OrderByDescending(x => x.GetParameters().Length))
             {
                 Type[] ctorParamsTypes = ctor.GetParameters().Select(param => param.ParameterType);
                 

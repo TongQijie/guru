@@ -386,9 +386,9 @@ namespace Guru.Formatter.Internal
         {
             var buf = new byte[firstCount + secondCount];
 
-            Array.Copy(firstArray, firstStart, buf, 0, firstCount);
+            Buffer.BlockCopy(firstArray, firstStart, buf, 0, firstCount);
 
-            Array.Copy(secondArray, secondStart, buf, firstCount, secondCount);
+            Buffer.BlockCopy(secondArray, secondStart, buf, firstCount, secondCount);
 
             return buf;
         }

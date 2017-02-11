@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
 using Guru.Logging;
+using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
 using Guru.Middleware.Abstractions;
@@ -95,11 +96,11 @@ namespace Guru.Middleware.RESTfulService
                             values[i] = await parameterInfo.GetParameterValueAsync(null, stream);
                         }
                     }
-                    else if (contentType.Contains("application/json"))
+                    else if (contentType.ContainsIgnoreCase("application/json"))
                     {
                         values[i] = await parameterInfo.GetParameterValueAsync(_JsonFormatter, stream);
                     }
-                    else if (contentType.Contains("application/xml"))
+                    else if (contentType.ContainsIgnoreCase("application/xml"))
                     {
                         values[i] = await parameterInfo.GetParameterValueAsync(_XmlFormatter, stream);
                     }
@@ -129,11 +130,11 @@ namespace Guru.Middleware.RESTfulService
                             values[i] = await parameterInfo.GetParameterValueAsync(null, stream);
                         }
                     }
-                    else if (contentType.Contains("application/json"))
+                    else if (contentType.ContainsIgnoreCase("application/json"))
                     {
                         values[i] = await parameterInfo.GetParameterValueAsync(_JsonFormatter, stream);
                     }
-                    else if (contentType.Contains("application/xml"))
+                    else if (contentType.ContainsIgnoreCase("application/xml"))
                     {
                         values[i] = await parameterInfo.GetParameterValueAsync(_XmlFormatter, stream);
                     }
@@ -161,11 +162,11 @@ namespace Guru.Middleware.RESTfulService
             {
                 return ContentType.Text;
             }
-            else if (accept.Contains("application/json"))
+            else if (accept.ContainsIgnoreCase("application/json"))
             {
                 return ContentType.Json;
             }
-            else if (accept.Contains("application/xml"))
+            else if (accept.ContainsIgnoreCase("application/xml"))
             {
                 return ContentType.Xml;
             }

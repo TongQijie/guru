@@ -36,7 +36,7 @@ namespace Guru.Middleware.RESTfulService
         {
             get
             {
-                return Context.Request.Headers["Content-Type"] == StringValues.Empty ? string.Empty : Context.Request.Headers["Content-Type"][0];
+                return Context.Request.Headers["Content-Type"] == StringValues.Empty ? string.Empty : string.Join(";", Context.Request.Headers["Content-Type"]);
             }
         }
 
@@ -44,7 +44,7 @@ namespace Guru.Middleware.RESTfulService
         {
             get
             {
-                return Context.Request.Headers["Accept"] == StringValues.Empty ? string.Empty : Context.Request.Headers["Accept"][0];
+                return Context.Request.Headers["Accept"] == StringValues.Empty ? string.Empty : string.Join(";", Context.Request.Headers["Accept"]);
             }
         }
 

@@ -124,9 +124,19 @@ namespace Guru.ExtensionMethod
             return Directory.Exists(stringValue.FullPath());
         }
 
-        public static bool EqualsWith(this string stringValue, string another)
+        public static bool EqualsWith(this string stringValue, string anotherStringValue)
         {
-            return string.Equals(stringValue, another, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(stringValue, anotherStringValue, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool EqualsIgnoreCase(this string stringValue, string anotherStringValue)
+        {
+            return string.Equals(stringValue, anotherStringValue, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool ContainsIgnoreCase(this string stringValue, string specifiedStringValue)
+        {
+            return stringValue.IndexOf(specifiedStringValue, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public static T ToEnum<T>(this string stringValue)
