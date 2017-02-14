@@ -60,7 +60,7 @@ namespace Guru.DependencyInjection
         {
             if (!_IsInit)
             {
-                _Container.GetImplementation<IFileSystemMonitor>().Add(this, _Path.Folder(), OnFileChanged, null, null, OnFileRenamed);
+                _Container.GetImplementation<IFileSystemMonitor>().Add(this, _Path.Folder(), OnFileChanged, OnFileChanged, OnFileChanged, OnFileRenamed);
                 _IsInit = true;
             }
             

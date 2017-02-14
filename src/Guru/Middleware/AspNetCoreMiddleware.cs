@@ -32,20 +32,6 @@ namespace Guru.Middleware
             
             var fields = context.Request.Path.Value.SplitByChar('/');
 
-            // check if fields is empty. if empty, apply default route.
-            if (!fields.HasLength())
-            {
-                var routes = ContainerEntry.Resolve<IApplicationConfiguration>().Routes;
-                if (routes.HasLength())
-                {
-                    var config = routes.FirstOrDefault(x => x.Key.EqualsWith("default"));
-                    if (config != null && config.Value.HasValue())
-                    {
-                        fields = fields.Append(config.Value.SplitByChar('/'));
-                    }
-                }
-            }
-
             // apply rewrite rules
             var rewrites = ContainerEntry.Resolve<IApplicationConfiguration>().Rewrites;
             if (rewrites.HasLength())
@@ -63,6 +49,20 @@ namespace Guru.Middleware
                         {
                             fields = Regex.Replace(url, item.Pattern, item.Value).SplitByChar('/');
                         }
+                    }
+                }
+            }
+
+            // check if fields is empty. if empty, apply default route.
+            if (!fields.HasLength())
+            {
+                var routes = ContainerEntry.Resolve<IApplicationConfiguration>().Routes;
+                if (routes.HasLength())
+                {
+                    var config = routes.FirstOrDefault(x => x.Key.EqualsWith("default"));
+                    if (config != null && config.Value.HasValue())
+                    {
+                        fields = fields.Append(config.Value.SplitByChar('/'));
                     }
                 }
             }
