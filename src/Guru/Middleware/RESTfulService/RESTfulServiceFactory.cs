@@ -69,12 +69,12 @@ namespace Guru.Middleware.RESTfulService
         public ServiceContext GetService(string serviceName, string methodName, HttpVerb httpVerb)
         {
             RESTfulServiceInfo serviceInfo;
-            if (!_ServiceInfos.TryGetValue(serviceName, out serviceInfo))
+            if (!_ServiceInfos.TryGetValue(serviceName.ToLower(), out serviceInfo))
             {
                 throw new Exception($"service '{serviceName}' does not exist.");
             }
 
-            var methodInfo = serviceInfo.MethodInfos.FirstOrDefault(x => x.Name.EqualsWith(methodName) && (x.HttpVerb == HttpVerb.Any || x.HttpVerb == httpVerb));
+            var methodInfo = serviceInfo.MethodInfos.FirstOrDefault(x => x.Name.EqualsIgnoreCase(methodName) && (x.HttpVerb == HttpVerb.Any || x.HttpVerb == httpVerb));
             if (methodInfo == null)
             {
                 throw new Exception($"method '{methodName}' does not exist.");

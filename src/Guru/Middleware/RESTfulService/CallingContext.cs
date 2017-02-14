@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 
 using Guru.ExtensionMethod;
 using Guru.Middleware.Abstractions;
-using Microsoft.Extensions.Primitives;
 
 namespace Guru.Middleware.RESTfulService
 {
@@ -24,29 +23,7 @@ namespace Guru.Middleware.RESTfulService
 
         public string MethodName { get; private set; }
 
-        public HttpVerb HttpVerb
-        {
-            get
-            {
-                return Context.Request.Method.EqualsWith("GET") ? HttpVerb.GET : HttpVerb.POST;
-            }
-        }
-
-        public string ContentType
-        {
-            get
-            {
-                return Context.Request.Headers["Content-Type"] == StringValues.Empty ? string.Empty : string.Join(";", Context.Request.Headers["Content-Type"]);
-            }
-        }
-
-        public string Accept
-        {
-            get
-            {
-                return Context.Request.Headers["Accept"] == StringValues.Empty ? string.Empty : string.Join(";", Context.Request.Headers["Accept"]);
-            }
-        }
+        public HttpVerb HttpVerb => Context.Request.Method.EqualsIgnoreCase("GET") ? HttpVerb.GET : HttpVerb.POST;
 
         private Dictionary<string, string> _QueryString;
 
@@ -63,6 +40,8 @@ namespace Guru.Middleware.RESTfulService
             }
         }
 
+        public string GetQueryString(string name) => QueryString.ContainsKey(name.ToLower()) ? QueryString[name.ToLower()] : string.Empty;
+
         private Dictionary<string, string> _Headers;
 
         public Dictionary<string, string> Headers
@@ -71,11 +50,17 @@ namespace Guru.Middleware.RESTfulService
             {
                 if (_Headers == null)
                 {
-                    _Headers = Context.Request.Headers.ToDictionary(x => x.Key.ToLower(), x => x.Value[0]);
+                    _Headers = Context.Request.Headers.ToDictionary(x => x.Key.ToLower(), x => string.Join(";", x.Value));
                 }
 
                 return _Headers;
             }
         }
+
+        public string GetHeader(string name) => Headers.ContainsKey(name.ToLower()) ? Headers[name.ToLower()] : string.Empty;
+
+        public string ContentType => GetHeader("Content-Type");
+
+        public string Accept => GetHeader("Accept");
     }
 }

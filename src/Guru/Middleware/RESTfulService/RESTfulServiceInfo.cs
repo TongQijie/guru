@@ -15,7 +15,8 @@ namespace Guru.Middleware.RESTfulService
         public RESTfulServiceInfo(Type serviceType, string name)
         {
             _ServiceType = serviceType;
-            _Name = name;
+            // service name MUST be lowercase
+            _Name = name.ToLower();
         }
 
         public string Name => _Name;
