@@ -2,6 +2,8 @@ namespace GitDiff
 {
     public class File
     {
+        public int Index { get; set; }
+
         public Commit LatestCommit { get; set; }
 
         public Commit InitialCommit { get; set; }

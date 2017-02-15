@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 
 using Guru.ExtensionMethod;
@@ -11,7 +10,12 @@ namespace GitDiff
     [DI(typeof(IGit), Lifetime = Lifetime.Singleton)]
     public class Git : IGit
     {
-        public string LocalDirectory { get; set; }
+        private readonly IFileManager _FileManager;
+
+        public Git(IFileManager fileManager)
+        {
+            _FileManager = fileManager;
+        }
 
         public Change[] GetCommitDetail(string commitId)
         {
@@ -20,7 +24,7 @@ namespace GitDiff
                 .Add(commitId);
 
             var changes = new Change[0];
-            using (var reader = process.ReadStream(LocalDirectory))
+            using (var reader = process.ReadStream(_FileManager.Single<IConfig>().LocalGitDirectory))
             {
                 string line = null;
                 while ((line = reader.ReadLine()) != null)
@@ -28,11 +32,26 @@ namespace GitDiff
                     var fields = line.SplitByChar('\t');
                     if (fields.Length >= 2)
                     {
-                        changes = changes.Append(new Change()
+                        if (fields[0].StartsWith("R", StringComparison.OrdinalIgnoreCase))
                         {
-                            Action = fields[0],
-                            Path = fields[1],
-                        });
+                            changes = changes.Append(new Change()
+                            {
+                                Action = "D",
+                                Path = fields[1],
+                            }).Append(new Change()
+                            {
+                                Action = "A",
+                                Path = fields[2],
+                            });
+                        }
+                        else
+                        {
+                            changes = changes.Append(new Change()
+                            {
+                                Action = fields[0],
+                                Path = fields[1],
+                            });
+                        }
                     }
                 }
             }
@@ -40,9 +59,10 @@ namespace GitDiff
             return changes;
         }
 
-        public Stream GetFileContent(string commitId, string path)
+        public string GetFileContent(string commitId, string path)
         {
-            throw new NotImplementedException();
+            return new ProcessHelper("git").Add("show").Add($"{commitId}:\"{path}\"")
+                .ReadString(_FileManager.Single<IConfig>().LocalGitDirectory);
         }
 
         public Commit GetFileHistory(string path, Commit beforeCommit)
@@ -52,7 +72,7 @@ namespace GitDiff
                 .Add("--before").Add($"\"{beforeCommit.Date.AddSeconds(-1)}\"")
                 .Add("--").Add($"\"{path}\"");
 
-            using (var reader = process.ReadStream(LocalDirectory))
+            using (var reader = process.ReadStream(_FileManager.Single<IConfig>().LocalGitDirectory))
             {
                 string line = reader.ReadLine();
                 if (line == null)
@@ -85,16 +105,18 @@ namespace GitDiff
             }
         }
 
-        public Commit[] GetTotalCommits(DateTime startTime, DateTime endTime, string branchName)
+        public Commit[] GetTotalCommits()
         {
+            var config = _FileManager.Single<IConfig>();
+
             var process = new ProcessHelper("git").Add("log")
-                .Add("--after").Add($"\"{startTime.ToString("yyyy-MM-dd HH:mm:ss")}\"")
-                .Add("--before").Add($"\"{endTime.ToString("yyyy-MM-dd HH:mm:ss")}\"")
+                .Add("--after").Add($"\"{config.StartTime.ToString("yyyy-MM-dd HH:mm:ss")}\"")
+                .Add("--before").Add($"\"{(config.EndTime ?? DateTime.Now).ToString("yyyy-MM-dd HH:mm:ss")}\"")
                 .Add("--pretty=format:\"%H|%cI|%an|%s\"")
-                .Add(branchName);
+                .Add(config.BranchName);
 
             var commits = new Commit[0];
-            using (var reader = process.ReadStream(LocalDirectory))
+            using (var reader = process.ReadStream(_FileManager.Single<IConfig>().LocalGitDirectory))
             {
                 string line = null;
                 while ((line = reader.ReadLine()) != null)

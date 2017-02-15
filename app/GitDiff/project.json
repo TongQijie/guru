@@ -2,7 +2,12 @@
   "version": "1.0.0",
   "buildOptions": {
     "emitEntryPoint": true,
-    "debugType": "portable"
+    "debugType": "portable",
+    "copyToOutput": {
+      "include": [
+        "config.json"
+      ]
+    }
   },
 
   "dependencies": {
