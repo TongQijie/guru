@@ -55,6 +55,9 @@ namespace GitDiff
 
             var files = new File[0];
 
+            index = 0;
+            Console.Write($"\r1st phrase: {index++}/{commits.Length}");
+
             foreach (var commit in commits.OrderBy(x => x.Date))
             {
                 var changes = _Git.GetCommitDetail(commit.Id);
@@ -80,6 +83,8 @@ namespace GitDiff
                         exists.LatestAction = change.Action;
                     }
                 }
+
+                Console.Write($"\r1st phrase: {index++}/{commits.Length}");
             }
 
             // A -> A -> A: N/A
@@ -104,8 +109,13 @@ namespace GitDiff
             // . -> A -> M: Add
             // . -> A -> D: Ignore
 
+            index = 0;
+            ConsoleHelper.ClearCurrentLine();
+            
             foreach (var file in files)
             {
+                Console.Write($"\r2nd phrase: {index++}/{files.Length}");
+
                 if ((file.InitialAction == "M" && file.LatestAction == "A") ||
                     (file.InitialAction == "M" && file.LatestAction == "M") ||
                     (file.InitialAction == "D" && file.LatestAction == "A") ||
@@ -148,6 +158,8 @@ namespace GitDiff
                 }
             }
 
+            ConsoleHelper.ClearCurrentLine();
+            
             index = 1;
             var compares = files.Where(x => x.Mark != "I").OrderBy(x => x.Mark).ToArray().Each(x => x.Index = index++);
 

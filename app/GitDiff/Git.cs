@@ -44,6 +44,14 @@ namespace GitDiff
                                 Path = fields[2],
                             });
                         }
+                        else if(fields[0] == "MM")
+                        {
+                            changes = changes.Append(new Change()
+                            {
+                                Action = "M",
+                                Path = fields[1],
+                            });
+                        }
                         else
                         {
                             changes = changes.Append(new Change()
