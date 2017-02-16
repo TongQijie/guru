@@ -161,7 +161,7 @@ namespace GitDiff
             ConsoleHelper.ClearCurrentLine();
             
             index = 1;
-            var compares = files.Where(x => x.Mark != "I").OrderBy(x => x.Mark).ToArray().Each(x => x.Index = index++);
+            var compares = files.Where(x => x.Mark != "I").OrderBy(x => x.Mark).ThenBy(x => x.Path).ToArray().Each(x => x.Index = index++);
 
             // print results
             Print(compares);
