@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using System.Diagnostics;
 
 namespace GitDiff
@@ -50,6 +51,7 @@ namespace GitDiff
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.Arguments = Arguments;
             process.StartInfo.WorkingDirectory = workingDirectory;
+            process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
             process.Start();
 
             return process.StandardOutput;

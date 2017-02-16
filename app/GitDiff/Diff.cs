@@ -201,7 +201,7 @@ namespace GitDiff
 
                                 var config = _FileManager.Single<IConfig>();
 
-                                new ProcessHelper(config.CompareTool).Add(config.CompareToolParams).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
+                                new ProcessHelper(config.CompareTool).Add(config.CompareToolParams ?? string.Empty).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
                             }
                             else if (compare.Mark == "A")
                             {
@@ -229,7 +229,7 @@ namespace GitDiff
 
                                 var config = _FileManager.Single<IConfig>();
 
-                                new ProcessHelper(config.CompareTool).Add(config.CompareToolParams).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
+                                new ProcessHelper(config.CompareTool).Add(config.CompareToolParams ?? string.Empty).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
                             }
                             else if (compare.Mark == "D" && compare.HistoryCommit != null)
                             {
@@ -257,7 +257,7 @@ namespace GitDiff
 
                                 var config = _FileManager.Single<IConfig>();
 
-                                new ProcessHelper(config.CompareTool).Add(config.CompareToolParams).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
+                                new ProcessHelper(config.CompareTool).Add(config.CompareToolParams ?? string.Empty).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
                             }
 
                             break;
@@ -279,7 +279,22 @@ namespace GitDiff
             Console.WriteLine("Index\tStatus\tPath");
             foreach (var file in files)
             {
-                Console.WriteLine($"{file.Index}\t{file.Mark}\t{file.Path}");
+                Console.Write($"{file.Index}\t");
+                if (file.Mark == "A")
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+                else if (file.Mark == "D")
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
+                Console.Write($"{file.Mark}\t");
+                Console.ResetColor();
+                Console.WriteLine($"{file.Path}");
             }
         }
 
