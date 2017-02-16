@@ -26,9 +26,32 @@ namespace Guru.ExtensionMethod
 
         public static object ConvertTo(this object obj, Type targetType)
         {
-            if (obj == null || targetType == null)
+            if (targetType == null)
             {
                 throw new ArgumentNullException("obj or targetType");
+            }
+
+            if (targetType.GetTypeInfo().IsValueType)
+            {
+                var t = Nullable.GetUnderlyingType(targetType);
+                if (t != null)
+                {
+                    if (obj == null)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        targetType = t;
+                    }
+                }
+            }
+            else
+            {
+                if (obj == null)
+                {
+                    return null;
+                }
             }
 
             if (targetType.GetTypeInfo().IsAssignableFrom(obj.GetType()))
