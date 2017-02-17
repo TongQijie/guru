@@ -3,17 +3,23 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Http;
 
+using Guru.ExtensionMethod;
 using Guru.Middleware.Abstractions;
 
 namespace Guru.Middleware.StaticFile
 {
     public class CallingContext : ICallingContext
     {
-        public CallingContext(HttpContext context, string path, string resourceType)
+        public CallingContext(HttpContext context, string uri)
         {
             Context = context;
-            Path = path;
-            ResourceType = resourceType;
+
+            var fields = uri.SplitByChar('/');
+            var lastField = fields[fields.Length - 1];
+            var dotIndex = lastField.LastIndexOf('.');
+
+            Path = uri;
+            ResourceType = (dotIndex < lastField.Length - 1) ? lastField.Substring(dotIndex + 1) : string.Empty;
         }
 
         public HttpContext Context { get; private set; }

@@ -10,11 +10,13 @@ namespace Guru.Middleware.RESTfulService
 {
     public class CallingContext : ICallingContext
     {
-        public CallingContext(HttpContext context, string serviceName, string methodName)
+        public CallingContext(HttpContext context, string uri)
         {
             Context = context;
-            ServiceName = serviceName;
-            MethodName = methodName;
+
+            var fields = uri.SplitByChar('/');
+            ServiceName = fields.Length > 0 ? fields[0] : "";
+            MethodName = fields.Length > 1 ? fields[1] : "";
         }
 
         public HttpContext Context { get; private set; }

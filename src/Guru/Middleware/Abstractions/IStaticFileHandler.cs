@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
-
-namespace Guru.Middleware.Abstractions
+﻿namespace Guru.Middleware.Abstractions
 {
-    public interface IStaticFileHandler
+    public interface IStaticFileHandler : IHttpHandler
     {
-        Task ProcessRequest(ICallingContext context);
     }
 }

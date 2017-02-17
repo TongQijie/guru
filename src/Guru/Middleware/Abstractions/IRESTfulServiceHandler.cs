@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
-
-namespace Guru.Middleware.Abstractions
+﻿namespace Guru.Middleware.Abstractions
 {
-    public interface IRESTfulServiceHandler
+    public interface IRESTfulServiceHandler : IHttpHandler
     {
-        Task ProcessRequest(ICallingContext context);
     }
 }
