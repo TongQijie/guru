@@ -3,10 +3,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 using Guru.ExtensionMethod;
+using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
+using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Middleware.Components
 {
+    [DI(typeof(IHttpHandlerComponent), Lifetime = Lifetime.Singleton)]
     public class HttpHandlerComponent : IHttpHandlerComponent
     {
         private readonly IStaticFileHandler _StaticFileHandler;
@@ -25,7 +28,13 @@ namespace Guru.Middleware.Components
         {
             var fields = uri.SplitByChar('/');
 
-            if (fields.HasLength() && fields[fields.Length - 1].Contains("."))
+            if (!fields.HasLength())
+            {
+                context.Response.StatusCode = 400;
+                return;
+            }
+
+            if (fields[fields.Length - 1].Contains("."))
             {
                 var callingContext = new StaticFile.CallingContext(context, uri);
 

@@ -32,7 +32,9 @@ namespace Guru.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            var path = _UriRewriteComponent.Rewrite(context.Request.Path.Value);
+            var path = context.Request.Path.Value.Trim('/');
+
+            path = _UriRewriteComponent.Rewrite(path);
 
             if (!path.HasValue())
             {

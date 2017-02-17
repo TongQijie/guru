@@ -50,13 +50,26 @@ namespace Guru.Middleware.RESTfulService
 
             try
             {
-                var serviceContext = _Factory.GetService(callingContext.ServiceName, callingContext.MethodName, callingContext.HttpVerb);
+                var serviceContext = _Factory.GetService(
+                    callingContext.ServicePrefix,
+                    callingContext.ServiceName,
+                    callingContext.MethodName,
+                    callingContext.HttpVerb);
 
-                var parameterValues = await GetParameterValuesAsync(serviceContext, callingContext.ContentType, callingContext.QueryString, callingContext.Context.Request.Body);
+                var parameterValues = await GetParameterValuesAsync(
+                    serviceContext, 
+                    callingContext.ContentType, 
+                    callingContext.QueryString, 
+                    callingContext.Context.Request.Body);
 
-                var result = serviceContext.MethodInfo.Invoke(serviceContext.ServiceIntance, parameterValues);
+                var result = serviceContext.MethodInfo.Invoke(
+                    serviceContext.ServiceIntance, 
+                    parameterValues);
 
-                await SetResponse(GetResponseContentType(serviceContext, callingContext.Accept), result, callingContext.Context);
+                await SetResponse(
+                    GetResponseContentType(serviceContext, callingContext.Accept), 
+                    result, 
+                    callingContext.Context);
             }
             catch (Exception e)
             {

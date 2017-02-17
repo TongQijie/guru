@@ -11,6 +11,6 @@ namespace Guru.Middleware.Abstractions
 
         void RegisterService(Type serviceType);
 
-        ServiceContext GetService(string serviceName, string methodName, HttpVerb httpVerb);
+        ServiceContext GetService(string servicePrefix, string serviceName, string methodName, HttpVerb httpVerb);
     }
 }

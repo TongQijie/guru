@@ -11,5 +11,7 @@ namespace Guru.Middleware.RESTfulService
         }
         
         public string Name { get; set; }
+
+        public string Prefix { get; set; }
     }
 }

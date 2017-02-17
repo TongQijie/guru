@@ -4,7 +4,7 @@ using Guru.Middleware.RESTfulService;
 
 namespace ConsoleApp.Middleware
 {
-    [Service("test")]
+    [Service("test", Prefix = "api")]
     public class TestRESTfulService
     {
         [Method(Name = "hi1", Response = ContentType.Text)]

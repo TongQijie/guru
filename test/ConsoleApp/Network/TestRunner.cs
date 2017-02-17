@@ -30,7 +30,7 @@ namespace ConsoleApp.Network
 
             var host = "http://localhost:5000";
 
-            using (var response = await request.GetAsync($"{host}/test/hi1"))
+            using (var response = await request.GetAsync($"{host}/api/test/hi1"))
             {
                 if (response.StatusCode == 200)
                 {
@@ -41,7 +41,7 @@ namespace ConsoleApp.Network
             }
 
             using (var response = await request.GetAsync(
-                $"{host}/test/hi2", 
+                $"{host}/api/test/hi2", 
                 new Dictionary<string, string>()
                 {
                     { "welcome", "abc" }
@@ -56,7 +56,7 @@ namespace ConsoleApp.Network
             }
 
             using (var response = await request.PostAsync<IJsonFormatter>(
-                $"{host}/test/hi3", 
+                $"{host}/api/test/hi3", 
                 new Request() 
                 { 
                     Data = "hello, world!" 
@@ -71,7 +71,7 @@ namespace ConsoleApp.Network
             }
 
             using (var response = await request.PostAsync<IJsonFormatter>(
-                $"{host}/test/hi4", 
+                $"{host}/api/test/hi4", 
                 new Dictionary<string, string>()
                 {
                     { "word", "abc" },
@@ -91,7 +91,7 @@ namespace ConsoleApp.Network
             }
 
             using (var response = await request.PostAsync<IJsonFormatter>(
-                $"{host}/test/hi5", 
+                $"{host}/api/test/hi5", 
                 new Dictionary<string, string>()
                 {
                     { "word", "abc" },
@@ -112,7 +112,7 @@ namespace ConsoleApp.Network
             }
 
             using (var response = await request.PostAsync<IJsonFormatter>(
-                $"{host}/test/hi6", 
+                $"{host}/api/test/hi6", 
                 new Dictionary<string, string>()
                 {
                     { "word", "abc" },

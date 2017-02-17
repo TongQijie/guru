@@ -12,8 +12,7 @@
     },
     "ConsoleApp": {
       "version": "1.0.0",
-      "target": "project",
-      "type": "build"
+      "target": "project"
     }
   },
 
@@ -31,6 +30,7 @@
 
   "buildOptions": {
     "emitEntryPoint": true,
+    "debugType": "portable",
     "preserveCompilationContext": false,
     "copyToOutput": {
       "include": [

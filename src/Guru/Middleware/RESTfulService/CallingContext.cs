@@ -15,11 +15,31 @@ namespace Guru.Middleware.RESTfulService
             Context = context;
 
             var fields = uri.SplitByChar('/');
-            ServiceName = fields.Length > 0 ? fields[0] : "";
-            MethodName = fields.Length > 1 ? fields[1] : "";
+
+            // 1) uri: A => A = service name, method is default
+            // 2) uri: A/B => A = service name, B = method name
+            // 3) uri: A/B/C => A = service prefix, B = service name, C = method name
+
+            if (fields.Length == 1)
+            {
+                ServiceName = fields[0];
+            }
+            else if (fields.Length == 2)
+            {
+                ServiceName = fields[0];
+                MethodName = fields[1];
+            }
+            else if (fields.Length > 2)
+            {
+                ServicePrefix = fields[0];
+                ServiceName = fields[1];
+                MethodName = fields[2];
+            }
         }
 
         public HttpContext Context { get; private set; }
+
+        public string ServicePrefix { get; private set; }
 
         public string ServiceName { get; private set; }
 

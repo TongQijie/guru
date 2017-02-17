@@ -13,6 +13,8 @@ namespace Guru.Middleware.RESTfulService
     public class RESTfulServiceFactory : IRESTfulServiceFactory
     {
         private static readonly ConcurrentDictionary<string, RESTfulServiceInfo> _ServiceInfos = new ConcurrentDictionary<string, RESTfulServiceInfo>();
+
+        private static readonly ConcurrentDictionary<string, ServiceContext> _ServiceContexts = new ConcurrentDictionary<string, ServiceContext>();
         
         private IContainer _Container;
         
@@ -45,12 +47,14 @@ namespace Guru.Middleware.RESTfulService
                 throw new Exception($"service type '{serviceType.FullName}' does not mark attribute 'RESTfulServiceAttribute'.");
             }
             
-            if (!serviceAttribute.Name.HasValue())
+            if (!serviceAttribute.Name.HasValue() 
+                || serviceAttribute.Name.ContainsIgnoreCase("/")
+                || serviceAttribute.Prefix.ContainsIgnoreCase("/"))
             {
-                throw new Exception($"service name cannot be empty.");
+                throw new Exception($"service name/prefix cannot be empty or may be invalid.");
             }
             
-            var serviceInfo = new RESTfulServiceInfo(serviceType, serviceAttribute.Name);
+            var serviceInfo = new RESTfulServiceInfo(serviceType, serviceAttribute.Name, serviceAttribute.Prefix);
             
             foreach (var methodInfo in serviceType.GetMethods())
             {
@@ -61,20 +65,31 @@ namespace Guru.Middleware.RESTfulService
                 }
             }
             
-            _ServiceInfos.AddOrUpdate(serviceInfo.Name, serviceInfo, (n, s) => serviceInfo);
+            _ServiceInfos.AddOrUpdate(serviceInfo.Key, serviceInfo, (n, s) => serviceInfo);
             
             _Container.RegisterSingleton(serviceType, serviceType, 0);
         }
 
-        public ServiceContext GetService(string serviceName, string methodName, HttpVerb httpVerb)
+        public ServiceContext GetService(string servicePrefix, string serviceName, string methodName, HttpVerb httpVerb)
         {
-            RESTfulServiceInfo serviceInfo;
-            if (!_ServiceInfos.TryGetValue(serviceName.ToLower(), out serviceInfo))
+            var serviceKey = $"{(servicePrefix ?? string.Empty).ToLower()}/{(serviceName ?? string.Empty).ToLower()}";
+            var cacheKey = $"{httpVerb.ToString()} {serviceKey}/{(methodName ?? string.Empty).ToLower()}";
+
+            ServiceContext serviceContext;
+            if (_ServiceContexts.TryGetValue(cacheKey, out serviceContext))
             {
-                throw new Exception($"service '{serviceName}' does not exist.");
+                return serviceContext;
             }
 
-            var methodInfo = serviceInfo.MethodInfos.FirstOrDefault(x => x.Name.EqualsIgnoreCase(methodName) && (x.HttpVerb == HttpVerb.Any || x.HttpVerb == httpVerb));
+            RESTfulServiceInfo serviceInfo;
+            if (!_ServiceInfos.TryGetValue(serviceKey, out serviceInfo))
+            {
+                throw new Exception($"service key '{serviceKey}' does not exist.");
+            }
+
+            var methodInfo = serviceInfo.MethodInfos.FirstOrDefault(x =>
+                (methodName.HasValue() ? x.Name.EqualsIgnoreCase(methodName) : x.Default) && 
+                (x.HttpVerb == HttpVerb.Any || x.HttpVerb == httpVerb));
             if (methodInfo == null)
             {
                 throw new Exception($"method '{methodName}' does not exist.");
@@ -82,12 +97,14 @@ namespace Guru.Middleware.RESTfulService
 
             var serviceInstance = _Container.GetImplementation(serviceInfo.ServiceType);
 
-            return new ServiceContext()
+            serviceContext = new ServiceContext()
             {
                 ServiceIntance = serviceInstance,
                 ServiceInfo = serviceInfo,
                 MethodInfo = methodInfo,
             };
+
+            return _ServiceContexts.GetOrAdd(cacheKey, serviceContext);
         }
         
         private RESTfulMethodInfo GetMethodInfo(MethodInfo info)
@@ -96,6 +113,11 @@ namespace Guru.Middleware.RESTfulService
             if (methodAttribute == null)
             {
                 return null;
+            }
+
+            if (methodAttribute.Name.ContainsIgnoreCase("/"))
+            {
+                throw new Exception($"method name '{methodAttribute.Name}' is not valid.");
             }
             
             var methodInfo = new RESTfulMethodInfo(info, methodAttribute.Name, methodAttribute.Default, methodAttribute.HttpVerb, 

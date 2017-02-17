@@ -136,6 +136,11 @@ namespace Guru.ExtensionMethod
 
         public static bool ContainsIgnoreCase(this string stringValue, string specifiedStringValue)
         {
+            if (!stringValue.HasValue())
+            {
+                return false;
+            }
+            
             return stringValue.IndexOf(specifiedStringValue, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
