@@ -3,8 +3,8 @@ using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
 
-using Guru.Monitor;
 using Guru.ExtensionMethod;
+using Guru.Monitor.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 

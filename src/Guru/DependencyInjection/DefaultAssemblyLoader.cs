@@ -22,14 +22,14 @@ namespace Guru.DependencyInjection
 
                 // load from runtime libraries
                 var dependencies = DependencyContext.Default.RuntimeLibraries;
-                foreach (var library in dependencies.Where(x => !x.Name.StartsWith("runtime") && !x.Name.StartsWith("System") && !x.Name.StartsWith("Microsoft") && !x.Name.StartsWith("NETStandard") && x.Name != "Libuv" && !x.Name.StartsWith("Newtonsoft")))
+                foreach (var library in dependencies.Where(x => Filter(x.Name)))
                 {
                     assemblyNames = assemblyNames.Append(new AssemblyName(library.Name));
                 }
 
                 // load from base directory
                 var directoryInfo = new DirectoryInfo("./".FullPath());
-                foreach (var fileInfo in directoryInfo.GetFiles("*.dll", SearchOption.TopDirectoryOnly).Where(x => !x.Name.StartsWith("runtime") && !x.Name.StartsWith("System") && !x.Name.StartsWith("Microsoft") && !x.Name.StartsWith("NETStandard") && x.Name != "Libuv" && !x.Name.StartsWith("Newtonsoft")))
+                foreach (var fileInfo in directoryInfo.GetFiles("*.dll", SearchOption.TopDirectoryOnly).Where(x => Filter(x.Name)))
                 {
                     var assemblyName = AssemblyLoadContext.GetAssemblyName(fileInfo.FullName);
 
@@ -43,6 +43,16 @@ namespace Guru.DependencyInjection
             }
 
             return _Assemblies;
+        }
+
+        private bool Filter(string assemblyName)
+        {
+            return !assemblyName.StartsWith("runtime") 
+                && !assemblyName.StartsWith("System") 
+                && !assemblyName.StartsWith("Microsoft") 
+                && !assemblyName.StartsWith("NETStandard") 
+                && assemblyName != "Libuv" 
+                && !assemblyName.StartsWith("Newtonsoft");
         }
     }
 }

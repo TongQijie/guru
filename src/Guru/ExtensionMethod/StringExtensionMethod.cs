@@ -124,6 +124,14 @@ namespace Guru.ExtensionMethod
             return Directory.Exists(stringValue.FullPath());
         }
 
+        public static void EnsureFolder(this string stringValue)
+        {
+            if (!stringValue.IsFolder())
+            {
+                Directory.CreateDirectory(stringValue.FullPath());
+            }
+        }
+
         public static bool EqualsWith(this string stringValue, string anotherStringValue)
         {
             return string.Equals(stringValue, anotherStringValue, StringComparison.OrdinalIgnoreCase);

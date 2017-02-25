@@ -9,7 +9,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.Middleware.Components
 {
     [DI(typeof(IUriRewriteComponent), Lifetime = Lifetime.Singleton)]
-    public class UriRewriteComponent : IUriRewriteComponent
+    internal class UriRewriteComponent : IUriRewriteComponent
     {
         private readonly IFileManager _FileManager;
 

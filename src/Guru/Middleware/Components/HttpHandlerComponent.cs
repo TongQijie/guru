@@ -10,7 +10,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.Middleware.Components
 {
     [DI(typeof(IHttpHandlerComponent), Lifetime = Lifetime.Singleton)]
-    public class HttpHandlerComponent : IHttpHandlerComponent
+    internal class HttpHandlerComponent : IHttpHandlerComponent
     {
         private readonly IStaticFileHandler _StaticFileHandler;
 

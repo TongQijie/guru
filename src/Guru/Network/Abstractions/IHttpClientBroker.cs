@@ -1,4 +1,4 @@
-namespace Guru.Network
+namespace Guru.Network.Abstractions
 {
     public interface IHttpClientBroker
     {

@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Http;
 
-using Guru.Logging;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
+using Guru.Logging.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.Middleware.Abstractions;
 using Guru.DependencyInjection.Abstractions;
@@ -16,7 +16,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.Middleware.RESTfulService
 {
     [DI(typeof(IRESTfulServiceHandler), Lifetime = Lifetime.Singleton)]
-    public class RESTfulServiceHandler : IRESTfulServiceHandler
+    internal class RESTfulServiceHandler : IRESTfulServiceHandler
     {
         private readonly IRESTfulServiceFactory _Factory;
 

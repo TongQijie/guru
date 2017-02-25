@@ -17,11 +17,11 @@ namespace ConsoleApp
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            // new DependencyInjection.TestRunner().Run();
+            new DependencyInjection.TestRunner().Run();
 
             // new Formatter.TestRunner().Run();
 
-            new Network.TestRunner().Run();
+            // new Network.TestRunner().Run();
 
             // new Network.UnsplashCrawler().Run();
 

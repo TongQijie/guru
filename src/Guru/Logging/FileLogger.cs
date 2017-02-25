@@ -6,12 +6,13 @@ using System.Collections.Concurrent;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
+using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Logging
 {
     [DI(typeof(IFileLogger), Lifetime = Lifetime.Singleton)]
-    public class FileLogger : IFileLogger
+    internal class FileLogger : IFileLogger
     {
         public FileLogger()
         {
@@ -34,13 +35,13 @@ namespace Guru.Logging
 
         private bool _IsAlive = false;
 
-        private object StartThreadLocker = new object();
+        private object _SyncLocker = new object();
 
         private void StartThread()
         {
             if (!_IsAlive)
             {
-                lock (StartThreadLocker)
+                lock (_SyncLocker)
                 {
                     if (!_IsAlive)
                     {
@@ -60,7 +61,10 @@ namespace Guru.Logging
                                 Thread.Sleep(3000);
                             }
                         })
-                        { IsBackground = true }.Start();
+                        {
+                            IsBackground = true,
+                            Name = "FileLogger",
+                        }.Start();
 
                         _IsAlive = true;
                     }
@@ -86,7 +90,7 @@ namespace Guru.Logging
                     }
                 }
 
-                
+
             }
             catch (Exception) { }
         }

@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using Guru.ExtensionMethod;
 using Guru.Monitor.Internal;
 using Guru.DependencyInjection;
+using Guru.Monitor.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Monitor

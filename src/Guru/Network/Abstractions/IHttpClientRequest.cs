@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Guru.Formatter.Abstractions;
 
-namespace Guru.Network
+namespace Guru.Network.Abstractions
 {
     public interface IHttpClientRequest
     {

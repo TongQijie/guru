@@ -11,7 +11,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.DynamicProxy
 {
     [DI(typeof(IDynamicProxyGenerator), Lifetime = Lifetime.Singleton)]
-    public class DynamicProxyGenerator : IDynamicProxyGenerator
+    internal class DynamicProxyGenerator : IDynamicProxyGenerator
     {
         private AssemblyBuilder _AssemblyBuilder = null;
 

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 using ConsoleApp.Middleware;
 
-using Guru.Network;
 using Guru.DependencyInjection;
+using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
 
 namespace ConsoleApp.Network

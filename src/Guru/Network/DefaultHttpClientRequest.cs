@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.WebUtilities;
 
 using Guru.DependencyInjection;
+using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
 
 namespace Guru.Network

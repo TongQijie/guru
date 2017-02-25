@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
 
-using Guru.Logging;
 using Guru.DependencyInjection;
+using Guru.Logging.Abstractions;
 using Guru.Middleware.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Middleware.StaticFile
 {
     [DI(typeof(IStaticFileHandler), Lifetime = Lifetime.Singleton)]
-    public class StaticFileHandler : IStaticFileHandler
+    internal class StaticFileHandler : IStaticFileHandler
     {
         private readonly IStaticFileFactory _Factory;
 

@@ -10,7 +10,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.Middleware.RESTfulService
 {
     [DI(typeof(IRESTfulServiceFactory), Lifetime = Lifetime.Singleton)]
-    public class RESTfulServiceFactory : IRESTfulServiceFactory
+    internal class RESTfulServiceFactory : IRESTfulServiceFactory
     {
         private static readonly ConcurrentDictionary<string, RESTfulServiceInfo> _ServiceInfos = new ConcurrentDictionary<string, RESTfulServiceInfo>();
 

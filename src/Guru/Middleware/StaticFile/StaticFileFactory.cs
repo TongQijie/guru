@@ -7,7 +7,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.Middleware.StaticFile
 {
     [DI(typeof(IStaticFileFactory), Lifetime = Lifetime.Singleton)]
-    public class StaticFileFactory : IStaticFileFactory
+    internal class StaticFileFactory : IStaticFileFactory
     {
         public StaticFileContext GetStaticFile(string path, string resourceType)
         {

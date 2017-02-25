@@ -4,7 +4,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.DependencyInjection
 {
     [DI(typeof(IFileManager), Lifetime = Lifetime.Singleton)]
-    public class FileManager : IFileManager
+    internal class FileManager : IFileManager
     {
         public T Single<T>()
         {

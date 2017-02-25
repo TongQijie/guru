@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using Guru.DependencyInjection;
+using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
 
 namespace Guru.Network

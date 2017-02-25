@@ -7,6 +7,7 @@ using Guru.Network;
 using Guru.Formatter.Json;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
+using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
 
 namespace ConsoleApp.Network

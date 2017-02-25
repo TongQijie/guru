@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Collections.Generic;
 
-namespace Guru.Network
+namespace Guru.Network.Abstractions
 {
     public interface IHttpClientSettings
     {

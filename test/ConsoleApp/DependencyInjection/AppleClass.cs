@@ -6,7 +6,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace ConsoleApp.DependencyInjection
 {
     [DI(typeof(IAppleInterface), Lifetime = Lifetime.Transient)]
-    public class AppleClass : IAppleInterface
+    internal class AppleClass : IAppleInterface
     {
         private readonly IBananaInterface _Banana;
 

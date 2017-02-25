@@ -8,36 +8,33 @@ namespace ConsoleApp.DependencyInjection
 {
     public class TestRunner
     {
+        private readonly IJsonFormatter _JsonFormatter;
+
+        public TestRunner()
+        {
+            _JsonFormatter = ContainerEntry.Resolve<IJsonFormatter>();
+        }
+
         public void Run()
         {
             var apple = ContainerEntry.Resolve<IAppleInterface>();
             Assert.IsTrue(apple.Banana != null);
 
+            "./dependencyinjection".EnsureFolder();
+
             using (var outputStream = new FileStream("./dependencyinjection/cherry.json".FullPath(), FileMode.Create, FileAccess.Write))
             {
-                var formatter = ContainerEntry.Resolve<IJsonFormatter>();
-
-                var data = formatter.WriteBytes(new CherryClass() { A = 100 });
-
-                outputStream.Write(data, 0, data.Length);
+                _JsonFormatter.WriteObject(new CherryClass() { A = 100 }, outputStream);
             }
 
             using (var outputStream = new FileStream("./dependencyinjection/durian_1.json".FullPath(), FileMode.Create, FileAccess.Write))
             {
-                var formatter = ContainerEntry.Resolve<IJsonFormatter>();
-
-                var data = formatter.WriteBytes(new DurianClass() { B = "hello, 1!" });
-
-                outputStream.Write(data, 0, data.Length);
+                _JsonFormatter.WriteObject(new DurianClass() { B = "hello, 1!" }, outputStream);
             }
 
             using (var outputStream = new FileStream("./dependencyinjection/durian_2.json".FullPath(), FileMode.Create, FileAccess.Write))
             {
-                var formatter = ContainerEntry.Resolve<IJsonFormatter>();
-
-                var data = formatter.WriteBytes(new DurianClass() { B = "hello, 2!" });
-
-                outputStream.Write(data, 0, data.Length);
+                _JsonFormatter.WriteObject(new DurianClass() { B = "hello, 2!" }, outputStream);
             }
 
             var cherry = ContainerEntry.Resolve<ICherryInterface>();

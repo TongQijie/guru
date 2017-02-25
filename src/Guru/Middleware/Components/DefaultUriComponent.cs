@@ -7,7 +7,7 @@ using Guru.DependencyInjection.Abstractions;
 namespace Guru.Middleware.Components
 {
     [DI(typeof(IDefaultUriComponent), Lifetime = Lifetime.Singleton)]
-    public class DefaultUriComponent : IDefaultUriComponent
+    internal class DefaultUriComponent : IDefaultUriComponent
     {
         private readonly IFileManager _FileManager;
 
