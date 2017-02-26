@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
@@ -24,6 +25,12 @@ namespace Watchman
             _Context = ContainerEntry.Resolve<IContext>();
 
             _FileSystemMonitor.Add(this, (_Context.Source + "/" + Path).FullPath(), Changed, Created, Deleted, Renamed);
+
+            var directoryInfo = new DirectoryInfo((_Context.Source + "/" + Path).FullPath());
+            foreach (var folder in directoryInfo.GetDirectories())
+            {
+                Children = Children.Append(new WatchFolder(Path + "/" + folder.Name, this));
+            }
         }
 
         public string Path { get; set; }
