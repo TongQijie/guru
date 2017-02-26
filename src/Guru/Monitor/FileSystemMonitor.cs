@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Concurrent;
 
 using Guru.ExtensionMethod;
@@ -21,15 +20,21 @@ namespace Guru.Monitor
             Delegates.FileDeletedHandlerDelegate fileDeleted,
             Delegates.FileRenamedHandlerDelegate fileRenamed)
         {
-            string folder = GetFolder(path);
+            var p = path.FullPath();
+            if (!p.IsFolder())
+            {
+                throw new Exception($"monitor folder '{p}' does not exist.");
+            }
+
+            var key = p.ToLower();
 
             FolderMonitor folderMonitor = null;
 
-            if (_FolderMonitors.ContainsKey(folder))
+            if (_FolderMonitors.ContainsKey(key))
             {
-                if (!_FolderMonitors[folder].ReferencedObjects.Exists(x => x.Equals(referenceObject)))
+                if (!_FolderMonitors[key].ReferencedObjects.Exists(x => x.Equals(referenceObject)))
                 {
-                    folderMonitor = _FolderMonitors[folder];
+                    folderMonitor = _FolderMonitors[key];
                 }
                 else
                 {
@@ -38,11 +43,11 @@ namespace Guru.Monitor
             }
             else
             {
-                folderMonitor = new FolderMonitor(folder);
+                folderMonitor = new FolderMonitor(p);
 
-                if (!_FolderMonitors.TryAdd(folder, folderMonitor))
+                if (!_FolderMonitors.TryAdd(key, folderMonitor))
                 {
-                    throw new Exception(string.Format("failed to add folder '{0}' monitor.", folder));
+                    throw new Exception(string.Format("failed to add folder '{0}' monitor.", p));
                 }
             }
 
@@ -74,12 +79,12 @@ namespace Guru.Monitor
             Delegates.FileDeletedHandlerDelegate fileDeleted,
             Delegates.FileRenamedHandlerDelegate fileRenamed)
         {
-            string folder = GetFolder(path);
+            var key = path.FullPath().ToLower();
 
             FolderMonitor folderMonitor = null;
-            if (_FolderMonitors.ContainsKey(folder) && _FolderMonitors[folder].ReferencedObjects.Exists(x => x.Equals(referenceObject)))
+            if (_FolderMonitors.ContainsKey(key) && _FolderMonitors[key].ReferencedObjects.Exists(x => x.Equals(referenceObject)))
             {
-                folderMonitor = _FolderMonitors[folder];
+                folderMonitor = _FolderMonitors[key];
             }
             else
             {
@@ -108,26 +113,10 @@ namespace Guru.Monitor
             if (folderMonitor.ReferencedObjects.Length == 0)
             {
                 folderMonitor.Stop();
-                if (!_FolderMonitors.TryRemove(folder, out folderMonitor))
+                if (!_FolderMonitors.TryRemove(key, out folderMonitor))
                 {
                     // TODO: throw
                 }
-            }
-        }
-
-        private string GetFolder(string path)
-        {
-            if (path.IsFile())
-            {
-                return Path.GetDirectoryName(path).Replace('\\', '/').ToLower();
-            }
-            else if (path.IsFolder())
-            {
-                return path.Replace('\\', '/').ToLower();
-            }
-            else
-            {
-                throw new Exception(string.Format("monitor path '{0}' is not valid.", path));
             }
         }
     }
