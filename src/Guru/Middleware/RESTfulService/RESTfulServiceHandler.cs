@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
-using Guru.Logging.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.Middleware.Abstractions;
 using Guru.DependencyInjection.Abstractions;
@@ -24,60 +23,46 @@ namespace Guru.Middleware.RESTfulService
 
         private readonly IXmlFormatter _XmlFormatter;
 
-        private readonly IFileLogger _FileLogger;
-        
-        private readonly byte[] _ErrorBytes;
-
         public RESTfulServiceHandler(
             IRESTfulServiceFactory factory,
             IJsonFormatter jsonFormatter,
-            IXmlFormatter xmlFormatter,
-            IFileLogger fileLogger)
+            IXmlFormatter xmlFormatter)
         {
             _Factory = factory;
             _Factory.Init(ContainerEntry.Container, new DefaultAssemblyLoader());
 
             _JsonFormatter = jsonFormatter;
             _XmlFormatter = xmlFormatter;
-            _FileLogger = fileLogger;
-
-            _ErrorBytes = Encoding.UTF8.GetBytes("sorry, i had trouble to process this request.");
         }
 
         public async Task ProcessRequest(ICallingContext context)
         {
             var callingContext = context as CallingContext;
-
-            try
+            if (callingContext == null)
             {
-                var serviceContext = _Factory.GetService(
-                    callingContext.ServicePrefix,
-                    callingContext.ServiceName,
-                    callingContext.MethodName,
-                    callingContext.HttpVerb);
-
-                var parameterValues = await GetParameterValuesAsync(
-                    serviceContext, 
-                    callingContext.ContentType, 
-                    callingContext.QueryString, 
-                    callingContext.Context.Request.Body);
-
-                var result = serviceContext.MethodInfo.Invoke(
-                    serviceContext.ServiceIntance, 
-                    parameterValues);
-
-                await SetResponse(
-                    GetResponseContentType(serviceContext, callingContext.Accept), 
-                    result, 
-                    callingContext.Context);
+                throw new Exception("calling context is null.");
             }
-            catch (Exception e)
-            {
-                _FileLogger.LogEvent("RESTfulServiceHandler", Severity.Error, "failed to process request.", e);
 
-                context.Context.Response.StatusCode = 500;
-                await callingContext.Context.Response.Body.WriteAsync(_ErrorBytes, 0, _ErrorBytes.Length);
-            }
+            var serviceContext = _Factory.GetService(
+                callingContext.ServicePrefix,
+                callingContext.ServiceName,
+                callingContext.MethodName,
+                callingContext.HttpVerb);
+
+            var parameterValues = await GetParameterValuesAsync(
+                serviceContext,
+                callingContext.ContentType,
+                callingContext.QueryString,
+                callingContext.Context.Request.Body);
+
+            var result = serviceContext.MethodInfo.Invoke(
+                serviceContext.ServiceIntance,
+                parameterValues);
+
+            await SetResponse(
+                GetResponseContentType(serviceContext, callingContext.Accept),
+                result,
+                callingContext.Context);
         }
 
         private async Task<object[]> GetParameterValuesAsync(ServiceContext context, string contentType, Dictionary<string, string> queryString, Stream stream)

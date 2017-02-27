@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
 
 using Guru.DependencyInjection;
-using Guru.Logging.Abstractions;
 using Guru.Middleware.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
@@ -17,40 +15,27 @@ namespace Guru.Middleware.StaticFile
     {
         private readonly IStaticFileFactory _Factory;
 
-        private readonly IFileLogger _FileLogger;
-        
-        private readonly byte[] _ErrorBytes;
-        
-        public StaticFileHandler(IStaticFileFactory factory, IFileLogger fileLogger)
+        public StaticFileHandler(IStaticFileFactory factory)
         {
             _Factory = factory;
-            _FileLogger = fileLogger;
-            
-            _ErrorBytes = Encoding.UTF8.GetBytes("sorry, i had trouble to process this request.");
         }
-        
+
         public async Task ProcessRequest(ICallingContext context)
         {
             var callingContext = context as CallingContext;
-            
-            try
+            if (callingContext == null)
             {
-                var staticFileContext = _Factory.GetStaticFile(callingContext.Path, callingContext.ResourceType);
-                if (staticFileContext == null)
-                {
-                    context.Context.Response.StatusCode = 404;
-                    return;
-                }
-
-                await SetResponse(staticFileContext, context.Context);
+                throw new Exception("calling context is null.");
             }
-            catch (Exception e)
+
+            var staticFileContext = _Factory.GetStaticFile(callingContext.Path, callingContext.ResourceType);
+            if (staticFileContext == null)
             {
-                _FileLogger.LogEvent("RESTfulServiceHandler", Severity.Error, "failed to process request.", e);
-
-                context.Context.Response.StatusCode = 500;
-                await callingContext.Context.Response.Body.WriteAsync(_ErrorBytes, 0, _ErrorBytes.Length);
+                context.Context.Response.StatusCode = 404;
+                return;
             }
+
+            await SetResponse(staticFileContext, context.Context);
         }
 
         private async Task SetResponse(StaticFileContext context, HttpContext httpContext)

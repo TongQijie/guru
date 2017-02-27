@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -16,12 +17,16 @@ namespace Guru.Middleware.Components
 
         private readonly IRESTfulServiceHandler _RESTfulServiceHandler;
 
+        private readonly IErrorHandler _ErrorHandler;
+
         public HttpHandlerComponent(
-            IStaticFileHandler staticFileHandler, 
-            IRESTfulServiceHandler restfulServiceHandler)
+            IStaticFileHandler staticFileHandler,
+            IRESTfulServiceHandler restfulServiceHandler,
+            IErrorHandler errorHandler)
         {
             _StaticFileHandler = staticFileHandler;
             _RESTfulServiceHandler = restfulServiceHandler;
+            _ErrorHandler = errorHandler;
         }
 
         public async Task Process(string uri, HttpContext context)
@@ -30,21 +35,24 @@ namespace Guru.Middleware.Components
 
             if (!fields.HasLength())
             {
-                context.Response.StatusCode = 400;
+                await _ErrorHandler.ProcessRequest(new Errors.CallingContext(context, null));
                 return;
             }
 
-            if (fields[fields.Length - 1].Contains("."))
+            try
             {
-                var callingContext = new StaticFile.CallingContext(context, uri);
-
-                await _StaticFileHandler.ProcessRequest(callingContext);
+                if (fields[fields.Length - 1].Contains("."))
+                {
+                    await _StaticFileHandler.ProcessRequest(new StaticFile.CallingContext(context, uri));
+                }
+                else
+                {
+                    await _RESTfulServiceHandler.ProcessRequest(new RESTfulService.CallingContext(context, uri));
+                }
             }
-            else
+            catch (Exception e)
             {
-                var callingContext = new RESTfulService.CallingContext(context, uri);
-                
-                await _RESTfulServiceHandler.ProcessRequest(callingContext);
+                await _ErrorHandler.ProcessRequest(new Errors.CallingContext(context, e));
             }
         }
     }
