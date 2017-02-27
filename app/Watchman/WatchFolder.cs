@@ -81,7 +81,7 @@ namespace Watchman
             _FileSystemHelper.Delete(Path + "/" + path.Name());
         }
 
-        private void Renamed(string newPath, string oldPath)
+        private void Renamed(string oldPath, string newPath)
         {
             Console.WriteLine($"deleted: {oldPath}");
 
@@ -103,6 +103,8 @@ namespace Watchman
             else if (newPath.IsFolder())
             {
                 Console.WriteLine($"folder created: {newPath}");
+
+                _FileSystemHelper.CreateFolder(Path + "/" + newPath.Name());
 
                 Children = Children.Append(new WatchFolder(Path + "/" + newPath.Name(), this));
             }
