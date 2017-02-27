@@ -193,7 +193,7 @@ namespace GitDiff
                                     Directory.CreateDirectory("./tempfiles".FullPath());
                                 }
 
-                                var history = $"./tempfiles/{compare.HistoryCommit.Id}".FullPath();
+                                var history = $"./tempfiles/{compare.HistoryCommit.Id.Substring(0, 6)}-{compare.FileName}".FullPath();
                                 using (var outputStream = new FileStream(history, FileMode.Create, FileAccess.Write))
                                 {
                                     using (var writer = new StreamWriter(outputStream))
@@ -202,7 +202,7 @@ namespace GitDiff
                                     }
                                 }
 
-                                var latest = $"./tempfiles/{compare.LatestCommit.Id}".FullPath();
+                                var latest = $"./tempfiles/{compare.LatestCommit.Id.Substring(0, 6)}-{compare.FileName}".FullPath();
                                 using (var outputStream = new FileStream(latest, FileMode.Create, FileAccess.Write))
                                 {
                                     using (var writer = new StreamWriter(outputStream))
@@ -230,7 +230,7 @@ namespace GitDiff
                                     using (var outputStream = new FileStream(history, FileMode.Create, FileAccess.Write)) { }
                                 }
 
-                                var latest = $"./tempfiles/{compare.LatestCommit.Id}".FullPath();
+                                var latest = $"./tempfiles/{compare.LatestCommit.Id.Substring(0, 6)}-{compare.FileName}".FullPath();
                                 using (var outputStream = new FileStream(latest, FileMode.Create, FileAccess.Write))
                                 {
                                     using (var writer = new StreamWriter(outputStream))
@@ -252,7 +252,7 @@ namespace GitDiff
                                     Directory.CreateDirectory("./tempfiles".FullPath());
                                 }
                                 
-                                var history = $"./tempfiles/{compare.HistoryCommit.Id}".FullPath();
+                                var history = $"./tempfiles/{compare.HistoryCommit.Id.Substring(0, 6)}-{compare.FileName}".FullPath();
                                 using (var outputStream = new FileStream(history, FileMode.Create, FileAccess.Write))
                                 {
                                     using (var writer = new StreamWriter(outputStream))

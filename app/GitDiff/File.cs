@@ -17,5 +17,21 @@ namespace GitDiff
         public string Path { get; set; }
 
         public string Mark { get; set; }
+
+        public string FileName
+        {
+            get
+            {
+                var index = Path.TrimEnd('/').LastIndexOf('/');
+                if (index == -1)
+                {
+                    return Path;
+                }
+                else
+                {
+                    return Path.Substring(index + 1);
+                }
+            }
+        }
     }
 }
