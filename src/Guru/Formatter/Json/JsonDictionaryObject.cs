@@ -65,28 +65,27 @@ namespace Guru.Formatter.Json
         private bool Parse(IStream stream)
         {
             var b = stream.SeekBytesUntilVisiableChar();
-            if (b == JsonEncoder.Right_Brace)
+            if (b == JsonConstants.Right_Brace)
             {
                 return true;
             }
-            else if (b != JsonEncoder.Double_Quotes)
+            else if (b != JsonConstants.Double_Quotes)
             {
                 throw new Errors.JsonParseFailedException(stream.Position, "dictionary name is invalid.");
             }
 
-            var buf = stream.ReadBytesUntil(JsonEncoder.Double_Quotes);
+            var buf = stream.ReadBytesUntil(JsonConstants.Double_Quotes);
             if (buf == null)
             {
                 buf = new byte[0];
             }
 
-            var elementName = JsonEncoder.GetString(buf);
-            if (!elementName.HasValue())
+            if (!buf.HasLength())
             {
                 throw new Errors.JsonParseFailedException(stream.Position, "dictionary element name is empty.");
             }
 
-            stream.SeekBytesUntilEqual(JsonEncoder.Colon);
+            stream.SeekBytesUntilEqual(JsonConstants.Colon);
 
             var args = new JsonObjectParseArgs()
             {
@@ -99,7 +98,7 @@ namespace Guru.Formatter.Json
             {
                 Elements = Elements.Append(new JsonDictionaryElement()
                 {
-                    Key = elementName,
+                    Key = buf,
                     Value = args.InternalObject,
                 });
             }
@@ -110,28 +109,27 @@ namespace Guru.Formatter.Json
         private async Task<bool> ParseAsync(IStream stream)
         {
             var b = await stream.SeekBytesUntilVisiableCharAsync();
-            if (b == JsonEncoder.Right_Brace)
+            if (b == JsonConstants.Right_Brace)
             {
                 return true;
             }
-            else if (b != JsonEncoder.Double_Quotes)
+            else if (b != JsonConstants.Double_Quotes)
             {
                 throw new Errors.JsonParseFailedException(stream.Position, "dictionary name is invalid.");
             }
 
-            var buf = await stream.ReadBytesUntilAsync(JsonEncoder.Double_Quotes);
+            var buf = await stream.ReadBytesUntilAsync(JsonConstants.Double_Quotes);
             if (buf == null)
             {
                 buf = new byte[0];
             }
 
-            var elementName = JsonEncoder.GetString(buf);
-            if (!elementName.HasValue())
+            if (!buf.HasLength())
             {
                 throw new Errors.JsonParseFailedException(stream.Position, "dictionary element name is empty.");
             }
 
-            await stream.SeekBytesUntilEqualAsync(JsonEncoder.Colon);
+            await stream.SeekBytesUntilEqualAsync(JsonConstants.Colon);
 
             var args = new JsonObjectParseArgs()
             {
@@ -144,7 +142,7 @@ namespace Guru.Formatter.Json
             {
                 Elements = Elements.Append(new JsonDictionaryElement()
                 {
-                    Key = elementName,
+                    Key = buf,
                     Value = args.InternalObject,
                 });
             }

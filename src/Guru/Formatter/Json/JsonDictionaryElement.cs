@@ -2,7 +2,7 @@
 {
     public class JsonDictionaryElement
     {
-        public string Key { get; set; }
+        public byte[] Key { get; set; }
 
         public JsonObject Value { get; set; }
     }

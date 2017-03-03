@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Guru.ExtensionMethod;
 using Guru.Formatter.Internal;
@@ -11,25 +10,6 @@ namespace Guru.Formatter.Json
         public bool EncompassedByQuote { get; set; }
 
         public byte[] Buffer { get; set; }
-
-        public override string ToString()
-        {
-            if (Buffer != null)
-            {
-                if (EncompassedByQuote)
-                {
-                    return JsonEncoder.GetString(Buffer);
-                }
-                else
-                {
-                    return JsonEncoder.GetString(Buffer).Trim();
-                }
-            }
-            else
-            {
-                return string.Empty;
-            }
-        }
 
         public override bool Fill(IStream stream, byte[] seperators, byte[] terminators)
         {
@@ -196,14 +176,14 @@ namespace Guru.Formatter.Json
             var buffer = new byte[0];
 
             var buf = new byte[0];
-            while ((buf = stream.ReadBytesUntil(new byte[] { JsonEncoder.Double_Quotes, JsonEncoder.Backslash })) != null)
+            while ((buf = stream.ReadBytesUntil(new byte[] { JsonConstants.Double_Quotes, JsonConstants.Backslash })) != null)
             {
-                if (buf[buf.Length - 1] == JsonEncoder.Double_Quotes)
+                if (buf[buf.Length - 1] == JsonConstants.Double_Quotes)
                 {
                     return Concat(buffer, 0, buffer.Length, buf, 0, buf.Length - 1);
                 }
 
-                if (buf[buf.Length - 1] == JsonEncoder.Backslash)
+                if (buf[buf.Length - 1] == JsonConstants.Backslash)
                 {
                     var b = stream.ReadByte();
                     if (b == -1)
@@ -211,14 +191,14 @@ namespace Guru.Formatter.Json
                         return null;
                     }
 
-                    if (b == JsonEncoder.U)
+                    if (b == JsonConstants.U)
                     {
-                        var escape = JsonEncoder.DoUnescape(stream.ReadBytes(4));
+                        var escape = JsonCharacterEscape.Unescape(stream.ReadBytes(4));
                         buf = Concat(buf, 0, buf.Length - 1, escape, 0, escape.Length);
                     }
                     else
                     {
-                        buf[buf.Length - 1] = JsonEncoder.DoUnescape(b);
+                        buf[buf.Length - 1] = JsonCharacterEscape.Unescape(b);
                     }
 
                     buffer = Concat(buffer, 0, buffer.Length, buf, 0, buf.Length);
@@ -233,14 +213,14 @@ namespace Guru.Formatter.Json
             var buffer = new byte[0];
 
             var buf = new byte[0];
-            while ((buf = await stream.ReadBytesUntilAsync(new byte[] { JsonEncoder.Double_Quotes, JsonEncoder.Backslash })) != null)
+            while ((buf = await stream.ReadBytesUntilAsync(new byte[] { JsonConstants.Double_Quotes, JsonConstants.Backslash })) != null)
             {
-                if (buf[buf.Length - 1] == JsonEncoder.Double_Quotes)
+                if (buf[buf.Length - 1] == JsonConstants.Double_Quotes)
                 {
                     return Concat(buffer, 0, buffer.Length, buf, 0, buf.Length - 1);
                 }
 
-                if (buf[buf.Length - 1] == JsonEncoder.Backslash)
+                if (buf[buf.Length - 1] == JsonConstants.Backslash)
                 {
                     var b = await stream.ReadByteAsync();
                     if (b == -1)
@@ -248,14 +228,14 @@ namespace Guru.Formatter.Json
                         return null;
                     }
 
-                    if (b == JsonEncoder.U)
+                    if (b == JsonConstants.U)
                     {
-                        var escape = JsonEncoder.DoUnescape(await stream.ReadBytesAsync(4));
+                        var escape = JsonCharacterEscape.Unescape(await stream.ReadBytesAsync(4));
                         buf = Concat(buf, 0, buf.Length - 1, escape, 0, escape.Length);
                     }
                     else
                     {
-                        buf[buf.Length - 1] = JsonEncoder.DoUnescape(b);
+                        buf[buf.Length - 1] = JsonCharacterEscape.Unescape(b);
                     }
 
                     buffer = Concat(buffer, 0, buffer.Length, buf, 0, buf.Length);
@@ -269,9 +249,9 @@ namespace Guru.Formatter.Json
         {
             var buf = new byte[firstCount + secondCount];
 
-            Array.Copy(firstArray, firstStart, buf, 0, firstCount);
+            System.Buffer.BlockCopy(firstArray, firstStart, buf, 0, firstCount);
 
-            Array.Copy(secondArray, secondStart, buf, firstCount, secondCount);
+            System.Buffer.BlockCopy(secondArray, secondStart, buf, firstCount, secondCount);
 
             return buf;
         }

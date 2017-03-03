@@ -17,17 +17,17 @@ namespace Guru.Formatter.Json
             {
                 if (args.ExternalObject is JsonDictionaryObject)
                 {
-                    seperators = new byte[] { JsonEncoder.Comma };
-                    terminators = new byte[] { JsonEncoder.Right_Brace };
+                    seperators = new byte[] { JsonConstants.Comma };
+                    terminators = new byte[] { JsonConstants.Right_Brace };
                 }
                 else if (args.ExternalObject is JsonCollectionObject)
                 {
-                    seperators = new byte[] { JsonEncoder.Comma };
-                    terminators = new byte[] { JsonEncoder.Right_Bracket };
+                    seperators = new byte[] { JsonConstants.Comma };
+                    terminators = new byte[] { JsonConstants.Right_Bracket };
                 }
             }
 
-            if (b == JsonEncoder.Left_Brace)
+            if (b == JsonConstants.Left_Brace)
             {
                 // dictionary
                 // case1: {"name01":{"name01":value01,"name02":value02},"name01":{"name01":value01,"name02":value02}}
@@ -38,7 +38,7 @@ namespace Guru.Formatter.Json
                 //                                             Position
                 args.InternalObject = new JsonDictionaryObject();
             }
-            else if (b == JsonEncoder.Left_Bracket)
+            else if (b == JsonConstants.Left_Bracket)
             {
                 // collection
                 // case1: {"name01":[value01,value02],"name02":[value03,value04]}
@@ -49,7 +49,7 @@ namespace Guru.Formatter.Json
                 //                           Position
                 args.InternalObject = new JsonCollectionObject();
             }
-            else if (b == JsonEncoder.Right_Bracket)
+            else if (b == JsonConstants.Right_Bracket)
             {
                 args.Handled = true;
                 return;
@@ -71,8 +71,8 @@ namespace Guru.Formatter.Json
                 //                          Position
                 args.InternalObject = new JsonValueObject()
                 {
-                    EncompassedByQuote = b == JsonEncoder.Double_Quotes,
-                    Buffer = b == JsonEncoder.Double_Quotes ? new byte[0] : new byte[1] { (byte)b },
+                    EncompassedByQuote = b == JsonConstants.Double_Quotes,
+                    Buffer = b == JsonConstants.Double_Quotes ? new byte[0] : new byte[1] { (byte)b },
                 };
             }
 
@@ -92,17 +92,17 @@ namespace Guru.Formatter.Json
             {
                 if (args.ExternalObject is JsonDictionaryObject)
                 {
-                    seperators = new byte[] { JsonEncoder.Comma };
-                    terminators = new byte[] { JsonEncoder.Right_Brace };
+                    seperators = new byte[] { JsonConstants.Comma };
+                    terminators = new byte[] { JsonConstants.Right_Brace };
                 }
                 else if (args.ExternalObject is JsonCollectionObject)
                 {
-                    seperators = new byte[] { JsonEncoder.Comma };
-                    terminators = new byte[] { JsonEncoder.Right_Bracket };
+                    seperators = new byte[] { JsonConstants.Comma };
+                    terminators = new byte[] { JsonConstants.Right_Bracket };
                 }
             }
 
-            if (b == JsonEncoder.Left_Brace)
+            if (b == JsonConstants.Left_Brace)
             {
                 // dictionary
                 // case1: {"name01":{"name01":value01,"name02":value02},"name01":{"name01":value01,"name02":value02}}
@@ -113,7 +113,7 @@ namespace Guru.Formatter.Json
                 //                                             Position
                 args.InternalObject = new JsonDictionaryObject();
             }
-            else if (b == JsonEncoder.Left_Bracket)
+            else if (b == JsonConstants.Left_Bracket)
             {
                 // collection
                 // case1: {"name01":[value01,value02],"name02":[value03,value04]}
@@ -124,7 +124,7 @@ namespace Guru.Formatter.Json
                 //                           Position
                 args.InternalObject = new JsonCollectionObject();
             }
-            else if (b == JsonEncoder.Right_Bracket)
+            else if (b == JsonConstants.Right_Bracket)
             {
                 args.Handled = true;
                 return;
@@ -146,8 +146,8 @@ namespace Guru.Formatter.Json
                 //                          Position
                 args.InternalObject = new JsonValueObject()
                 {
-                    EncompassedByQuote = b == JsonEncoder.Double_Quotes,
-                    Buffer = b == JsonEncoder.Double_Quotes ? new byte[0] : new byte[1] { (byte)b },
+                    EncompassedByQuote = b == JsonConstants.Double_Quotes,
+                    Buffer = b == JsonConstants.Double_Quotes ? new byte[0] : new byte[1] { (byte)b },
                 };
             }
 

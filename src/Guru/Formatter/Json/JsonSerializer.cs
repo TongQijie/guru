@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Linq;
 using System.Reflection;
 using System.Collections;
@@ -12,15 +13,18 @@ namespace Guru.Formatter.Json
 {
     internal class JsonSerializer
     {
-        public JsonSerializer(Type type)
+        public JsonSerializer(Type type, Encoding encoding)
         {
             Type = type;
-            JsonObjectType = JsonUtility.GetJsonObjectType(Type);
+            JsonSettings = new JsonSettings(encoding);
 
+            JsonObjectType = JsonUtility.GetJsonObjectType(Type);
             Initialize();
         }
 
         public Type Type { get; private set; }
+
+        public JsonSettings JsonSettings { get; private set; }
 
         public JsonObjectType JsonObjectType { get; private set; }
 
@@ -46,7 +50,7 @@ namespace Guru.Formatter.Json
                     if (!_IsInitialized)
                     {
                         var jsonObjectType = JsonUtility.GetJsonObjectType(Type);
-                        
+
                         // only parse json dictionary object
                         if (jsonObjectType == JsonObjectType.Dictionary)
                         {
@@ -82,14 +86,19 @@ namespace Guru.Formatter.Json
 
         #region Serializer Cache
 
-        private static ConcurrentDictionary<Type, JsonSerializer> _CachedSerializers = null;
+        private static ConcurrentDictionary<string, JsonSerializer> _Caches = null;
 
-        private static ConcurrentDictionary<Type, JsonSerializer> CachedSerializers
+        private static ConcurrentDictionary<string, JsonSerializer> Caches
         {
-            get { return _CachedSerializers ?? (_CachedSerializers = new ConcurrentDictionary<Type, JsonSerializer>()); }
+            get { return _Caches ?? (_Caches = new ConcurrentDictionary<string, JsonSerializer>()); }
         }
 
-        public static JsonSerializer GetSerializer(Type targetType)
+        private static string GetSerializerKey(Type type, Encoding encoding)
+        {
+            return $"{type.FullName};{encoding.EncodingName}";
+        }
+
+        public static JsonSerializer GetSerializer(Type targetType, Encoding encoding)
         {
             var objectType = JsonUtility.GetJsonObjectType(targetType);
             if (objectType == JsonObjectType.Runtime || objectType == JsonObjectType.Value)
@@ -97,18 +106,21 @@ namespace Guru.Formatter.Json
                 return null;
             }
 
-            if (!CachedSerializers.ContainsKey(targetType))
-            {
-                CachedSerializers.TryAdd(targetType, new JsonSerializer(targetType));
-            }
+            var serializerKey = GetSerializerKey(targetType, encoding);
 
             JsonSerializer serializer;
-            if (CachedSerializers.TryGetValue(targetType, out serializer))
+            if (!Caches.ContainsKey(serializerKey))
+            {
+                return Caches.GetOrAdd(serializerKey, new JsonSerializer(targetType, encoding));
+            }
+            else if (Caches.TryGetValue(serializerKey, out serializer))
             {
                 return serializer;
             }
-
-            return null;
+            else
+            {
+                return null;
+            }
         }
 
         #endregion
@@ -138,7 +150,7 @@ namespace Guru.Formatter.Json
 
         private void SerializeJsonDictionaryObject(Stream stream, object value, bool omitDefaultValue)
         {
-            stream.WriteByte(JsonEncoder.Left_Brace);
+            stream.WriteByte(JsonConstants.Left_Brace);
 
             var firstElement = true;
             foreach (var jsonProperty in JsonProperties.Values.ToArray())
@@ -155,21 +167,21 @@ namespace Guru.Formatter.Json
                 }
                 else
                 {
-                    stream.WriteByte(JsonEncoder.Comma);
+                    stream.WriteByte(JsonConstants.Comma);
                 }
 
-                var buf = JsonEncoder.GetElementName(jsonProperty.Key);
+                var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{jsonProperty.Key}\":");
                 stream.Write(buf, 0, buf.Length);
 
                 SerializeRegularValue(stream, propertyValue, jsonProperty.ObjectType, omitDefaultValue);
             }
 
-            stream.WriteByte(JsonEncoder.Right_Brace);
+            stream.WriteByte(JsonConstants.Right_Brace);
         }
 
         private void SerializeJsonCollectionObject(Stream stream, object value, bool omitDefaultValue)
         {
-            stream.WriteByte(JsonEncoder.Left_Bracket);
+            stream.WriteByte(JsonConstants.Left_Bracket);
 
             var collection = value as ICollection;
             var objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
@@ -188,26 +200,25 @@ namespace Guru.Formatter.Json
                 }
                 else
                 {
-                    stream.WriteByte(JsonEncoder.Comma);
+                    stream.WriteByte(JsonConstants.Comma);
                 }
 
                 SerializeRegularValue(stream, element, objectType, omitDefaultValue);
             }
 
-            stream.WriteByte(JsonEncoder.Right_Bracket);
+            stream.WriteByte(JsonConstants.Right_Bracket);
         }
 
         private void SerializeRegularValue(Stream stream, object value, JsonObjectType objectType, bool omitDefaultValue)
         {
             if (objectType == JsonObjectType.Value)
             {
-                var buf = JsonEncoder.GetPlainValue(value);
+                var buf = JsonSettings.SerializeValue(value);
                 stream.Write(buf, 0, buf.Length);
             }
             else if (value == null)
             {
-                var buf = JsonEncoder.GetNullValue();
-                stream.Write(buf, 0, buf.Length);
+                stream.Write(JsonConstants.NullValueBytes, 0, JsonConstants.NullValueBytes.Length);
             }
             else if (objectType == JsonObjectType.Runtime)
             {
@@ -215,7 +226,7 @@ namespace Guru.Formatter.Json
             }
             else
             {
-                GetSerializer(value.GetType()).Serialize(value, stream, omitDefaultValue);
+                GetSerializer(value.GetType(), JsonSettings.CurrentEncoding).Serialize(value, stream, omitDefaultValue);
             }
         }
 
@@ -264,7 +275,7 @@ namespace Guru.Formatter.Json
             }
             else if (jsonObject is JsonValueObject)
             {
-                return DeserializeJsonPlainValueObject(jsonObject as JsonValueObject, Type);
+                return JsonSettings.DeserializeValue(jsonObject as JsonValueObject, Type);
             }
 
             return null;
@@ -276,8 +287,10 @@ namespace Guru.Formatter.Json
 
             foreach (var element in dictionaryObject.Elements)
             {
+                var key = JsonSettings.CurrentEncoding.GetString(element.Key);
+
                 JsonProperty jsonProperty;
-                JsonProperties.TryGetValue(element.Key, out jsonProperty);
+                JsonProperties.TryGetValue(key, out jsonProperty);
                 if (jsonProperty == null)
                 {
                     continue;
@@ -298,16 +311,19 @@ namespace Guru.Formatter.Json
                 {
                     if (element.Value is JsonDictionaryObject)
                     {
-                        var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType).InternalDeserialize(element.Value);
+                        var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding).InternalDeserialize(element.Value);
                         jsonProperty.PropertyInfo.SetValue(instance, value, null);
                     }
-                    else if (element.Value is JsonValueObject && JsonEncoder.IsNullValue(element.Value))
+                    else if (element.Value is JsonValueObject)
                     {
-                        jsonProperty.PropertyInfo.SetValue(instance, null, null);
+                        var value = element.Value as JsonValueObject;
+                        jsonProperty.PropertyInfo.SetValue(instance,
+                            JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
+                            null);
                     }
                     else
                     {
-                        throw new Errors.JsonSerializeFailedException(element.Key, ".net runtime type does not match json type.");
+                        throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                     }
                 }
                 else if (jsonProperty.ObjectType == JsonObjectType.Collection)
@@ -318,23 +334,26 @@ namespace Guru.Formatter.Json
                         jsonProperty.PropertyInfo.SetValue(instance,
                             DeserializeJsonCollectionObject(collectionObject, jsonProperty.PropertyInfo.PropertyType), null);
                     }
-                    else if (element.Value is JsonValueObject && JsonEncoder.IsNullValue(element.Value))
+                    else if (element.Value is JsonValueObject)
                     {
-                        jsonProperty.PropertyInfo.SetValue(instance, null, null);
+                        var value = element.Value as JsonValueObject;
+                        jsonProperty.PropertyInfo.SetValue(instance,
+                            JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
+                            null);
                     }
                     else
                     {
-                        throw new Errors.JsonSerializeFailedException(element.Key, ".net runtime type does not match json type.");
+                        throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                     }
                 }
                 else if (jsonProperty.ObjectType == JsonObjectType.Value && element.Value is JsonValueObject)
                 {
-                    var value = DeserializeJsonPlainValueObject(element.Value as JsonValueObject, jsonProperty.PropertyInfo.PropertyType);
+                    var value = JsonSettings.DeserializeValue(element.Value as JsonValueObject, jsonProperty.PropertyInfo.PropertyType);
                     jsonProperty.PropertyInfo.SetValue(instance, value, null);
                 }
                 else
                 {
-                    throw new Errors.JsonSerializeFailedException(element.Key, ".net runtime type does not match json type.");
+                    throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                 }
             }
 
@@ -352,7 +371,7 @@ namespace Guru.Formatter.Json
                     var jsonObject = collectionObject.Elements[i].Value;
                     if (jsonObject is JsonDictionaryObject)
                     {
-                        var value = GetSerializer(elementType).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding).InternalDeserialize(jsonObject);
                         array.SetValue(value, i);
                     }
                     else if (jsonObject is JsonCollectionObject)
@@ -361,7 +380,7 @@ namespace Guru.Formatter.Json
                     }
                     else if (jsonObject is JsonValueObject)
                     {
-                        var value = DeserializeJsonPlainValueObject(jsonObject as JsonValueObject, elementType);
+                        var value = JsonSettings.DeserializeValue(jsonObject as JsonValueObject, elementType);
                         array.SetValue(value, i);
                     }
                 }
@@ -377,7 +396,7 @@ namespace Guru.Formatter.Json
                     var jsonObject = collectionObject.Elements[i].Value;
                     if (jsonObject is JsonDictionaryObject)
                     {
-                        var value = GetSerializer(elementType).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding).InternalDeserialize(jsonObject);
                         collection.Add(value);
                     }
                     else if (jsonObject is JsonCollectionObject)
@@ -386,7 +405,7 @@ namespace Guru.Formatter.Json
                     }
                     else if (jsonObject is JsonValueObject)
                     {
-                        var value = DeserializeJsonPlainValueObject(jsonObject as JsonValueObject, elementType);
+                        var value = JsonSettings.DeserializeValue(jsonObject as JsonValueObject, elementType);
                         collection.Add(value);
                     }
                 }
@@ -397,17 +416,17 @@ namespace Guru.Formatter.Json
             return null;
         }
 
-        private object DeserializeJsonPlainValueObject(JsonValueObject plainValueObject, Type targetType)
-        {
-            if (JsonEncoder.IsNullValue(plainValueObject))
-            {
-                return null;
-            }
-            else
-            {
-                return plainValueObject.ToString().ConvertTo(targetType);
-            }
-        }
+        // private object DeserializeJsonPlainValueObject(JsonValueObject plainValueObject, Type targetType)
+        // {
+        //     if (JsonEncoder.IsNullValue(plainValueObject))
+        //     {
+        //         return null;
+        //     }
+        //     else
+        //     {
+        //         return plainValueObject.ToString().ConvertTo(targetType);
+        //     }
+        // }
 
         #endregion
     }

@@ -12,6 +12,13 @@ namespace Guru.Formatter
     [DI(typeof(ITextFormatter), Lifetime = Lifetime.Singleton)]
     public class TextFormatter : ITextFormatter
     {
+        public Encoding TextEncoding { get; set; }
+
+        public TextFormatter()
+        {
+            TextEncoding = Encoding.UTF8;
+        }
+
         public object ReadObject(Type targetType, string path)
         {
             using (var inputStream = new FileStream(path, FileMode.Open, FileAccess.Read))
