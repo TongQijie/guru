@@ -44,7 +44,7 @@ namespace Watchman
 
             try
             {
-                using (var inputStream = new FileStream(s, FileMode.Open, FileAccess.Read))
+                using (var inputStream = new FileStream(s, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var buffer = new byte[4 * 1024];
                     var count = 0;
