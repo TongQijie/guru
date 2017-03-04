@@ -44,7 +44,7 @@ namespace ConsoleApp.Formatter
                 },
             };
 
-            var json = _JsonFormatter.WriteString(item, Encoding.UTF8);
+            var json = await _JsonFormatter.WriteStringAsync(item, Encoding.UTF8);
 
             var i = await _JsonFormatter.ReadObjectAsync<Item>(json, Encoding.UTF8);
         }

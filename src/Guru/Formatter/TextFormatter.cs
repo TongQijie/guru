@@ -169,5 +169,34 @@ namespace Guru.Formatter
         {
             return instance.ToString();
         }
+
+        public async Task WriteObjectAsync(object instance, Stream stream)
+        {
+            using (var writer = new StreamWriter(stream, DefaultEncoding))
+            {
+                await writer.WriteAsync(instance.ToString());
+            }
+        }
+
+        public async Task WriteObjectAsync(object instance, string path)
+        {
+            using (var outputStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                using (var writer = new StreamWriter(outputStream, DefaultEncoding))
+                {
+                    await writer.WriteAsync(instance.ToString());
+                }
+            }
+        }
+
+        public Task<string> WriteStringAsync(object instance, Encoding encoding)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<byte[]> WriteBytesAsync(object instance)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,9 +1,9 @@
+using System;
 using System.IO;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Abstractions;
-using System;
 
 namespace Watchman
 {

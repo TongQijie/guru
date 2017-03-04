@@ -9,17 +9,23 @@ namespace Guru.Formatter.Json
     {
         private readonly Encoding _CurrentEncoding;
 
+        private readonly bool _OmitDefaultValue;
+
         public JsonSettings()
         {
             _CurrentEncoding = Encoding.UTF8;
+            _OmitDefaultValue = true;
         }
 
-        public JsonSettings(Encoding encoding)
+        public JsonSettings(Encoding encoding, bool omitDefaultValue)
         {
             _CurrentEncoding = encoding;
+            _OmitDefaultValue = omitDefaultValue;
         }
 
         public Encoding CurrentEncoding => _CurrentEncoding;
+
+        public bool OmitDefaultValue => _OmitDefaultValue;
 
         public object DeserializeValue(JsonValueObject value, Type targetType)
         {

@@ -180,8 +180,7 @@ namespace Guru.Middleware.RESTfulService
             {
                 httpContext.Response.ContentType = "application/json";
 
-                var data = _JsonFormatter.WriteBytes(result);
-                await httpContext.Response.Body.WriteAsync(data, 0, data.Length);
+                await _JsonFormatter.WriteObjectAsync(result, httpContext.Response.Body);
             }
             else if (contentType == ContentType.Xml)
             {

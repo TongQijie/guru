@@ -11,7 +11,7 @@ namespace Guru.Formatter.Json
 
         public byte[] Buffer { get; set; }
 
-        public override bool Fill(IReaderStream stream, byte[] seperators, byte[] terminators)
+        internal override bool Fill(IReaderStream stream, byte[] seperators, byte[] terminators)
         {
             var terminated = true;
             if (Buffer == null)
@@ -91,7 +91,7 @@ namespace Guru.Formatter.Json
             return terminated;
         }
 
-        public override async Task<bool> FillAsync(IReaderStream stream, byte[] seperators, byte[] terminators)
+        internal override async Task<bool> FillAsync(IReaderStream stream, byte[] seperators, byte[] terminators)
         {
             var terminated = true;
             if (Buffer == null)

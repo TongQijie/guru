@@ -41,10 +41,18 @@ namespace Guru.Formatter.Abstractions
 
         void WriteObject(object instance, Stream stream);
 
+        Task WriteObjectAsync(object instance, Stream stream);
+
         void WriteObject(object instance, string path);
+
+        Task WriteObjectAsync(object instance, string path);
 
         string WriteString(object instance, Encoding encoding);
 
+        Task<string> WriteStringAsync(object instance, Encoding encoding);
+
         byte[] WriteBytes(object instance);
+
+        Task<byte[]> WriteBytesAsync(object instance);
     }
 }

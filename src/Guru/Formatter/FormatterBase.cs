@@ -59,33 +59,6 @@ namespace Guru.Formatter
             return ReadObject(typeof(T), byteValues, offset, count).ConvertTo<T>();
         }
 
-        public virtual void WriteObject(object instance, Stream stream)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual void WriteObject(object instance, string path)
-        {
-            using (var outputStream = new FileStream(path, FileMode.Create, FileAccess.Write))
-            {
-                WriteObject(instance, outputStream);
-            }
-        }
-
-        public virtual string WriteString(object instance, Encoding encoding)
-        {
-            return encoding.GetString(WriteBytes(instance));
-        }
-
-        public virtual byte[] WriteBytes(object instance)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                WriteObject(instance, memoryStream);
-                return memoryStream.ToArray();
-            }
-        }
-
         public virtual Task<object> ReadObjectAsync(Type targetType, Stream stream)
         {
             throw new NotImplementedException();
@@ -133,6 +106,60 @@ namespace Guru.Formatter
         public virtual async Task<T> ReadObjectAsync<T>(byte[] byteValues, int offset, int count)
         {
             return (await ReadObjectAsync(typeof(T), byteValues, offset, count)).ConvertTo<T>();
+        }
+
+        public virtual void WriteObject(object instance, Stream stream)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void WriteObject(object instance, string path)
+        {
+            using (var outputStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                WriteObject(instance, outputStream);
+            }
+        }
+
+        public virtual string WriteString(object instance, Encoding encoding)
+        {
+            return encoding.GetString(WriteBytes(instance));
+        }
+
+        public virtual byte[] WriteBytes(object instance)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                WriteObject(instance, memoryStream);
+                return memoryStream.ToArray();
+            }
+        }
+
+        public virtual Task WriteObjectAsync(object instance, Stream stream)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual async Task WriteObjectAsync(object instance, string path)
+        {
+            using (var outputStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                await WriteObjectAsync(instance, outputStream);
+            }
+        }
+
+        public virtual async Task<string> WriteStringAsync(object instance, Encoding encoding)
+        {
+            return encoding.GetString(await WriteBytesAsync(instance));
+        }
+
+        public virtual async Task<byte[]> WriteBytesAsync(object instance)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await WriteObjectAsync(instance, memoryStream);
+                return memoryStream.ToArray();
+            }
         }
     }
 }
