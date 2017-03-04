@@ -60,6 +60,14 @@ namespace Guru.Network
             }
         }
 
+        public async Task<TBody> GetBodyAsync<TBody>(IFormatter formatter)
+        {
+            using (var stream = await _Response.Content.ReadAsStreamAsync())
+            {
+                return await formatter.ReadObjectAsync<TBody>(stream);
+            }
+        }
+
         public async Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4096)
         {
             var buffer = new byte[bufferSize];

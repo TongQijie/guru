@@ -9,14 +9,14 @@ using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Formatter
 {
-    [DI(typeof(ITextFormatter), Lifetime = Lifetime.Singleton)]
+    [DI(typeof(ITextFormatter), Lifetime = Lifetime.Transient)]
     public class TextFormatter : ITextFormatter
     {
-        public Encoding TextEncoding { get; set; }
+        public Encoding DefaultEncoding { get; set; }
 
         public TextFormatter()
         {
-            TextEncoding = Encoding.UTF8;
+            DefaultEncoding = Encoding.UTF8;
         }
 
         public object ReadObject(Type targetType, string path)
@@ -29,7 +29,7 @@ namespace Guru.Formatter
 
         public object ReadObject(Type targetType, Stream stream)
         {
-            using(var reader = new StreamReader(stream, Encoding.UTF8))
+            using(var reader = new StreamReader(stream, DefaultEncoding))
             {
                 return reader.ReadToEnd();
             }
@@ -95,7 +95,7 @@ namespace Guru.Formatter
 
         public async Task<object> ReadObjectAsync(Type targetType, Stream stream)
         {
-            using(var reader = new StreamReader(stream, Encoding.UTF8))
+            using(var reader = new StreamReader(stream, DefaultEncoding))
             {
                 return await reader.ReadToEndAsync();
             }
@@ -150,7 +150,7 @@ namespace Guru.Formatter
         {
             using (var outputStream = new FileStream(path, FileMode.Create, FileAccess.Write))
             {
-                using (var writer = new StreamWriter(outputStream, Encoding.UTF8))
+                using (var writer = new StreamWriter(outputStream, DefaultEncoding))
                 {
                     writer.Write(instance.ToString());
                 }
@@ -159,7 +159,7 @@ namespace Guru.Formatter
 
         public void WriteObject(object instance, Stream stream)
         {
-            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            using (var writer = new StreamWriter(stream, DefaultEncoding))
             {
                 writer.Write(instance.ToString());
             }

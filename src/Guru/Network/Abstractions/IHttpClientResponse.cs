@@ -14,6 +14,8 @@ namespace Guru.Network.Abstractions
 
         Task<TBody> GetBodyAsync<TBody, TFormatter>() where TFormatter : IFormatter;
 
+        Task<TBody> GetBodyAsync<TBody>(IFormatter formatter);
+
         Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4 * 1024);
     }
 }
