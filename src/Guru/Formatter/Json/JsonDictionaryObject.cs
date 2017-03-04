@@ -9,7 +9,7 @@ namespace Guru.Formatter.Json
     {
         public JsonDictionaryElement[] Elements { get; set; }
 
-        public override bool Fill(IStream stream, byte[] seperators, byte[] terminators)
+        public override bool Fill(IReaderStream stream, byte[] seperators, byte[] terminators)
         {
             Elements = new JsonDictionaryElement[0];
 
@@ -37,7 +37,7 @@ namespace Guru.Formatter.Json
             throw new Errors.JsonParseFailedException(stream.Position, "dictionary element has invalid terminal byte.");
         }
 
-        public override async Task<bool> FillAsync(IStream stream, byte[] seperators, byte[] terminators)
+        public override async Task<bool> FillAsync(IReaderStream stream, byte[] seperators, byte[] terminators)
         {
             Elements = new JsonDictionaryElement[0];
 
@@ -62,7 +62,7 @@ namespace Guru.Formatter.Json
             throw new Errors.JsonParseFailedException(stream.Position, "dictionary element has invalid terminal byte.");
         }
 
-        private bool Parse(IStream stream)
+        private bool Parse(IReaderStream stream)
         {
             var b = stream.SeekBytesUntilVisiableChar();
             if (b == JsonConstants.Right_Brace)
@@ -106,7 +106,7 @@ namespace Guru.Formatter.Json
             return args.Handled;
         }
 
-        private async Task<bool> ParseAsync(IStream stream)
+        private async Task<bool> ParseAsync(IReaderStream stream)
         {
             var b = await stream.SeekBytesUntilVisiableCharAsync();
             if (b == JsonConstants.Right_Brace)

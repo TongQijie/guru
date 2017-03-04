@@ -19,9 +19,9 @@ namespace ConsoleApp
 
             // new DependencyInjection.TestRunner().Run();
 
-            // new Formatter.TestRunner().Run();
+            new Formatter.TestRunner().Run();
 
-            new Network.TestRunner().Run();
+            // new Network.TestRunner().Run();
 
             // new Network.UnsplashCrawler().Run();
 

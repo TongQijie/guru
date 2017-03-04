@@ -238,7 +238,7 @@ namespace Guru.Formatter.Json
         {
             var args = new JsonObjectParseArgs()
             {
-                Stream = new Internal.BufferedStream(stream, 8 * 1024),
+                Stream = new Internal.BufferedReaderStream(stream, 8 * 1024),
             };
 
             JsonObjectParser.Parse(args);
@@ -250,7 +250,7 @@ namespace Guru.Formatter.Json
         {
             var args = new JsonObjectParseArgs()
             {
-                Stream = new Internal.BufferedStream(stream, 8 * 1024),
+                Stream = new Internal.BufferedReaderStream(stream, 8 * 1024),
             };
 
             await JsonObjectParser.ParseAsync(args);

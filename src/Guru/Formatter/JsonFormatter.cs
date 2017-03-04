@@ -10,7 +10,7 @@ using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Formatter
 {
-    [DI(typeof(IJsonFormatter), Lifetime = Lifetime.Singleton)]
+    [DI(typeof(IJsonFormatter), Lifetime = Lifetime.Transient)]
     public class JsonFormatter : FormatterBase, IJsonFormatter
     {
         public bool OmitDefaultValue { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Guru.Formatter.Internal
 {
-    public interface IStream
+    public interface IReaderStream
     {
         /// <summary>
         /// number of bytes that have read.

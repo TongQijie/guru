@@ -4,7 +4,7 @@ namespace Guru.Formatter.Json
 {
     internal class JsonObjectParseArgs
     {
-        public IStream Stream { get; set; }
+        public IReaderStream Stream { get; set; }
 
         public JsonObject ExternalObject { get; set; }
 

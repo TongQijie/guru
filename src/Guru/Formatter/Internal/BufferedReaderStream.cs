@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace Guru.Formatter.Internal
 {
-    internal class BufferedStream : IStream
+    internal class BufferedReaderStream : IReaderStream
     {
-        public BufferedStream(Stream stream, int capacity)
+        public BufferedReaderStream(Stream stream, int capacity)
         {
             _InternalStream = stream;
             _InternalBuffer = new byte[capacity];
