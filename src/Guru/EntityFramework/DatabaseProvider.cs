@@ -1,8 +1,6 @@
 using System;
-using System.IO;
 using System.Reflection;
 using System.Data.Common;
-using System.Runtime.Loader;
 using System.Collections.Concurrent;
 
 using Guru.ExtensionMethod;
@@ -65,7 +63,7 @@ namespace Guru.EntityFramework
 
         private Type GetFactoryType(string stringValue)
         {
-            foreach (var a in GetAssemblies())
+            foreach (var a in new DefaultAssemblyLoader().GetAssemblies())
             {
                 var type = a.GetType(stringValue, false, true);
                 if (type != null)
@@ -75,20 +73,6 @@ namespace Guru.EntityFramework
             }
 
             return null;
-        }
-
-        private Assembly[] GetAssemblies()
-        {
-            var assemblies = new Assembly[0];
-
-            var directoryInfo = new DirectoryInfo("./".FullPath());
-
-            foreach (var fileInfo in directoryInfo.GetFiles("*.dll", SearchOption.TopDirectoryOnly))
-            {
-                assemblies = assemblies.Append(Assembly.Load(AssemblyLoadContext.GetAssemblyName(fileInfo.FullName)));
-            }
-
-            return assemblies;
         }
     }
 }
