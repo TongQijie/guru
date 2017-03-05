@@ -29,7 +29,9 @@ namespace ConsoleApp.EntityFramework
                 {
                     stopwatch.Restart();
 
-                    var messages = GetMessages().GetAwaiter().GetResult();
+                    // var messages = GetMessages().GetAwaiter().GetResult();
+
+                    var test = GetTests().GetAwaiter().GetResult();
 
                     stopwatch.Stop();
                     Console.WriteLine($"cost: {stopwatch.Elapsed.TotalMilliseconds}");
@@ -46,6 +48,13 @@ namespace ConsoleApp.EntityFramework
             var command = _CommandProvider.GetCommand("messages");
             command.SetParameterValue("@Type", "Text");
             return await command.GetEntitiesAsync<Message>();
+        }
+
+        private async Task<List<Test>> GetTests()
+        {
+            var command = _CommandProvider.GetCommand("test");
+            command.SetParameterValue("@Id", 1);
+            return await command.GetEntitiesAsync<Test>();
         }
     }
 }

@@ -2,4 +2,7 @@
   <database name="sqlserver" 
             connectionString="Server=192.168.0.105;Database=conference2017;User Id=dev;Password=123456;" 
             provider="System.Data.SqlClient.SqlClientFactory" />
+  <database name="mysql" 
+            connectionString="Server=192.168.0.103;Database=test;Uid=jerry;Pwd=123456;" 
+            provider="Mysql.Data.MySqlClient.MySqlClientFactory" />
 </databases>

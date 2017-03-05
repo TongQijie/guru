@@ -13,4 +13,14 @@
       <param name="@Type" type="String" direction="Input" size="10" />
     </params>
   </command>
+  <command name="test" commandType="Text" database="mysql">
+    <commandText>
+      <![CDATA[
+      select * from test where Id = @Id;
+      ]]>
+    </commandText>
+    <params>
+      <param name="@Id" type="Int32" direction="Input" size="4" />
+    </params>
+  </command>
 </commands>

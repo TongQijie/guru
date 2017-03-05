@@ -30,4 +30,13 @@ namespace ConsoleApp.EntityFramework
         [SimpleValue("MediaId")]
         public string MediaId { get; set; }
     }
+
+    public class Test
+    {
+        [SimpleValue("Id")]
+        public int Id { get; set; }
+
+        [SimpleValue("Value")]
+        public string Value { get; set; }
+    }
 }

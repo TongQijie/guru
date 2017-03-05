@@ -18,7 +18,9 @@
     "Guru": {
       "version": "1.0.5",
       "target": "project"
-    }
+    },
+    "MySql.Data": "6.10.1-beta",
+    "System.Data.SqlClient": "4.3.0"
   },
 
   "frameworks": {
