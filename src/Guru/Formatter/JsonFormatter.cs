@@ -19,7 +19,6 @@ namespace Guru.Formatter
 
         public JsonFormatter()
         {
-            OmitDefaultValue = true;
             DefaultEncoding = Encoding.UTF8;
         }
 

@@ -60,5 +60,7 @@ namespace ConsoleApp.Middleware
     public class Response
     {
         public string Result { get; set; }
+
+        public int Status { get; set; }
     }
 }

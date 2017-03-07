@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 using Guru.Middleware;
+using Guru.Middleware.Abstractions;
+using Guru.DependencyInjection.Abstractions;
 
 namespace AspNetCoreApp
 {
@@ -21,10 +23,19 @@ namespace AspNetCoreApp
                 .Configure(x =>
                 {
                     AspNetCoreHttpContext.Configure(x.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
-                    x.UseMiddleware<AspNetCoreMiddleware>();
+                    x.UseMiddleware<AspNetCoreMiddleware>(new Lifetime());
                 })
                 .Build()
                 .Run();
+        }
+
+        public class Lifetime : IMiddlewareLifetime
+        {
+            public void Startup(IContainer container)
+            {
+                var handler = container.GetImplementation<IRESTfulServiceHandler>();
+                handler.JsonFormatter.OmitDefaultValue = true;
+            }
         }
     }
 }

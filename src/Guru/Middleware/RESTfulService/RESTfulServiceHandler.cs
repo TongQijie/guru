@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -23,17 +22,27 @@ namespace Guru.Middleware.RESTfulService
 
         private readonly IXmlFormatter _XmlFormatter;
 
+        private readonly ITextFormatter _TextFormatter;
+
         public RESTfulServiceHandler(
             IRESTfulServiceFactory factory,
             IJsonFormatter jsonFormatter,
-            IXmlFormatter xmlFormatter)
+            IXmlFormatter xmlFormatter,
+            ITextFormatter textFormatter)
         {
             _Factory = factory;
             _Factory.Init(ContainerEntry.Container, new DefaultAssemblyLoader());
 
             _JsonFormatter = jsonFormatter;
             _XmlFormatter = xmlFormatter;
+            _TextFormatter = textFormatter;
         }
+
+        public IJsonFormatter JsonFormatter => _JsonFormatter;
+
+        public IXmlFormatter XmlFormatter => _XmlFormatter;
+
+        public ITextFormatter TextFormatter => _TextFormatter;
 
         public async Task ProcessRequest(ICallingContext context)
         {
@@ -91,7 +100,7 @@ namespace Guru.Middleware.RESTfulService
                         }
                         else
                         {
-                            values[i] = await parameterInfo.GetParameterValueAsync(null, stream);
+                            values[i] = await parameterInfo.GetParameterValueAsync(_TextFormatter, stream);
                         }
                     }
                     else if (contentType.ContainsIgnoreCase("application/json"))
@@ -104,10 +113,10 @@ namespace Guru.Middleware.RESTfulService
                     }
                     else
                     {
-                        values[i] = await parameterInfo.GetParameterValueAsync(null, stream);
+                        values[i] = await parameterInfo.GetParameterValueAsync(_TextFormatter, stream);
                     }
                 }
-                else if (queryString.ContainsKey(parameterInfo.Name))
+                else if (queryString.ContainsKey(parameterInfo.ParameterName))
                 {
                     values[i] = parameterInfo.GetParameterValue(queryString);
                 }
@@ -125,7 +134,7 @@ namespace Guru.Middleware.RESTfulService
                         }
                         else
                         {
-                            values[i] = await parameterInfo.GetParameterValueAsync(null, stream);
+                            values[i] = await parameterInfo.GetParameterValueAsync(_TextFormatter, stream);
                         }
                     }
                     else if (contentType.ContainsIgnoreCase("application/json"))
@@ -138,7 +147,7 @@ namespace Guru.Middleware.RESTfulService
                     }
                     else
                     {
-                        values[i] = await parameterInfo.GetParameterValueAsync(null, stream);
+                        values[i] = await parameterInfo.GetParameterValueAsync(_TextFormatter, stream);
                     }
                 }
             }
@@ -193,8 +202,7 @@ namespace Guru.Middleware.RESTfulService
             {
                 httpContext.Response.ContentType = "plain/text";
 
-                var data = Encoding.UTF8.GetBytes(result.ToString());
-                await httpContext.Response.Body.WriteAsync(data, 0, data.Length);
+                await _TextFormatter.WriteObjectAsync(result, httpContext.Response.Body);
             }
         }
     }

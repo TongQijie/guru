@@ -8,7 +8,7 @@ using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Formatter
 {
-    [DI(typeof(IXmlFormatter), Lifetime = Lifetime.Singleton)]
+    [DI(typeof(IXmlFormatter), Lifetime = Lifetime.Transient)]
     public class XmlFormatter : FormatterBase, IXmlFormatter
     {
         public bool OmitNamespaces { get; set; }

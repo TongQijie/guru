@@ -127,9 +127,9 @@ namespace ConsoleApp.Network
             {
                 if (response.StatusCode == 200)
                 {
-                    var data = await response.GetBodyAsync<Response, IJsonFormatter>();
+                    var data = await response.GetBodyAsync<string, ITextFormatter>();
 
-                    Console.WriteLine(data.Result);
+                    Console.WriteLine(data);
                 }
             }
         }

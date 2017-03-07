@@ -21,11 +21,11 @@ namespace ConsoleApp
 
             // new Formatter.TestRunner().Run();
 
-            // new Network.TestRunner().Run();
+            new Network.TestRunner().Run();
 
             // new Network.UnsplashCrawler().Run();
 
-            new EntityFramework.TestRunner().Run();
+            // new EntityFramework.TestRunner().Run();
 
             stopwatch.Stop();
             Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");
