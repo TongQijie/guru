@@ -20,7 +20,8 @@
       "target": "project"
     },
     "MySql.Data": "6.10.1-beta",
-    "System.Data.SqlClient": "4.3.0"
+    "System.Data.SqlClient": "4.3.0",
+    "StackExchange.Redis": "1.2.1"
   },
 
   "frameworks": {

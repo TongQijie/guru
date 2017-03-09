@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -47,12 +48,12 @@ namespace Guru.DependencyInjection
 
         private bool Filter(string assemblyName)
         {
-            return !assemblyName.StartsWith("runtime") 
-                && !assemblyName.StartsWith("System") 
-                && !assemblyName.StartsWith("Microsoft") 
-                && !assemblyName.StartsWith("NETStandard") 
-                && assemblyName != "Libuv" 
-                && !assemblyName.StartsWith("Newtonsoft");
+            return !assemblyName.StartsWith("runtime", StringComparison.OrdinalIgnoreCase)
+                && !assemblyName.StartsWith("System", StringComparison.OrdinalIgnoreCase) 
+                && !assemblyName.StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase) 
+                && !assemblyName.StartsWith("NETStandard", StringComparison.OrdinalIgnoreCase) 
+                && !assemblyName.EqualsIgnoreCase("Libuv") 
+                && !assemblyName.StartsWith("Newtonsoft", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
