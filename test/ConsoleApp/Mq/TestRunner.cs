@@ -13,12 +13,14 @@ namespace ConsoleApp.Mq
                 factory.UserName = "jerry";
                 factory.Password = "123456";
                 //factory.VirtualHost = "/";
-                factory.HostName = "192.168.0.102";
-                factory.Port = 25672;
+                factory.HostName = "192.168.0.101";
+                factory.Port = 5672;
+                factory.Protocol = Protocols.DefaultProtocol;
 
-
-                IConnection conn = factory.CreateConnection();
-                IModel channel = conn.CreateModel();
+                using (IConnection conn = factory.CreateConnection())
+                {
+                    IModel channel = conn.CreateModel();
+                }
             }
             catch (Exception e)
             {

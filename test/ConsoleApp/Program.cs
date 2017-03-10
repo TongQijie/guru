@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Threading;
 using System.Diagnostics;
-
 using Guru.DependencyInjection;
 
 namespace ConsoleApp
@@ -14,6 +14,8 @@ namespace ConsoleApp
 
         public static void Main(string[] args)
         {
+            Thread.CurrentThread.Name = "Main Thread";
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
