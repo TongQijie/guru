@@ -21,7 +21,8 @@
     },
     "MySql.Data": "6.10.1-beta",
     "System.Data.SqlClient": "4.3.0",
-    "StackExchange.Redis": "1.2.1"
+    "StackExchange.Redis": "1.2.1",
+    "RabbitMQ.Client": "4.1.1"
   },
 
   "frameworks": {

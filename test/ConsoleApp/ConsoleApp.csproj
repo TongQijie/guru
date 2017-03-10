@@ -24,6 +24,7 @@
     <PackageReference Include="MySql.Data" Version="6.10.1-beta" />
     <PackageReference Include="System.Data.SqlClient" Version="4.3.0" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="4.1.1" />
   </ItemGroup>
 
 </Project>
