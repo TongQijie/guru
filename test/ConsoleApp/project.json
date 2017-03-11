@@ -16,7 +16,7 @@
       "version": "1.0.0-*"
     },
     "Guru": {
-      "version": "1.0.5",
+      "version": "1.0.6",
       "target": "project"
     },
     "MySql.Data": "6.10.1-beta",
