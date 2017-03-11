@@ -20,7 +20,7 @@ namespace Guru.Middleware
 
         private readonly IHttpHandlerComponent _HttpHandlerComponent;
 
-        public AspNetCoreMiddleware(RequestDelegate next, IMiddlewareLifetime lifetime)
+        public AspNetCoreMiddleware(RequestDelegate next, IMiddlewareLifetime lifetime = null)
         {
             _Next = next;
             _Lifetime = lifetime;

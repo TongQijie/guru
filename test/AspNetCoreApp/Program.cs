@@ -23,7 +23,8 @@ namespace AspNetCoreApp
                 .Configure(x =>
                 {
                     AspNetCoreHttpContext.Configure(x.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
-                    x.UseMiddleware<AspNetCoreMiddleware>(new Lifetime());
+                    // x.UseMiddleware<AspNetCoreMiddleware>(new Lifetime());
+                    x.UseMiddleware<AspNetCoreMiddleware>();
                 })
                 .Build()
                 .Run();
