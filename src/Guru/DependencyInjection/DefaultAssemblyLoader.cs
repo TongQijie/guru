@@ -40,7 +40,17 @@ namespace Guru.DependencyInjection
                     }
                 }
 
-                _Assemblies = assemblyNames.Select(x => Assembly.Load(x));
+                foreach (var assemblyName in assemblyNames)
+                {
+                    try
+                    {
+                        _Assemblies = _Assemblies.Append(Assembly.Load(assemblyName));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                }
             }
 
             return _Assemblies;
