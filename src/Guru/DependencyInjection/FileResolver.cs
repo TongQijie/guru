@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 using Guru.ExtensionMethod;
 using Guru.Monitor.Abstractions;
+using Guru.Logging.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
@@ -44,6 +45,8 @@ namespace Guru.DependencyInjection
             _Path = path;
             _Format = format;
             _Multiply = multiply;
+
+            Console.WriteLine($"file resolver: {_Path.FullPath()}");
         }
         
         public Type Abstraction { get { return _Abstraction; } }
@@ -115,8 +118,10 @@ namespace Guru.DependencyInjection
                                 
                                 _IsDirty = false;
                             }
-                            catch (Exception)
+                            catch (Exception e)
                             {
+                                _Container.GetImplementation<IFileLogger>().LogEvent("error", Severity.Error, e);
+
                                 if (retries > 1)
                                 {
                                     Thread.Sleep(100);
