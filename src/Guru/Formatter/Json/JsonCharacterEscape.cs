@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Guru.Formatter.Json
 {
-    public static class JsonCharacterEscape
+    internal static class JsonCharacterEscape
     {
         public static byte Unescape(int source)
         {

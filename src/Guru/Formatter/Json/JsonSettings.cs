@@ -5,7 +5,7 @@ using Guru.ExtensionMethod;
 
 namespace Guru.Formatter.Json
 {
-    public class JsonSettings
+    internal class JsonSettings
     {
         private readonly Encoding _CurrentEncoding;
 

@@ -1,6 +1,6 @@
 ﻿namespace Guru.Formatter.Json
 {
-    public enum JsonObjectType
+    internal enum JsonObjectType
     {
         Runtime = 0,
 

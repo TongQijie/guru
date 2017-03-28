@@ -1,6 +1,6 @@
 namespace Guru.Formatter.Json
 {
-    public static class JsonConstants
+    internal static class JsonConstants
     {
         /// <summary>
         /// '{'
