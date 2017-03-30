@@ -12,14 +12,19 @@ namespace GitDiff
     {
         private readonly IFileManager _FileManager;
 
+        private readonly string _Command;
+
         public Git(IFileManager fileManager)
         {
             _FileManager = fileManager;
+
+            var config = _FileManager.Single<IConfig>();
+            _Command = config.GitPath;
         }
 
         public Change[] GetCommitDetail(string commitId)
         {
-            var process = new ProcessHelper("git").Add("show")
+            var process = new ProcessHelper(_Command).Add("show")
                 .Add("--pretty=\"\"").Add("--name-status")
                 .Add(commitId);
 
@@ -69,13 +74,13 @@ namespace GitDiff
 
         public string GetFileContent(string commitId, string path)
         {
-            return new ProcessHelper("git").Add("show").Add($"{commitId}:\"{path}\"")
+            return new ProcessHelper(_Command).Add("show").Add($"{commitId}:\"{path}\"")
                 .ReadString(_FileManager.Single<IConfig>().LocalGitDirectory);
         }
 
         public Commit GetFileHistory(string path, Commit beforeCommit)
         {
-            var process = new ProcessHelper("git").Add("log")
+            var process = new ProcessHelper(_Command).Add("log")
                 .Add("--name-status")
                 .Add("--before").Add($"\"{beforeCommit.Date.AddSeconds(-1)}\"")
                 .Add("--").Add($"\"{path}\"");
@@ -117,7 +122,7 @@ namespace GitDiff
         {
             var config = _FileManager.Single<IConfig>();
 
-            var process = new ProcessHelper("git").Add("log")
+            var process = new ProcessHelper(_Command).Add("log")
                 .Add("--after").Add($"\"{config.StartTime.ToString("yyyy-MM-dd HH:mm:ss")}\"")
                 .Add("--before").Add($"\"{(config.EndTime ?? DateTime.Now).ToString("yyyy-MM-dd HH:mm:ss")}\"")
                 .Add("--pretty=format:\"%H|%cI|%an|%s\"")

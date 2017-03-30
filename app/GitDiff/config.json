@@ -1,4 +1,5 @@
 {
+  "GitPath": "REQUIRED: this is git command path",
   "LocalGitDirectory": "REQUIRED: this is your local git directory",
   "BranchName": "REQUIRED: this is your branch name",
   "StartTime": "REQUIRED: this is start time when searching commits from.",

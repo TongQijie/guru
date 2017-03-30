@@ -7,6 +7,8 @@ namespace GitDiff
     [FileDI(typeof(IConfig), "./config.json", Format = FileFormat.Json)]
     public class Config : IConfig
     {
+        public string GitPath { get; set; }
+
         public string LocalGitDirectory { get; set; }
 
         public string BranchName { get; set; }

@@ -4,6 +4,8 @@ namespace GitDiff
 {
     public interface IConfig
     {
+        string GitPath { get; set; }
+
         string LocalGitDirectory { get; }
 
         string BranchName { get; }
