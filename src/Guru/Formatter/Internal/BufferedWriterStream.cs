@@ -45,6 +45,7 @@ namespace Guru.Formatter.Internal
                 var copied = _InternalBuffer.Length - _Index;
                 Buffer.BlockCopy(buffer, offset, _InternalBuffer, _Index, copied);
 
+                _Index += copied;
                 await Flush();
                 await WriteAsync(buffer, offset + copied, count - copied);
             }
