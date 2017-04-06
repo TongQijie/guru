@@ -125,6 +125,15 @@ namespace GitDiff
                     if (commit != null)
                     {
                         file.HistoryCommit = commit;
+
+                        var historyContent = _Git.GetFileContent(file.HistoryCommit.Id, file.Path);
+                        var latestContent = _Git.GetFileContent(file.LatestCommit.Id, file.Path);
+
+                        if (historyContent == latestContent)
+                        {
+                            file.Mark = "I";
+                            continue;
+                        }
                     }
 
                     file.Mark = "M";
