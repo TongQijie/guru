@@ -45,8 +45,6 @@ namespace Guru.DependencyInjection
             _Path = path;
             _Format = format;
             _Multiply = multiply;
-
-            Console.WriteLine($"file resolver: {_Path.FullPath()}");
         }
         
         public Type Abstraction { get { return _Abstraction; } }

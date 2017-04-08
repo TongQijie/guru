@@ -31,7 +31,9 @@ namespace ConsoleApp
 
             // new Cache.TestRunner().Run();
 
-            new Mq.TestRunner().Run();
+            // new Mq.TestRunner().Run();
+
+            new Jobs.TestRunner().Run();
 
             stopwatch.Stop();
             Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");
