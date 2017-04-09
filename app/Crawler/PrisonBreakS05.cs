@@ -103,10 +103,7 @@ namespace Crawler
 
             if (downloadLinks.Count > 0)
             {
-                foreach (var downloadLink in downloadLinks)
-                {
-                    _Logger.LogEvent("PrisonBreakS05", Severity.Information, await _Formatter.WriteStringAsync(downloadLink, Encoding.UTF8));
-                }
+                _Logger.LogEvent("PrisonBreakS05", Severity.Information, await _Formatter.WriteStringAsync(downloadLinks, Encoding.UTF8));
 
                 RedisClient.Current.Set("DownloadLinks.PrisonBreakS05", await _Formatter.WriteStringAsync(downloadLinks, Encoding.UTF8), null);
             }

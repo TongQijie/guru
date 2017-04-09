@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Collections.Generic;
 
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
@@ -44,9 +45,13 @@ namespace ConsoleApp.Formatter
                 },
             };
 
-            var json = await _JsonFormatter.WriteStringAsync(item, Encoding.UTF8);
+            // var items = new Item[] { item };
 
-            var i = await _JsonFormatter.ReadObjectAsync<Item>(json, Encoding.UTF8);
+            var items = new List<Item>() { item };
+
+            var json = await _JsonFormatter.WriteStringAsync(items, Encoding.UTF8);
+
+            //var i = await _JsonFormatter.ReadObjectAsync<Item>(json, Encoding.UTF8);
         }
 
         public class Item

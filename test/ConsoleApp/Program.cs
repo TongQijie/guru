@@ -21,7 +21,7 @@ namespace ConsoleApp
 
             // new DependencyInjection.TestRunner().Run();
 
-            // new Formatter.TestRunner().Run();
+            new Formatter.TestRunner().Run();
 
             // new Network.TestRunner().Run();
 
@@ -33,7 +33,7 @@ namespace ConsoleApp
 
             // new Mq.TestRunner().Run();
 
-            new Jobs.TestRunner().Run();
+            // new Jobs.TestRunner().Run();
 
             stopwatch.Stop();
             Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");
