@@ -10,6 +10,8 @@ namespace Guru.Jobs.Abstractions
 
          void Disable(IJob job);
 
+         bool Async { get; set; }
+
          void Run();
     }
 }

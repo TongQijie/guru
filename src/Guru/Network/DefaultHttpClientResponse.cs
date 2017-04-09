@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -80,6 +81,11 @@ namespace Guru.Network
                     await handler(buffer, 0, count);
                 }
             }
+        }
+
+        public async Task<Stream> GetStream()
+        {
+            return await _Response.Content.ReadAsStreamAsync();
         }
 
         public void Dispose()

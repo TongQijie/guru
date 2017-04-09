@@ -1,13 +1,20 @@
 using System;
+using System.Threading.Tasks;
+using Guru.DependencyInjection;
+using Guru.Logging.Abstractions;
 
 namespace Guru.Jobs
 {
     public abstract class AbstractJob : IJob
     {
+        private readonly ILogger _Logger;
+
         public AbstractJob(string name, Schedule schedule)
         {
             Name = name;
             Schedule = schedule;
+
+            _Logger = ContainerEntry.Resolve<IFileLogger>();
         }
 
         public string Name { get; private set; }
@@ -45,13 +52,45 @@ namespace Guru.Jobs
 
                 NextExecTime = GetNextExecTime((DateTime)PrevExecTime);
 
-                OnRun(args);
+                try
+                {
+                    OnRun(args);
+                }
+                catch (Exception e)
+                {
+                    _Logger.LogEvent("Job", Severity.Error, $"failed to execute job '{Name}'", e);
+                }
+                
+                IsRunning = false;
+            }
+        }
+
+        public async Task RunAsync(string[] args)
+        {
+            if (!IsRunning)
+            {
+                IsRunning = true;
+
+                PrevExecTime = DateTime.Now;
+
+                NextExecTime = GetNextExecTime((DateTime)PrevExecTime);
+
+                try
+                {
+                    await OnRunAsync(args);
+                }
+                catch (Exception e)
+                {
+                    _Logger.LogEvent("Job", Severity.Error, $"failed to execute job '{Name}'", e);
+                }
 
                 IsRunning = false;
             }
         }
 
         protected abstract void OnRun(string[] args);
+
+        protected abstract Task OnRunAsync(string[] args);
 
         private DateTime GetNextExecTime(DateTime prevExecTime)
         {

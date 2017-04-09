@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -17,5 +18,7 @@ namespace Guru.Network.Abstractions
         Task<TBody> GetBodyAsync<TBody>(IFormatter formatter);
 
         Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4 * 1024);
+
+        Task<Stream> GetStream();
     }
 }

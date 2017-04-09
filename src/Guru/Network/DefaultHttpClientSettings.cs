@@ -35,6 +35,11 @@ namespace Guru.Network
 
         private TimeSpan? _Timeout;
 
+        public DefaultHttpClientSettings(string id)
+        {
+            _Id = id;
+        }
+
         public DefaultHttpClientSettings(string id, IDictionary<string, string[]> headers, IWebProxy proxy, TimeSpan? timeout)
         {
             _Id = id;

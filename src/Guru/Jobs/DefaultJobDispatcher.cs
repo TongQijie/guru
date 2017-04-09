@@ -19,7 +19,7 @@ namespace Guru.Jobs
             {
                 args = new string[0];
             }
-            
+
             _Jobs.AddOrUpdate(job, args, (j, a) => a);
         }
 
@@ -252,16 +252,25 @@ namespace Guru.Jobs
             }
         }
 
+        public bool Async { get; set; }
+
         private void CreateJobThread(IJob job, string[] args)
         {
-            new Thread(() =>
+            if (Async)
             {
-                job.Run(args);
-            })
+                job.RunAsync(args);
+            }
+            else
             {
-                IsBackground = true,
-                Name = job.Name,
-            }.Start();
+                new Thread(() =>
+                {
+                    job.Run(args);
+                })
+                {
+                    IsBackground = true,
+                    Name = job.Name,
+                }.Start();
+            }
         }
     }
 }

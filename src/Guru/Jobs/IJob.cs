@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Guru.Jobs
 {
@@ -21,5 +22,7 @@ namespace Guru.Jobs
         void Disable();
 
         void Run(string[] args);
+
+        Task RunAsync(string [] args);
     }
 }
