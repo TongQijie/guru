@@ -60,6 +60,9 @@ namespace Guru.Jobs
                 {
                     _Logger.LogEvent("Job", Severity.Error, $"failed to execute job '{Name}'", e);
                 }
+
+                _Logger.LogEvent("Job", Severity.Information, 
+                    $"job '{Name}' finished executing with costing {(DateTime.Now - (DateTime)PrevExecTime).TotalSeconds} seconds.");
                 
                 IsRunning = false;
             }

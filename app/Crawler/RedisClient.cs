@@ -1,3 +1,4 @@
+using System;
 using StackExchange.Redis;
 
 namespace Crawler
@@ -14,13 +15,13 @@ namespace Crawler
 
         private RedisClient()
         {
-            _Redis = ConnectionMultiplexer.Connect("localhost:6379");
+            _Redis = ConnectionMultiplexer.Connect("localhost");
             _Db = _Redis.GetDatabase();
         }
 
-        public void Set(string key, string value)
+        public void Set(string key, string value, TimeSpan? expire)
         {
-            _Db.SetAdd(key, value);
+            _Db.StringSet(key, value, expire);
         }
 
         public string Get(string key)
