@@ -15,7 +15,7 @@ namespace Crawler
 
         private RedisClient()
         {
-            _Redis = ConnectionMultiplexer.Connect("localhost");
+            _Redis = ConnectionMultiplexer.Connect("127.0.0.1");
             _Db = _Redis.GetDatabase();
         }
 
