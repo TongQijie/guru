@@ -245,8 +245,17 @@ namespace Guru.Formatter.Json
         {
             stream.WriteByte(JsonConstants.Left_Bracket);
 
+            JsonObjectType objectType;
+            if (value is Array)
+            {
+                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
+            }
+            else
+            {
+                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetGenericArguments()[0]);
+            }
+
             var collection = value as ICollection;
-            var objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
 
             var firstElement = true;
             foreach (var element in collection)
@@ -275,8 +284,17 @@ namespace Guru.Formatter.Json
         {
             await stream.WriteAsync(JsonConstants.Left_Bracket);
 
+            JsonObjectType objectType;
+            if (value is Array)
+            {
+                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
+            }
+            else
+            {
+                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetGenericArguments()[0]);
+            }
+            
             var collection = value as ICollection;
-            var objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
 
             var firstElement = true;
             foreach (var element in collection)
