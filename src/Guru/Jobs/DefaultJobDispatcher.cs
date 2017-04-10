@@ -4,14 +4,22 @@ using System.Collections.Concurrent;
 
 using Guru.Jobs.Abstractions;
 using Guru.DependencyInjection;
+using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Jobs
 {
     [DI(typeof(IJobDispatcher), Lifetime = Lifetime.Singleton)]
-    public class DefaultJobDispatcher : IJobDispatcher
+    internal class DefaultJobDispatcher : IJobDispatcher
     {
         private ConcurrentDictionary<IJob, string[]> _Jobs = new ConcurrentDictionary<IJob, string[]>();
+
+        private readonly IFileLogger _FileLogger;
+
+        public DefaultJobDispatcher(IFileLogger fileLogger)
+        {
+            _FileLogger = fileLogger;
+        }
 
         public void Add(IJob job, string[] args)
         {
@@ -76,17 +84,24 @@ namespace Guru.Jobs
 
                         new Thread(() =>
                         {
-                            while (_IsAlive)
+                            try
                             {
-                                foreach (var job in _Jobs)
+                                while (_IsAlive)
                                 {
-                                    if (WillExec(job.Key))
+                                    foreach (var job in _Jobs)
                                     {
-                                        CreateJobThread(job.Key, job.Value);
+                                        if (WillExec(job.Key))
+                                        {
+                                            CreateJobThread(job.Key, job.Value);
+                                        }
                                     }
-                                }
 
-                                Thread.Sleep(1000);
+                                    Thread.Sleep(1000);
+                                }
+                            }
+                            catch(Exception e)
+                            {
+                                _FileLogger.LogEvent("DefaultJobDispatcher", Severity.Fatal, e);
                             }
                         })
                         {
