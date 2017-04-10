@@ -28,7 +28,7 @@ namespace Crawler
                 Cycle = ExecutionCycle.Periodic,
                 Point = new ExecutionPoint()
                 {
-                    Minute = 60,
+                    Second = 10,
                 },
             })
         {

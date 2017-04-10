@@ -22,7 +22,7 @@ namespace Crawler
             dispatcher.Enable(job);
 
             dispatcher.Run();
-            Thread.Sleep(100000000);
+            Thread.Sleep(int.MaxValue);
         }
     }
 }
