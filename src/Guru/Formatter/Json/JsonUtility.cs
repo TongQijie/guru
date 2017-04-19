@@ -12,13 +12,17 @@ namespace Guru.Formatter.Json
             {
                 return JsonObjectType.Runtime;
             }
+            else if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(type))
+            {
+                return JsonObjectType.Dictionary;
+            }
             else if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(type))
             {
                 return JsonObjectType.Collection;
             }
             else if (type.GetTypeInfo().IsClass && type != typeof(string))
             {
-                return JsonObjectType.Dictionary;
+                return JsonObjectType.ClassObject;
             }
             else
             {

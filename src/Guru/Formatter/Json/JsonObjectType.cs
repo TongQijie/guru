@@ -4,10 +4,12 @@
     {
         Runtime = 0,
 
-        Dictionary = 1,
+        ClassObject = 1,
 
-        Collection = 2,
+        Dictionary = 2,
 
-        Value = 3,
+        Collection = 3,
+
+        Value = 4,
     }
 }

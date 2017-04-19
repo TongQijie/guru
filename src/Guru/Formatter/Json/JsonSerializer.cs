@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 using Guru.ExtensionMethod;
@@ -53,7 +54,7 @@ namespace Guru.Formatter.Json
                         var jsonObjectType = JsonUtility.GetJsonObjectType(Type);
 
                         // only parse json dictionary object
-                        if (jsonObjectType == JsonObjectType.Dictionary)
+                        if (jsonObjectType == JsonObjectType.ClassObject)
                         {
                             foreach (var propertyInfo in Type.GetTypeInfo().GetProperties().Where(x => x.CanRead && x.CanWrite && !x.IsDefined(typeof(JsonIngoreAttribute))))
                             {
@@ -135,7 +136,11 @@ namespace Guru.Formatter.Json
                 throw new ArgumentNullException("instance");
             }
 
-            if (JsonObjectType == JsonObjectType.Dictionary)
+            if (JsonObjectType == JsonObjectType.ClassObject)
+            {
+                SerializeJsonClassObject(stream, instance);
+            }
+            else if (JsonObjectType == JsonObjectType.Dictionary)
             {
                 SerializeJsonDictionaryObject(stream, instance);
             }
@@ -165,7 +170,11 @@ namespace Guru.Formatter.Json
 
         private async Task InternalSerializeAsync(object instance, IWriterStream stream)
         {
-            if (JsonObjectType == JsonObjectType.Dictionary)
+            if (JsonObjectType == JsonObjectType.ClassObject)
+            {
+                await SerializeJsonClassObjectAsync(stream, instance);
+            }
+            else if (JsonObjectType == JsonObjectType.Dictionary)
             {
                 await SerializeJsonDictionaryObjectAsync(stream, instance);
             }
@@ -179,7 +188,7 @@ namespace Guru.Formatter.Json
             }
         }
 
-        private void SerializeJsonDictionaryObject(Stream stream, object value)
+        private void SerializeJsonClassObject(Stream stream, object value)
         {
             stream.WriteByte(JsonConstants.Left_Brace);
 
@@ -210,7 +219,7 @@ namespace Guru.Formatter.Json
             stream.WriteByte(JsonConstants.Right_Brace);
         }
 
-        private async Task SerializeJsonDictionaryObjectAsync(IWriterStream stream, object value)
+        private async Task SerializeJsonClassObjectAsync(IWriterStream stream, object value)
         {
             await stream.WriteAsync(JsonConstants.Left_Brace);
 
@@ -236,6 +245,78 @@ namespace Guru.Formatter.Json
                 await stream.WriteAsync(buf, 0, buf.Length);
 
                 await SerializeRegularValueAsync(stream, propertyValue, jsonProperty.ObjectType);
+            }
+
+            await stream.WriteAsync(JsonConstants.Right_Brace);
+        }
+
+        private void SerializeJsonDictionaryObject(Stream stream, object value)
+        {
+            stream.WriteByte(JsonConstants.Left_Brace);
+
+            var args = value.GetType().GetGenericArguments();
+            if (args == null || args.Length != 2)
+            {
+                // TODO: log
+                return;
+            }
+
+            var objectType = JsonUtility.GetJsonObjectType(args[1]);
+
+            var dictionary = value as IDictionary;
+
+            var firstElement = true;
+            foreach (var key in dictionary.Keys)
+            {
+                if (firstElement)
+                {
+                    firstElement = false;
+                }
+                else
+                {
+                    stream.WriteByte(JsonConstants.Comma);
+                }
+
+                var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{key}\":");
+                stream.Write(buf, 0, buf.Length);
+
+                SerializeRegularValue(stream, dictionary[key], JsonUtility.GetJsonObjectType(dictionary[key].GetType()));
+            }
+
+            stream.WriteByte(JsonConstants.Right_Brace);
+        }
+
+        private async Task SerializeJsonDictionaryObjectAsync(IWriterStream stream, object value)
+        {
+            await stream.WriteAsync(JsonConstants.Left_Brace);
+
+            var args = value.GetType().GetGenericArguments();
+            if (args == null || args.Length != 2)
+            {
+                // TODO: log
+                return;
+            }
+
+            var objectType = JsonUtility.GetJsonObjectType(args[1]);
+
+            var dictionary = value as IDictionary;
+
+            var firstElement = true;
+            foreach (var key in dictionary.Keys)
+            {
+                if (firstElement)
+                {
+                    firstElement = false;
+                }
+                else
+                {
+                    await stream.WriteAsync(JsonConstants.Comma);
+                }
+
+                var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{key}\":");
+                await stream.WriteAsync(buf, 0, buf.Length);
+
+                await SerializeRegularValueAsync(stream, dictionary[key], JsonUtility.GetJsonObjectType(dictionary[key].GetType()));
             }
 
             await stream.WriteAsync(JsonConstants.Right_Brace);
@@ -398,7 +479,7 @@ namespace Guru.Formatter.Json
         {
             if (jsonObject is JsonDictionaryObject)
             {
-                return DeserializeJsonDictionaryObject(jsonObject as JsonDictionaryObject);
+                return DeserializeJsonClassObject(jsonObject as JsonDictionaryObject);
             }
             else if (jsonObject is JsonCollectionObject)
             {
@@ -412,83 +493,153 @@ namespace Guru.Formatter.Json
             return null;
         }
 
-        private object DeserializeJsonDictionaryObject(JsonDictionaryObject dictionaryObject)
+        private object DeserializeJsonClassObject(JsonDictionaryObject dictionaryObject)
         {
-            var instance = Activator.CreateInstance(Type);
-
-            foreach (var element in dictionaryObject.Elements)
+            if (JsonObjectType == JsonObjectType.ClassObject)
             {
-                var key = JsonSettings.CurrentEncoding.GetString(element.Key);
+                var instance = Activator.CreateInstance(Type);
 
-                JsonProperty jsonProperty;
-                JsonProperties.TryGetValue(key, out jsonProperty);
-                if (jsonProperty == null)
+                foreach (var element in dictionaryObject.Elements)
                 {
-                    continue;
-                }
+                    var key = JsonSettings.CurrentEncoding.GetString(element.Key);
 
-                if (jsonProperty.IsJsonObject)
-                {
-                    jsonProperty.PropertyInfo.SetValue(instance, element.Value, null);
-                    continue;
-                }
-
-                if (jsonProperty.ObjectType == JsonObjectType.Runtime)
-                {
-                    continue;
-                }
-
-                if (jsonProperty.ObjectType == JsonObjectType.Dictionary)
-                {
-                    if (element.Value is JsonDictionaryObject)
+                    JsonProperty jsonProperty;
+                    JsonProperties.TryGetValue(key, out jsonProperty);
+                    if (jsonProperty == null)
                     {
-                        var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element.Value);
+                        continue;
+                    }
+
+                    if (jsonProperty.IsJsonObject)
+                    {
+                        jsonProperty.PropertyInfo.SetValue(instance, element.Value, null);
+                        continue;
+                    }
+
+                    if (jsonProperty.ObjectType == JsonObjectType.Runtime)
+                    {
+                        continue;
+                    }
+
+                    if (jsonProperty.ObjectType == JsonObjectType.ClassObject)
+                    {
+                        if (element.Value is JsonDictionaryObject)
+                        {
+                            var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element.Value);
+                            jsonProperty.PropertyInfo.SetValue(instance, value, null);
+                        }
+                        else if (element.Value is JsonValueObject)
+                        {
+                            var value = element.Value as JsonValueObject;
+                            jsonProperty.PropertyInfo.SetValue(instance,
+                                JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
+                                null);
+                        }
+                        else
+                        {
+                            throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
+                        }
+                    }
+                    else if (jsonProperty.ObjectType == JsonObjectType.Collection)
+                    {
+                        if (element.Value is JsonCollectionObject)
+                        {
+                            var collectionObject = element.Value as JsonCollectionObject;
+                            jsonProperty.PropertyInfo.SetValue(instance,
+                                DeserializeJsonCollectionObject(collectionObject, jsonProperty.PropertyInfo.PropertyType), null);
+                        }
+                        else if (element.Value is JsonValueObject)
+                        {
+                            var value = element.Value as JsonValueObject;
+                            jsonProperty.PropertyInfo.SetValue(instance,
+                                JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
+                                null);
+                        }
+                        else
+                        {
+                            throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
+                        }
+                    }
+                    else if (jsonProperty.ObjectType == JsonObjectType.Value && element.Value is JsonValueObject)
+                    {
+                        var value = JsonSettings.DeserializeValue(element.Value as JsonValueObject, jsonProperty.PropertyInfo.PropertyType);
                         jsonProperty.PropertyInfo.SetValue(instance, value, null);
                     }
-                    else if (element.Value is JsonValueObject)
-                    {
-                        var value = element.Value as JsonValueObject;
-                        jsonProperty.PropertyInfo.SetValue(instance,
-                            JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
-                            null);
-                    }
                     else
                     {
                         throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                     }
                 }
-                else if (jsonProperty.ObjectType == JsonObjectType.Collection)
+
+                return instance;
+            }
+            else if (JsonObjectType == JsonObjectType.Dictionary)
+            {
+                var type = typeof(Dictionary<,>);
+
+                var args = Type.GetGenericArguments();
+
+                var instance = Activator.CreateInstance(type.MakeGenericType(args)) as IDictionary;
+
+                foreach (var element in dictionaryObject.Elements)
                 {
-                    if (element.Value is JsonCollectionObject)
+                    var dictKey = JsonSettings.CurrentEncoding.GetString(element.Key);
+
+                    object dictValue = null;
+
+                    var valueType = JsonUtility.GetJsonObjectType(args[1]);
+
+                    if (valueType == JsonObjectType.Runtime)
                     {
-                        var collectionObject = element.Value as JsonCollectionObject;
-                        jsonProperty.PropertyInfo.SetValue(instance,
-                            DeserializeJsonCollectionObject(collectionObject, jsonProperty.PropertyInfo.PropertyType), null);
+                        continue;
                     }
-                    else if (element.Value is JsonValueObject)
+
+                    if (valueType == JsonObjectType.ClassObject)
                     {
-                        var value = element.Value as JsonValueObject;
-                        jsonProperty.PropertyInfo.SetValue(instance,
-                            JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
-                            null);
+                        if (element.Value is JsonDictionaryObject)
+                        {
+                            dictValue = GetSerializer(args[1], JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element.Value);
+                        }
+                        else if (element.Value is JsonValueObject)
+                        {
+                            dictValue = JsonSettings.DeserializeValue(element.Value as JsonValueObject, args[1]);
+                        }
+                        else
+                        {
+                            throw new Errors.JsonSerializeFailedException(dictKey, ".net runtime type does not match json type.");
+                        }
+                    }
+                    else if (valueType == JsonObjectType.Collection)
+                    {
+                        if (element.Value is JsonCollectionObject)
+                        {
+                            dictValue = DeserializeJsonCollectionObject(element.Value as JsonCollectionObject, args[1]);
+                        }
+                        else if (element.Value is JsonValueObject)
+                        {
+                            dictValue = JsonSettings.DeserializeValue(element.Value as JsonValueObject, args[1]);
+                        }
+                        else
+                        {
+                            throw new Errors.JsonSerializeFailedException(dictKey, ".net runtime type does not match json type.");
+                        }
+                    }
+                    else if (valueType == JsonObjectType.Value && element.Value is JsonValueObject)
+                    {
+                        dictValue = JsonSettings.DeserializeValue(element.Value as JsonValueObject, args[1]);
                     }
                     else
                     {
-                        throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
+                        throw new Errors.JsonSerializeFailedException(dictKey, ".net runtime type does not match json type.");
                     }
+
+                    instance.Add(dictKey, dictValue);
                 }
-                else if (jsonProperty.ObjectType == JsonObjectType.Value && element.Value is JsonValueObject)
-                {
-                    var value = JsonSettings.DeserializeValue(element.Value as JsonValueObject, jsonProperty.PropertyInfo.PropertyType);
-                    jsonProperty.PropertyInfo.SetValue(instance, value, null);
-                }
-                else
-                {
-                    throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
-                }
+
+                return instance;
             }
 
-            return instance;
+            return null;
         }
 
         private object DeserializeJsonCollectionObject(JsonCollectionObject collectionObject, Type targetType)
