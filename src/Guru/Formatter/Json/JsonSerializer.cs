@@ -56,7 +56,7 @@ namespace Guru.Formatter.Json
                         // only parse json dictionary object
                         if (jsonObjectType == JsonObjectType.ClassObject)
                         {
-                            foreach (var propertyInfo in Type.GetTypeInfo().GetProperties().Where(x => x.CanRead && x.CanWrite && !x.IsDefined(typeof(JsonIngoreAttribute))))
+                            foreach (var propertyInfo in Type.GetTypeInfo().GetProperties().Where(x => x.CanRead && x.CanWrite && !x.IsDefined(typeof(JsonIgnoreAttribute))))
                             {
                                 JsonProperty jsonProperty = null;
 
