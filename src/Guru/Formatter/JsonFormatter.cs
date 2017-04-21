@@ -32,12 +32,12 @@ namespace Guru.Formatter
             return await JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue).DeserializeAsync(stream);
         }
 
-        public object ReadObject(Type targetType, JsonObject jsonObject)
+        public object ReadObject(Type targetType, JBase jsonObject)
         {
             return JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue).Deserialize(jsonObject);
         }
 
-        public T ReadObject<T>(JsonObject jsonObject)
+        public T ReadObject<T>(JBase jsonObject)
         {
             return (T)ReadObject(typeof(T), jsonObject);
         }

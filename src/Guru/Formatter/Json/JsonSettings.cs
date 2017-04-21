@@ -27,7 +27,7 @@ namespace Guru.Formatter.Json
 
         public bool OmitDefaultValue => _OmitDefaultValue;
 
-        public object DeserializeValue(JsonValueObject value, Type targetType)
+        public object DeserializeValue(JValue value, Type targetType)
         {
             var stringValue = CurrentEncoding.GetString(value.Buffer);
 

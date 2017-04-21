@@ -11,8 +11,8 @@ namespace Guru.Formatter.Abstractions
 
         Encoding DefaultEncoding { get; set; }
 
-        object ReadObject(Type targetType, JsonObject jsonObject);
+        object ReadObject(Type targetType, JBase jsonObject);
 
-        T ReadObject<T>(JsonObject jsonObject);
+        T ReadObject<T>(JBase jsonObject);
     }
 }

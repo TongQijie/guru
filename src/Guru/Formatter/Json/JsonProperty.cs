@@ -20,7 +20,7 @@ namespace Guru.Formatter.Json
 
         public PropertyInfo PropertyInfo { get; private set; }
 
-        public JsonObjectType ObjectType { get; private set; }
+        public JType ObjectType { get; private set; }
 
         public object DefaultValue { get; private set; }
 

@@ -28,7 +28,7 @@ namespace Guru.Formatter.Json
 
         public JsonSettings JsonSettings { get; private set; }
 
-        public JsonObjectType JsonObjectType { get; private set; }
+        public JType JsonObjectType { get; private set; }
 
         #region Initialization
 
@@ -54,7 +54,7 @@ namespace Guru.Formatter.Json
                         var jsonObjectType = JsonUtility.GetJsonObjectType(Type);
 
                         // only parse json dictionary object
-                        if (jsonObjectType == JsonObjectType.ClassObject)
+                        if (jsonObjectType == JType.Object)
                         {
                             foreach (var propertyInfo in Type.GetTypeInfo().GetProperties().Where(x => x.CanRead && x.CanWrite && !x.IsDefined(typeof(JsonIgnoreAttribute))))
                             {
@@ -103,7 +103,7 @@ namespace Guru.Formatter.Json
         public static JsonSerializer GetSerializer(Type targetType, Encoding encoding, bool omitDefaultValue)
         {
             var objectType = JsonUtility.GetJsonObjectType(targetType);
-            if (objectType == JsonObjectType.Runtime || objectType == JsonObjectType.Value)
+            if (objectType == JType.Dynamic || objectType == JType.Value)
             {
                 return null;
             }
@@ -136,15 +136,15 @@ namespace Guru.Formatter.Json
                 throw new ArgumentNullException("instance");
             }
 
-            if (JsonObjectType == JsonObjectType.ClassObject)
+            if (JsonObjectType == JType.Object)
             {
                 SerializeJsonClassObject(stream, instance);
             }
-            else if (JsonObjectType == JsonObjectType.Dictionary)
+            else if (JsonObjectType == JType.Map)
             {
                 SerializeJsonDictionaryObject(stream, instance);
             }
-            else if (JsonObjectType == JsonObjectType.Collection)
+            else if (JsonObjectType == JType.Array)
             {
                 SerializeJsonCollectionObject(stream, instance);
             }
@@ -170,15 +170,15 @@ namespace Guru.Formatter.Json
 
         private async Task InternalSerializeAsync(object instance, IWriterStream stream)
         {
-            if (JsonObjectType == JsonObjectType.ClassObject)
+            if (JsonObjectType == JType.Object)
             {
                 await SerializeJsonClassObjectAsync(stream, instance);
             }
-            else if (JsonObjectType == JsonObjectType.Dictionary)
+            else if (JsonObjectType == JType.Map)
             {
                 await SerializeJsonDictionaryObjectAsync(stream, instance);
             }
-            else if (JsonObjectType == JsonObjectType.Collection)
+            else if (JsonObjectType == JType.Array)
             {
                 await SerializeJsonCollectionObjectAsync(stream, instance);
             }
@@ -326,7 +326,7 @@ namespace Guru.Formatter.Json
         {
             stream.WriteByte(JsonConstants.Left_Bracket);
 
-            JsonObjectType objectType;
+            JType objectType;
             if (value is Array)
             {
                 objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
@@ -365,7 +365,7 @@ namespace Guru.Formatter.Json
         {
             await stream.WriteAsync(JsonConstants.Left_Bracket);
 
-            JsonObjectType objectType;
+            JType objectType;
             if (value is Array)
             {
                 objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
@@ -400,9 +400,9 @@ namespace Guru.Formatter.Json
             await stream.WriteAsync(JsonConstants.Right_Bracket);
         }
 
-        private void SerializeRegularValue(Stream stream, object value, JsonObjectType objectType)
+        private void SerializeRegularValue(Stream stream, object value, JType objectType)
         {
-            if (objectType == JsonObjectType.Value)
+            if (objectType == JType.Value)
             {
                 var buf = JsonSettings.SerializeValue(value);
                 stream.Write(buf, 0, buf.Length);
@@ -411,7 +411,7 @@ namespace Guru.Formatter.Json
             {
                 stream.Write(JsonConstants.NullValueBytes, 0, JsonConstants.NullValueBytes.Length);
             }
-            else if (objectType == JsonObjectType.Runtime)
+            else if (objectType == JType.Dynamic)
             {
                 SerializeRegularValue(stream, value, JsonUtility.GetJsonObjectType(value.GetType()));
             }
@@ -421,9 +421,9 @@ namespace Guru.Formatter.Json
             }
         }
 
-        private async Task SerializeRegularValueAsync(IWriterStream stream, object value, JsonObjectType objectType)
+        private async Task SerializeRegularValueAsync(IWriterStream stream, object value, JType objectType)
         {
-            if (objectType == JsonObjectType.Value)
+            if (objectType == JType.Value)
             {
                 var buf = JsonSettings.SerializeValue(value);
                 await stream.WriteAsync(buf, 0, buf.Length);
@@ -432,7 +432,7 @@ namespace Guru.Formatter.Json
             {
                 await stream.WriteAsync(JsonConstants.NullValueBytes, 0, JsonConstants.NullValueBytes.Length);
             }
-            else if (objectType == JsonObjectType.Runtime)
+            else if (objectType == JType.Dynamic)
             {
                 await SerializeRegularValueAsync(stream, value, JsonUtility.GetJsonObjectType(value.GetType()));
             }
@@ -448,54 +448,54 @@ namespace Guru.Formatter.Json
 
         public object Deserialize(Stream stream)
         {
-            var args = new JsonObjectParseArgs()
+            var args = new JsonParserArgs()
             {
                 Stream = new Internal.BufferedReaderStream(stream, 8 * 1024),
             };
 
-            JsonObjectParser.Parse(args);
+            JsonParser.Parse(args);
 
             return InternalDeserialize(args.InternalObject);
         }
 
         public async Task<object> DeserializeAsync(Stream stream)
         {
-            var args = new JsonObjectParseArgs()
+            var args = new JsonParserArgs()
             {
                 Stream = new Internal.BufferedReaderStream(stream, 8 * 1024),
             };
 
-            await JsonObjectParser.ParseAsync(args);
+            await JsonParser.ParseAsync(args);
 
             return InternalDeserialize(args.InternalObject);
         }
 
-        public object Deserialize(JsonObject jsonObject)
+        public object Deserialize(JBase jsonObject)
         {
             return InternalDeserialize(jsonObject);
         }
 
-        private object InternalDeserialize(JsonObject jsonObject)
+        private object InternalDeserialize(JBase jsonObject)
         {
-            if (jsonObject is JsonDictionaryObject)
+            if (jsonObject is JObject)
             {
-                return DeserializeJsonClassObject(jsonObject as JsonDictionaryObject);
+                return DeserializeJsonClassObject(jsonObject as JObject);
             }
-            else if (jsonObject is JsonCollectionObject)
+            else if (jsonObject is JArray)
             {
-                return DeserializeJsonCollectionObject(jsonObject as JsonCollectionObject, Type);
+                return DeserializeJsonCollectionObject(jsonObject as JArray, Type);
             }
-            else if (jsonObject is JsonValueObject)
+            else if (jsonObject is JValue)
             {
-                return JsonSettings.DeserializeValue(jsonObject as JsonValueObject, Type);
+                return JsonSettings.DeserializeValue(jsonObject as JValue, Type);
             }
 
             return null;
         }
 
-        private object DeserializeJsonClassObject(JsonDictionaryObject dictionaryObject)
+        private object DeserializeJsonClassObject(JObject dictionaryObject)
         {
-            if (JsonObjectType == JsonObjectType.ClassObject)
+            if (JsonObjectType == JType.Object)
             {
                 var instance = Activator.CreateInstance(Type);
 
@@ -512,25 +512,25 @@ namespace Guru.Formatter.Json
 
                     if (jsonProperty.IsJsonObject)
                     {
-                        jsonProperty.PropertyInfo.SetValue(instance, element.Value, null);
+                        jsonProperty.PropertyInfo.SetValue(instance, element, null);
                         continue;
                     }
 
-                    if (jsonProperty.ObjectType == JsonObjectType.Runtime)
+                    if (jsonProperty.ObjectType == JType.Dynamic)
                     {
                         continue;
                     }
 
-                    if (jsonProperty.ObjectType == JsonObjectType.ClassObject)
+                    if (jsonProperty.ObjectType == JType.Object)
                     {
-                        if (element.Value is JsonDictionaryObject)
+                        if (element is JObject)
                         {
-                            var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element.Value);
+                            var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element);
                             jsonProperty.PropertyInfo.SetValue(instance, value, null);
                         }
-                        else if (element.Value is JsonValueObject)
+                        else if (element is JValue)
                         {
-                            var value = element.Value as JsonValueObject;
+                            var value = element as JValue;
                             jsonProperty.PropertyInfo.SetValue(instance,
                                 JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
                                 null);
@@ -540,17 +540,17 @@ namespace Guru.Formatter.Json
                             throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                         }
                     }
-                    else if (jsonProperty.ObjectType == JsonObjectType.Collection)
+                    else if (jsonProperty.ObjectType == JType.Array)
                     {
-                        if (element.Value is JsonCollectionObject)
+                        if (element is JArray)
                         {
-                            var collectionObject = element.Value as JsonCollectionObject;
+                            var collectionObject = element as JArray;
                             jsonProperty.PropertyInfo.SetValue(instance,
                                 DeserializeJsonCollectionObject(collectionObject, jsonProperty.PropertyInfo.PropertyType), null);
                         }
-                        else if (element.Value is JsonValueObject)
+                        else if (element is JValue)
                         {
-                            var value = element.Value as JsonValueObject;
+                            var value = element as JValue;
                             jsonProperty.PropertyInfo.SetValue(instance,
                                 JsonSettings.DeserializeValue(value, jsonProperty.PropertyInfo.PropertyType),
                                 null);
@@ -560,9 +560,9 @@ namespace Guru.Formatter.Json
                             throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                         }
                     }
-                    else if (jsonProperty.ObjectType == JsonObjectType.Value && element.Value is JsonValueObject)
+                    else if (jsonProperty.ObjectType == JType.Value && element is JValue)
                     {
-                        var value = JsonSettings.DeserializeValue(element.Value as JsonValueObject, jsonProperty.PropertyInfo.PropertyType);
+                        var value = JsonSettings.DeserializeValue(element as JValue, jsonProperty.PropertyInfo.PropertyType);
                         jsonProperty.PropertyInfo.SetValue(instance, value, null);
                     }
                     else
@@ -573,7 +573,7 @@ namespace Guru.Formatter.Json
 
                 return instance;
             }
-            else if (JsonObjectType == JsonObjectType.Dictionary)
+            else if (JsonObjectType == JType.Map)
             {
                 var type = typeof(Dictionary<,>);
 
@@ -589,44 +589,44 @@ namespace Guru.Formatter.Json
 
                     var valueType = JsonUtility.GetJsonObjectType(args[1]);
 
-                    if (valueType == JsonObjectType.Runtime)
+                    if (valueType == JType.Dynamic)
                     {
                         continue;
                     }
 
-                    if (valueType == JsonObjectType.ClassObject)
+                    if (valueType == JType.Object)
                     {
-                        if (element.Value is JsonDictionaryObject)
+                        if (element is JObject)
                         {
-                            dictValue = GetSerializer(args[1], JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element.Value);
+                            dictValue = GetSerializer(args[1], JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element);
                         }
-                        else if (element.Value is JsonValueObject)
+                        else if (element is JValue)
                         {
-                            dictValue = JsonSettings.DeserializeValue(element.Value as JsonValueObject, args[1]);
+                            dictValue = JsonSettings.DeserializeValue(element as JValue, args[1]);
                         }
                         else
                         {
                             throw new Errors.JsonSerializeFailedException(dictKey, ".net runtime type does not match json type.");
                         }
                     }
-                    else if (valueType == JsonObjectType.Collection)
+                    else if (valueType == JType.Array)
                     {
-                        if (element.Value is JsonCollectionObject)
+                        if (element is JArray)
                         {
-                            dictValue = DeserializeJsonCollectionObject(element.Value as JsonCollectionObject, args[1]);
+                            dictValue = DeserializeJsonCollectionObject(element as JArray, args[1]);
                         }
-                        else if (element.Value is JsonValueObject)
+                        else if (element is JValue)
                         {
-                            dictValue = JsonSettings.DeserializeValue(element.Value as JsonValueObject, args[1]);
+                            dictValue = JsonSettings.DeserializeValue(element as JValue, args[1]);
                         }
                         else
                         {
                             throw new Errors.JsonSerializeFailedException(dictKey, ".net runtime type does not match json type.");
                         }
                     }
-                    else if (valueType == JsonObjectType.Value && element.Value is JsonValueObject)
+                    else if (valueType == JType.Value && element is JValue)
                     {
-                        dictValue = JsonSettings.DeserializeValue(element.Value as JsonValueObject, args[1]);
+                        dictValue = JsonSettings.DeserializeValue(element as JValue, args[1]);
                     }
                     else
                     {
@@ -642,7 +642,7 @@ namespace Guru.Formatter.Json
             return null;
         }
 
-        private object DeserializeJsonCollectionObject(JsonCollectionObject collectionObject, Type targetType)
+        private object DeserializeJsonCollectionObject(JArray collectionObject, Type targetType)
         {
             if (targetType.IsArray)
             {
@@ -650,19 +650,19 @@ namespace Guru.Formatter.Json
                 var array = Array.CreateInstance(elementType, collectionObject.Elements.Length);
                 for (var i = 0; i < array.Length; i++)
                 {
-                    var jsonObject = collectionObject.Elements[i].Value;
-                    if (jsonObject is JsonDictionaryObject)
+                    var jsonObject = collectionObject.Elements[i];
+                    if (jsonObject is JObject)
                     {
                         var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(jsonObject);
                         array.SetValue(value, i);
                     }
-                    else if (jsonObject is JsonCollectionObject)
+                    else if (jsonObject is JArray)
                     {
                         // TODO: multi-dimension array
                     }
-                    else if (jsonObject is JsonValueObject)
+                    else if (jsonObject is JValue)
                     {
-                        var value = JsonSettings.DeserializeValue(jsonObject as JsonValueObject, elementType);
+                        var value = JsonSettings.DeserializeValue(jsonObject as JValue, elementType);
                         array.SetValue(value, i);
                     }
                 }
@@ -675,19 +675,19 @@ namespace Guru.Formatter.Json
                 var collection = Activator.CreateInstance(targetType) as IList;
                 for (int i = 0; i < collectionObject.Elements.Length; i++)
                 {
-                    var jsonObject = collectionObject.Elements[i].Value;
-                    if (jsonObject is JsonDictionaryObject)
+                    var jsonObject = collectionObject.Elements[i];
+                    if (jsonObject is JObject)
                     {
                         var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(jsonObject);
                         collection.Add(value);
                     }
-                    else if (jsonObject is JsonCollectionObject)
+                    else if (jsonObject is JArray)
                     {
                         // TODO: multi-dimension array
                     }
-                    else if (jsonObject is JsonValueObject)
+                    else if (jsonObject is JValue)
                     {
-                        var value = JsonSettings.DeserializeValue(jsonObject as JsonValueObject, elementType);
+                        var value = JsonSettings.DeserializeValue(jsonObject as JValue, elementType);
                         collection.Add(value);
                     }
                 }

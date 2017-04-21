@@ -6,27 +6,27 @@ namespace Guru.Formatter.Json
 {
     internal static class JsonUtility
     {
-        public static JsonObjectType GetJsonObjectType(Type type)
+        public static JType GetJsonObjectType(Type type)
         {
             if (type == typeof(object))
             {
-                return JsonObjectType.Runtime;
+                return JType.Dynamic;
             }
             else if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(type))
             {
-                return JsonObjectType.Dictionary;
+                return JType.Map;
             }
             else if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(type))
             {
-                return JsonObjectType.Collection;
+                return JType.Array;
             }
             else if (type.GetTypeInfo().IsClass && type != typeof(string))
             {
-                return JsonObjectType.ClassObject;
+                return JType.Object;
             }
             else
             {
-                return JsonObjectType.Value;
+                return JType.Value;
             }
         }
     }
