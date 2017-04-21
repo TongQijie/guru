@@ -95,6 +95,7 @@ namespace Crawler
                         Title = "PrisonBreakS05",
                         LinkText = anchor.InnerText,
                         LinkAddr = href,
+                        Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     });
                 }
             }

@@ -70,46 +70,39 @@ namespace Guru.Jobs
 
         private bool _IsAlive = false;
 
+        public bool IsAlive => _IsAlive;
+
         private object _Sync = new object();
 
         public void Run()
         {
-            if (!_IsAlive)
+            try
             {
-                lock (_Sync)
+                if (!_IsAlive)
                 {
-                    if (!_IsAlive)
-                    {
-                        _IsAlive = true;
-
-                        new Thread(() =>
-                        {
-                            try
-                            {
-                                while (_IsAlive)
-                                {
-                                    foreach (var job in _Jobs)
-                                    {
-                                        if (WillExec(job.Key))
-                                        {
-                                            CreateJobThread(job.Key, job.Value);
-                                        }
-                                    }
-
-                                    Thread.Sleep(1000);
-                                }
-                            }
-                            catch(Exception e)
-                            {
-                                _FileLogger.LogEvent("DefaultJobDispatcher", Severity.Fatal, e);
-                            }
-                        })
-                        {
-                            IsBackground = true,
-                            Name = "JobDispatcher",
-                        }.Start();
-                    }
+                    _IsAlive = true;
                 }
+
+                while (_IsAlive)
+                {
+                    foreach (var job in _Jobs)
+                    {
+                        if (WillExec(job.Key))
+                        {
+                            CreateJobThread(job.Key, job.Value);
+                        }
+                    }
+
+                    Thread.Sleep(1000);
+                }
+            }
+            catch (Exception e)
+            {
+                _FileLogger.LogEvent("DefaultJobDispatcher", Severity.Fatal, e);
+            }
+            finally
+            {
+                _IsAlive = false;
             }
         }
 

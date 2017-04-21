@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-using Guru.Jobs.Abstractions;
+﻿using Guru.Jobs.Abstractions;
 using Guru.DependencyInjection;
 
 namespace Crawler
@@ -22,7 +20,6 @@ namespace Crawler
             dispatcher.Enable(job);
 
             dispatcher.Run();
-            Thread.Sleep(int.MaxValue);
         }
     }
 }
