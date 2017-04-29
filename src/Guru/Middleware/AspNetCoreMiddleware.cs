@@ -26,15 +26,15 @@ namespace Guru.Middleware
             _Lifetime = lifetime;
 
             var loader = new DefaultAssemblyLoader();
-            ContainerEntry.Init(loader);
+            Container.Init(loader);
 
-            _UriRewriteComponent = ContainerEntry.Resolve<IUriRewriteComponent>();
-            _DefaultUriComponent = ContainerEntry.Resolve<IDefaultUriComponent>();
-            _HttpHandlerComponent = ContainerEntry.Resolve<IHttpHandlerComponent>();
+            _UriRewriteComponent = Container.Resolve<IUriRewriteComponent>();
+            _DefaultUriComponent = Container.Resolve<IDefaultUriComponent>();
+            _HttpHandlerComponent = Container.Resolve<IHttpHandlerComponent>();
 
             if (_Lifetime != null)
             {
-                _Lifetime.Startup(ContainerEntry.Container);
+                _Lifetime.Startup(Container.Instance);
             }
         }
 

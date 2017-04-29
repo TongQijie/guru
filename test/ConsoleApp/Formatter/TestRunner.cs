@@ -14,7 +14,7 @@ namespace ConsoleApp.Formatter
 
         public TestRunner()
         {
-            _JsonFormatter = ContainerEntry.Resolve<IJsonFormatter>();
+            _JsonFormatter = Container.Resolve<IJsonFormatter>();
 
             _JsonFormatter.DefaultEncoding = Encoding.UTF8;
             _JsonFormatter.OmitDefaultValue = false;

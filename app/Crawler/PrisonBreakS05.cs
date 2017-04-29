@@ -32,12 +32,12 @@ namespace Crawler
                 },
             })
         {
-            _Request = ContainerEntry.Resolve<IHttpClientBroker>()
+            _Request = Container.Resolve<IHttpClientBroker>()
                 .Get(new DefaultHttpClientSettings("PrisonBreakS05"));
 
-            _Logger = ContainerEntry.Resolve<IFileLogger>();
+            _Logger = Container.Resolve<IFileLogger>();
 
-            _Formatter = ContainerEntry.Resolve<IJsonFormatter>();
+            _Formatter = Container.Resolve<IJsonFormatter>();
         }
 
         protected override void OnRun(string[] args)

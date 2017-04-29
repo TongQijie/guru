@@ -14,7 +14,7 @@ namespace Guru.Jobs
             Name = name;
             Schedule = schedule;
 
-            _Logger = ContainerEntry.Resolve<IFileLogger>();
+            _Logger = Container.Resolve<IFileLogger>();
         }
 
         public string Name { get; private set; }

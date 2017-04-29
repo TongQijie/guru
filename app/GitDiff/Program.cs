@@ -6,12 +6,12 @@ namespace GitDiff
     {
         static Program()
         {
-            ContainerEntry.Init(new DefaultAssemblyLoader());
+            Container.Init(new DefaultAssemblyLoader());
         }
 
         public static void Main(string[] args)
         {
-            var diff = ContainerEntry.Resolve<IDiff>();
+            var diff = Container.Resolve<IDiff>();
             diff.Execute();
         }
     }

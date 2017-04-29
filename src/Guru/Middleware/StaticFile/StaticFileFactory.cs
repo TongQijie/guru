@@ -13,7 +13,7 @@ namespace Guru.Middleware.StaticFile
         {
             var fullPath = $"./wwwroot/{path.Trim('/')}".FullPath();
 
-            var resources = ContainerEntry.Resolve<IApplicationConfiguration>().Resources;
+            var resources = Container.Resolve<IApplicationConfiguration>().Resources;
             if (!resources.HasLength())
             {
                 return null;

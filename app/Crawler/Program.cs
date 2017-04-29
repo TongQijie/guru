@@ -7,12 +7,12 @@ namespace Crawler
     {
         static Program()
         {
-            ContainerEntry.Init(new DefaultAssemblyLoader());
+            Container.Init(new DefaultAssemblyLoader());
         }
 
         static void Main(string[] args)
         {
-            var dispatcher = ContainerEntry.Resolve<IJobDispatcher>();
+            var dispatcher = Container.Resolve<IJobDispatcher>();
             dispatcher.Async = true;
 
             var job = new PrisonBreakS05();

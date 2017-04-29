@@ -49,7 +49,7 @@ namespace Guru.EntityFramework
 
         private CommandItemConfiguration GetCommandItem(string name)
         {
-            var configurations = (ContainerEntry.Resolve(typeof(ICommandConfiguration)) as object[]).Select(x => x as ICommandConfiguration);
+            var configurations = (Container.Resolve(typeof(ICommandConfiguration)) as object[]).Select(x => x as ICommandConfiguration);
             if (!configurations.HasLength())
             {
                 return null;

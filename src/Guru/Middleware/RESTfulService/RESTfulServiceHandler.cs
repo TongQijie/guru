@@ -31,7 +31,7 @@ namespace Guru.Middleware.RESTfulService
             ITextFormatter textFormatter)
         {
             _Factory = factory;
-            _Factory.Init(ContainerEntry.Container, new DefaultAssemblyLoader());
+            _Factory.Init(Container.Instance, new DefaultAssemblyLoader());
 
             _JsonFormatter = jsonFormatter;
             _XmlFormatter = xmlFormatter;

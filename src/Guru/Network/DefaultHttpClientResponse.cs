@@ -57,7 +57,7 @@ namespace Guru.Network
         {
             using (var stream = await _Response.Content.ReadAsStreamAsync())
             {
-                return await ContainerEntry.Resolve<TFormatter>().ReadObjectAsync<TBody>(stream);
+                return await Container.Resolve<TFormatter>().ReadObjectAsync<TBody>(stream);
             }
         }
 

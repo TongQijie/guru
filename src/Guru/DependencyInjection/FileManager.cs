@@ -8,12 +8,12 @@ namespace Guru.DependencyInjection
     {
         public T Single<T>()
         {
-            return ContainerEntry.Resolve<T>();
+            return Container.Resolve<T>();
         }
 
         public T[] Many<T>()
         {
-            return (ContainerEntry.Resolve(typeof(T)) as object[]).Select(x => (T)x);
+            return (Container.Resolve(typeof(T)) as object[]).Select(x => (T)x);
         }
     }
 }

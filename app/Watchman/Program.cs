@@ -9,7 +9,7 @@ namespace Watchman
     {
         static Program()
         {
-            ContainerEntry.Init(new DefaultAssemblyLoader());
+            Container.Init(new DefaultAssemblyLoader());
         }
 
         public static void Main(string[] args)
@@ -20,7 +20,7 @@ namespace Watchman
                 return;
             }
 
-            var context = ContainerEntry.Resolve<IContext>();
+            var context = Container.Resolve<IContext>();
             context.Source = args[0].FullPath();
             context.Target = args[1].FullPath();
 
