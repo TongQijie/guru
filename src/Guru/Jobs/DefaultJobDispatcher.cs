@@ -1,8 +1,11 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Collections.Concurrent;
 
+using Guru.ExtensionMethod;
 using Guru.Jobs.Abstractions;
+using Guru.Jobs.Configuration;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Abstractions;
@@ -16,9 +19,12 @@ namespace Guru.Jobs
 
         private readonly IFileLogger _FileLogger;
 
-        public DefaultJobDispatcher(IFileLogger fileLogger)
+        private readonly IFileManager _FileManager;
+
+        public DefaultJobDispatcher(IFileLogger fileLogger, IFileManager fileManager)
         {
             _FileLogger = fileLogger;
+            _FileManager = fileManager;
         }
 
         public void Add(IJob job, string[] args)
@@ -38,14 +44,10 @@ namespace Guru.Jobs
                 return;
             }
 
-            var retry = 1;
-            while (job.IsRunning && retry < 10)
+            if (!job.Disable() || !_Jobs.TryRemove(job, out var args))
             {
-                Thread.Sleep(1000);
+                _FileLogger.LogEvent("DefaultJobDispatcher", Severity.Error, $"failed to remove job '{job.Name}'. this job is still running.");
             }
-
-            string[] args;
-            _Jobs.TryRemove(job, out args);
         }
 
         public void Enable(IJob job)
@@ -65,14 +67,15 @@ namespace Guru.Jobs
                 return;
             }
 
-            job.Disable();
+            if (!job.Disable())
+            {
+                _FileLogger.LogEvent("DefaultJobDispatcher", Severity.Error, $"failed to disable job '{job.Name}'. this job is still running.");
+            }
         }
 
         private bool _IsAlive = false;
 
         public bool IsAlive => _IsAlive;
-
-        private object _Sync = new object();
 
         public void Run()
         {
@@ -82,6 +85,8 @@ namespace Guru.Jobs
                 {
                     _IsAlive = true;
                 }
+
+                ReadConfig();
 
                 while (_IsAlive)
                 {
@@ -94,6 +99,8 @@ namespace Guru.Jobs
                     }
 
                     Thread.Sleep(1000);
+
+                    ReadConfig();
                 }
             }
             catch (Exception e)
@@ -102,7 +109,74 @@ namespace Guru.Jobs
             }
             finally
             {
+                SafeStop();
                 _IsAlive = false;
+            }
+        }
+
+        public void SafeStop()
+        {
+            var existsJobs = _Jobs.Keys.ToArray();
+
+            var retry = 1;
+            while (existsJobs.Exists(x => x.IsRunning) && retry < 10)
+            {
+                Thread.Sleep(2000);
+                retry++;
+            }
+        }
+
+        public void ReadConfig()
+        {
+            var config = _FileManager.Single<IApplicationConfiguration>();
+            if (!config.Enabled)
+            {
+                _IsAlive = false;
+                return;
+            }
+
+            if (config.Jobs.HasLength())
+            {
+                var existsJobs = _Jobs.Keys.ToArray();
+                foreach (var job in existsJobs)
+                {
+                    var j = config.Jobs.FirstOrDefault(x => x.Name == job.Name);
+                    if (j == null)
+                    {
+                        Remove(job);
+                    }
+
+                    if (j.Enabled != job.Enabled)
+                    {
+                        if (j.Enabled)
+                        {
+                            Disable(job);
+                        }
+                        else
+                        {
+                            Enable(job);
+                        }
+                    }
+                }
+
+                foreach (var job in config.Jobs.Where(x => !existsJobs.Exists(y => y.Name == x.Name)))
+                {
+                    var instance = Activator.CreateInstance(Type.GetType(job.Type), job.Name) as IJob;
+                    if (instance != null)
+                    {
+                        if (job.Schedule != null)
+                        {
+                            instance.Config(job.Schedule);
+                        }
+
+                        Add(instance, job.Args);
+
+                        if (job.Enabled)
+                        {
+                            Enable(instance);
+                        }
+                    }
+                }
             }
         }
 

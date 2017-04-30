@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "jobs": [
+    {
+      "name": "apple",
+      "type": "ConsoleApp.Jobs.AppleJob,ConsoleApp",
+      "enabled": true,
+      "args": [
+        "abc",
+        "def"
+      ],
+      "schedule": {
+        "cycle": "Periodic",
+        "second": 5
+      }
+    }
+  ]
+}

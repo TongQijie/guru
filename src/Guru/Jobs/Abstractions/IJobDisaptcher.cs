@@ -2,16 +2,9 @@ namespace Guru.Jobs.Abstractions
 {
     public interface IJobDispatcher
     {
-         void Add(IJob job, string[] args);
+        bool Async { get; set; }
 
-         void Remove(IJob job);
+        void Run();
 
-         void Enable(IJob job);
-
-         void Disable(IJob job);
-
-         bool Async { get; set; }
-
-         void Run();
     }
 }

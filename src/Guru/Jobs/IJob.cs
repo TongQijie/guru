@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 
+using Guru.Jobs.Configuration;
+
 namespace Guru.Jobs
 {
     public interface IJob
@@ -17,9 +19,11 @@ namespace Guru.Jobs
 
         DateTime NextExecTime { get; }
 
-        void Enable();
+        void Config(JobScheduleConfiguration schedule);
 
-        void Disable();
+        bool Enable();
+
+        bool Disable();
 
         void Run(string[] args);
 

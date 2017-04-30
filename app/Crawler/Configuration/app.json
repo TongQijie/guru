@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "jobs": [
+    {
+      "name": "PrisonBreakS05",
+      "type": "Crawler.PrisonBreakS05",
+      "enabled": true,
+      "args": [
+      ],
+      "schedule": {
+        "cycle": "Periodic",
+        "minute": 10
+      }
+    }
+  ]
+}

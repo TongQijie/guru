@@ -22,15 +22,7 @@ namespace Crawler
 
         private readonly IFormatter _Formatter;
 
-        public PrisonBreakS05()
-            : base("PrisonBreakS05", new Schedule()
-            {
-                Cycle = ExecutionCycle.Periodic,
-                Point = new ExecutionPoint()
-                {
-                    Second = 10,
-                },
-            })
+        public PrisonBreakS05(string name) : base(name)
         {
             _Request = Container.Resolve<IHttpClientBroker>()
                 .Get(new DefaultHttpClientSettings("PrisonBreakS05"));

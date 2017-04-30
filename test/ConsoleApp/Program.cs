@@ -33,9 +33,9 @@ namespace ConsoleApp
 
             // new Mq.TestRunner().Run();
 
-            // new Jobs.TestRunner().Run();
+            new Jobs.TestRunner().Run();
 
-            new Markdown.TestRunner().Run();
+            //new Markdown.TestRunner().Run();
 
             stopwatch.Stop();
             Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");

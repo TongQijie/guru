@@ -1,5 +1,8 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
+
+using Guru.Jobs.Configuration;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 
@@ -9,12 +12,16 @@ namespace Guru.Jobs
     {
         private readonly ILogger _Logger;
 
-        public AbstractJob(string name, Schedule schedule)
+        public AbstractJob(string name)
         {
             Name = name;
-            Schedule = schedule;
 
             _Logger = Container.Resolve<IFileLogger>();
+        }
+
+        public AbstractJob(string name, Schedule schedule) : this(name)
+        {
+            Schedule = schedule;
         }
 
         public string Name { get; private set; }
@@ -29,15 +36,35 @@ namespace Guru.Jobs
 
         public DateTime NextExecTime { get; private set; }
 
-        public void Disable()
+        public void Config(JobScheduleConfiguration schedule)
         {
-            IsRunning = false;
-            Enabled = false;
+            Schedule = new Schedule()
+            {
+                StartTime = schedule.StartTime,
+                EndTime = schedule.EndTime,
+                Cycle = schedule.Cycle,
+                Point = new ExecutionPoint()
+                {
+                    Year = schedule.Year,
+                    Month = schedule.Month,
+                    Day = schedule.Day,
+                    Hour = schedule.Hour,
+                    Minute = schedule.Minute,
+                    Second = schedule.Second,
+                },
+            };
         }
 
-        public void Enable()
+        public bool Disable()
+        {
+            Enabled = false;
+            return SafeStop();
+        }
+
+        public bool Enable()
         {
             Enabled = true;
+            return Enabled;
         }
 
         private object _Sync = new object();
@@ -179,6 +206,18 @@ namespace Guru.Jobs
                         throw new Exception("schedule cycle is not valid.");
                     }
             }
+        }
+
+        private bool SafeStop()
+        {
+            var retry = 1;
+            while (IsRunning && retry < 10)
+            {
+                Thread.Sleep(1000);
+                retry++;
+            }
+
+            return !IsRunning;
         }
     }
 }

@@ -6,15 +6,7 @@ namespace ConsoleApp.Jobs
 {
     public class AppleJob : AbstractJob
     {
-        public AppleJob() 
-            : base("Apple", new Schedule()
-            {
-                Cycle = ExecutionCycle.Periodic,
-                Point = new ExecutionPoint()
-                {
-                    Second = 5,
-                },
-            })
+        public AppleJob(string name) : base(name)
         {
         }
 
