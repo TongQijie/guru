@@ -3,7 +3,7 @@ using Guru.DependencyInjection;
 
 namespace Guru.Middleware.Configuration
 {
-    [FileDI(typeof(IApplicationConfiguration), "./configuration/app.json", Format = FileFormat.Json)]
+    [FileDI(typeof(IApplicationConfiguration), "./Configuration/app.json", Format = FileFormat.Json)]
     public class ApplicationConfiguration : IApplicationConfiguration
     {
         [JsonProperty(Alias = "routes")]

@@ -4,7 +4,7 @@ using Guru.DependencyInjection;
 
 namespace Guru.EntityFramework.Configuration
 {
-    [FileDI(typeof(IDatabaseConfiguration), "./configuration/databases.xml", Format = FileFormat.Xml)]
+    [FileDI(typeof(IDatabaseConfiguration), "./Configuration/databases.xml", Format = FileFormat.Xml)]
     [XmlRoot(ElementName = "databases")]
     public class DatabaseConfiguration : IDatabaseConfiguration
     {
