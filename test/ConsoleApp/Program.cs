@@ -9,7 +9,7 @@ namespace ConsoleApp
     {
         static Program()
         {
-            Container.Init(new DefaultAssemblyLoader());
+            Container.Init();
         }
 
         public static void Main(string[] args)

@@ -67,34 +67,6 @@ namespace Guru.Jobs
             return Enabled;
         }
 
-        private object _Sync = new object();
-
-        public void Run(string[] args)
-        {
-            if (!IsRunning)
-            {
-                IsRunning = true;
-
-                PrevExecTime = DateTime.Now;
-
-                NextExecTime = GetNextExecTime((DateTime)PrevExecTime);
-
-                try
-                {
-                    OnRun(args);
-                }
-                catch (Exception e)
-                {
-                    _Logger.LogEvent("Job", Severity.Error, $"failed to execute job '{Name}'", e);
-                }
-
-                _Logger.LogEvent("Job", Severity.Information, 
-                    $"job '{Name}' done and cost {(DateTime.Now - (DateTime)PrevExecTime).TotalMilliseconds} milliseconds.");
-                
-                IsRunning = false;
-            }
-        }
-
         public async Task RunAsync(string[] args)
         {
             if (!IsRunning)
@@ -120,8 +92,6 @@ namespace Guru.Jobs
                 IsRunning = false;
             }
         }
-
-        protected abstract void OnRun(string[] args);
 
         protected abstract Task OnRunAsync(string[] args);
 

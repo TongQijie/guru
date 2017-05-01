@@ -12,11 +12,6 @@ namespace ConsoleApp.Jobs
 
         private int Count = 1;
 
-        protected override void OnRun(string[] args)
-        {
-            Console.WriteLine($"run: {Count++} time(s)");
-        }
-
         protected override async Task OnRunAsync(string[] args)
         {
             Console.WriteLine($"run: {Count++} time(s)");

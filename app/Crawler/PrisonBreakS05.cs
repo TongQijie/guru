@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 using Guru.Jobs;
 using Guru.Network;
+using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
 using Guru.Logging.Abstractions;
@@ -30,11 +31,6 @@ namespace Crawler
             _Logger = Container.Resolve<IFileLogger>();
 
             _Formatter = Container.Resolve<IJsonFormatter>();
-        }
-
-        protected override void OnRun(string[] args)
-        {
-            throw new NotImplementedException();
         }
 
         protected override async Task OnRunAsync(string[] args)
@@ -96,9 +92,15 @@ namespace Crawler
 
             if (downloadLinks.Count > 0)
             {
-                _Logger.LogEvent("PrisonBreakS05", Severity.Information, await _Formatter.WriteStringAsync(downloadLinks, Encoding.UTF8));
+                if (args.Exists(x => x.EqualsIgnoreCase("enableLog")))
+                {
+                    _Logger.LogEvent("PrisonBreakS05", Severity.Information, await _Formatter.WriteStringAsync(downloadLinks, Encoding.UTF8));
+                }
 
-                RedisClient.Current.Set("DownloadLinks.PrisonBreakS05", await _Formatter.WriteStringAsync(downloadLinks, Encoding.UTF8), null);
+                if (args.Exists(x => x.EqualsIgnoreCase("enableRedis")))
+                {
+                    RedisClient.Current.Set("DownloadLinks.PrisonBreakS05", await _Formatter.WriteStringAsync(downloadLinks, Encoding.UTF8), null);
+                }
             }
         }
     }

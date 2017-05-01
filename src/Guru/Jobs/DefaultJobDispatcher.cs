@@ -34,7 +34,8 @@ namespace Guru.Jobs
                 args = new string[0];
             }
 
-            _Jobs.AddOrUpdate(job, args, (j, a) => a);
+            _Jobs.GetOrAdd(job, args);
+            _Jobs[job] = args;
         }
 
         public void Remove(IJob job)
@@ -94,7 +95,7 @@ namespace Guru.Jobs
                     {
                         if (WillExec(job.Key))
                         {
-                            CreateJobThread(job.Key, job.Value);
+                            job.Key.RunAsync(job.Value);
                         }
                     }
 
@@ -102,6 +103,8 @@ namespace Guru.Jobs
 
                     ReadConfig();
                 }
+
+                SafeStop();
             }
             catch (Exception e)
             {
@@ -109,7 +112,6 @@ namespace Guru.Jobs
             }
             finally
             {
-                SafeStop();
                 _IsAlive = false;
             }
         }
@@ -121,7 +123,11 @@ namespace Guru.Jobs
             var retry = 1;
             while (existsJobs.Exists(x => x.IsRunning) && retry < 10)
             {
-                Thread.Sleep(2000);
+                foreach (var job in existsJobs.Subset(x => x.IsRunning))
+                {
+                    job.Disable();
+                }
+
                 retry++;
             }
         }
@@ -150,11 +156,13 @@ namespace Guru.Jobs
                     {
                         if (j.Enabled)
                         {
-                            Disable(job);
+                            job.Config(j.Schedule);
+                            Add(job, j.Args);
+                            Enable(job);
                         }
                         else
                         {
-                            Enable(job);
+                            Disable(job);
                         }
                     }
                 }
@@ -331,27 +339,6 @@ namespace Guru.Jobs
                     {
                         return false;
                     }
-            }
-        }
-
-        public bool Async { get; set; }
-
-        private void CreateJobThread(IJob job, string[] args)
-        {
-            if (Async)
-            {
-                job.RunAsync(args);
-            }
-            else
-            {
-                new Thread(() =>
-                {
-                    job.Run(args);
-                })
-                {
-                    IsBackground = true,
-                    Name = job.Name,
-                }.Start();
             }
         }
     }

@@ -3,7 +3,7 @@
   "jobs": [
     {
       "name": "PrisonBreakS05",
-      "type": "Crawler.PrisonBreakS05",
+      "type": "Crawler.PrisonBreakS05,Crawler",
       "enabled": true,
       "args": [
       ],

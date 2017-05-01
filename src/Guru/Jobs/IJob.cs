@@ -25,8 +25,6 @@ namespace Guru.Jobs
 
         bool Disable();
 
-        void Run(string[] args);
-
         Task RunAsync(string [] args);
     }
 }

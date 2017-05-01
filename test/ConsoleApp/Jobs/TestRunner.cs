@@ -10,10 +10,6 @@ namespace ConsoleApp.Jobs
         public TestRunner()
         {
             _JobDispatcher = Container.Resolve<IJobDispatcher>();
-            _JobDispatcher.Async = true;
-            //var job = new AppleJob();
-            //_JobDispatcher.Add(job, null);
-            //_JobDispatcher.Enable(job);
         }
 
         public void Run()
