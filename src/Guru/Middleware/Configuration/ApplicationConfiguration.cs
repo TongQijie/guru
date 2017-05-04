@@ -6,6 +6,12 @@ namespace Guru.Middleware.Configuration
     [FileDI(typeof(IApplicationConfiguration), "./Configuration/app.json", Format = FileFormat.Json)]
     public class ApplicationConfiguration : IApplicationConfiguration
     {
+        [JsonProperty(Alias = "wwwRoot")]
+        public string WWWRoot { get; set; }
+
+        [JsonProperty(Alias = "servicePrefixes")]
+        public string[] ServicePrefixes { get; set; }
+
         [JsonProperty(Alias = "routes")]
         public KeyValueItemConfiguration[] Routes { get; set; }
 

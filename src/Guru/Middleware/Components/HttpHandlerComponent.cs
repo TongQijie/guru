@@ -7,6 +7,7 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
 using Guru.DependencyInjection.Abstractions;
+using Guru.Middleware.Configuration;
 
 namespace Guru.Middleware.Components
 {
@@ -19,14 +20,18 @@ namespace Guru.Middleware.Components
 
         private readonly IErrorHandler _ErrorHandler;
 
+        private readonly IFileManager _FileManager;
+
         public HttpHandlerComponent(
             IStaticFileHandler staticFileHandler,
             IRESTfulServiceHandler restfulServiceHandler,
-            IErrorHandler errorHandler)
+            IErrorHandler errorHandler,
+            IFileManager fileManager)
         {
             _StaticFileHandler = staticFileHandler;
             _RESTfulServiceHandler = restfulServiceHandler;
             _ErrorHandler = errorHandler;
+            _FileManager = fileManager;
         }
 
         public async Task Process(string uri, HttpContext context)
@@ -41,13 +46,29 @@ namespace Guru.Middleware.Components
 
             try
             {
-                if (fields[fields.Length - 1].Contains("."))
+                var appConfig = _FileManager.Single<IApplicationConfiguration>();
+
+                if (appConfig.ServicePrefixes.HasLength())
                 {
-                    await _StaticFileHandler.ProcessRequest(new StaticFile.CallingContext(context, uri));
+                    if (appConfig.ServicePrefixes.Exists(x => x.EqualsIgnoreCase(fields[0])))
+                    {
+                        await _RESTfulServiceHandler.ProcessRequest(new RESTfulService.CallingContext(context, uri));
+                    }
+                    else
+                    {
+                        await _StaticFileHandler.ProcessRequest(new StaticFile.CallingContext(context, uri));
+                    }
                 }
                 else
                 {
-                    await _RESTfulServiceHandler.ProcessRequest(new RESTfulService.CallingContext(context, uri));
+                    if (fields[fields.Length - 1].Contains("."))
+                    {
+                        await _StaticFileHandler.ProcessRequest(new StaticFile.CallingContext(context, uri));
+                    }
+                    else
+                    {
+                        await _RESTfulServiceHandler.ProcessRequest(new RESTfulService.CallingContext(context, uri));
+                    }
                 }
             }
             catch (Exception e)

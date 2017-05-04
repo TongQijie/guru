@@ -9,9 +9,24 @@ namespace Guru.Middleware.StaticFile
     [DI(typeof(IStaticFileFactory), Lifetime = Lifetime.Singleton)]
     internal class StaticFileFactory : IStaticFileFactory
     {
+        private readonly IFileManager _FileManager;
+
+        public StaticFileFactory(IFileManager fileManager)
+        {
+            _FileManager = fileManager;
+        }
+
         public StaticFileContext GetStaticFile(string path, string resourceType)
         {
-            var fullPath = $"./wwwroot/{path.Trim('/')}".FullPath();
+            var wwwRoot = "./wwwroot";
+
+            var appConfig = _FileManager.Single<IApplicationConfiguration>();
+            if (appConfig.WWWRoot.HasValue())
+            {
+                wwwRoot = appConfig.WWWRoot;
+            }
+
+            var fullPath = wwwRoot.FullPath() +  $"/{path.Trim('/')}";
 
             var resources = Container.Resolve<IApplicationConfiguration>().Resources;
             if (!resources.HasLength())

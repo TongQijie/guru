@@ -2,12 +2,16 @@ namespace Guru.Middleware.Configuration
 {
     public interface IApplicationConfiguration
     {
-         KeyValueItemConfiguration[] Routes { get; }
+        string WWWRoot { get; }
 
-         KeyValueItemConfiguration[] Headers { get; }
+        string[] ServicePrefixes { get; }
 
-         StaticResouceConfiguration[] Resources { get; }
+        KeyValueItemConfiguration[] Routes { get; }
 
-         RewriteConfiguration[] Rewrites { get; }
+        KeyValueItemConfiguration[] Headers { get; }
+
+        StaticResouceConfiguration[] Resources { get; }
+
+        RewriteConfiguration[] Rewrites { get; }
     }
 }

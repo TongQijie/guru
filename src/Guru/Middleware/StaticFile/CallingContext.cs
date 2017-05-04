@@ -19,7 +19,7 @@ namespace Guru.Middleware.StaticFile
             var dotIndex = lastField.LastIndexOf('.');
 
             Path = uri;
-            ResourceType = (dotIndex < lastField.Length - 1) ? lastField.Substring(dotIndex + 1) : string.Empty;
+            ResourceType = ((dotIndex >= 0) && (dotIndex < lastField.Length - 1)) ? lastField.Substring(dotIndex + 1) : string.Empty;
         }
 
         public HttpContext Context { get; private set; }
