@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
 
@@ -25,16 +26,26 @@ namespace Guru.Middleware
             _Next = next;
             _Lifetime = lifetime;
 
-            var loader = new DefaultAssemblyLoader();
-            Container.Init(loader);
-
-            _UriRewriteComponent = Container.Resolve<IUriRewriteComponent>();
-            _DefaultUriComponent = Container.Resolve<IDefaultUriComponent>();
-            _HttpHandlerComponent = Container.Resolve<IHttpHandlerComponent>();
-
-            if (_Lifetime != null)
+            try
             {
-                _Lifetime.Startup(Container.Instance);
+                var loader = new DefaultAssemblyLoader();
+                Container.Init(loader);
+
+                _UriRewriteComponent = Container.Resolve<IUriRewriteComponent>();
+                _DefaultUriComponent = Container.Resolve<IDefaultUriComponent>();
+                _HttpHandlerComponent = Container.Resolve<IHttpHandlerComponent>();
+
+                if (_Lifetime != null)
+                {
+                    _Lifetime.Startup(Container.Instance);
+                }
+
+                Console.WriteLine("startup succeeded.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(new Logging.ExceptionWrapper(e).ToString());
+                Console.WriteLine("startup failed.");
             }
         }
 
