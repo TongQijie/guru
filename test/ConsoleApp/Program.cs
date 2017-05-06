@@ -2,16 +2,12 @@
 using System.Threading;
 using System.Diagnostics;
 using Guru.DependencyInjection;
+using System.Collections.Concurrent;
 
 namespace ConsoleApp
 {
     public class Program
     {
-        static Program()
-        {
-            Container.Init();
-        }
-
         public static void Main(string[] args)
         {
             Thread.CurrentThread.Name = "Main Thread";
@@ -19,7 +15,7 @@ namespace ConsoleApp
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            // new DependencyInjection.TestRunner().Run();
+            new DependencyInjection.TestRunner().Run();
 
             //new Formatter.TestRunner().Run();
 
@@ -33,12 +29,14 @@ namespace ConsoleApp
 
             // new Mq.TestRunner().Run();
 
-            new Jobs.TestRunner().Run();
+            //new Jobs.TestRunner().Run();
 
             //new Markdown.TestRunner().Run();
 
             stopwatch.Stop();
             Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");
         }
+
+        private static ConcurrentDictionary<object, string> _ImplementationResolvers = new ConcurrentDictionary<object, string>();
     }
 }

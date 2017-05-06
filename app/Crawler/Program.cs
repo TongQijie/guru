@@ -5,14 +5,9 @@ namespace Crawler
 {
     class Program
     {
-        static Program()
-        {
-            Container.Init();
-        }
-
         static void Main(string[] args)
         {
-            Container.Resolve<IJobDispatcher>().Run();
+            ContainerManager.Default.Resolve<IJobDispatcher>().Run();
         }
     }
 }

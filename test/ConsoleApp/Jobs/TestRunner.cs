@@ -9,7 +9,7 @@ namespace ConsoleApp.Jobs
 
         public TestRunner()
         {
-            _JobDispatcher = Container.Resolve<IJobDispatcher>();
+            _JobDispatcher = ContainerManager.Default.Resolve<IJobDispatcher>();
         }
 
         public void Run()

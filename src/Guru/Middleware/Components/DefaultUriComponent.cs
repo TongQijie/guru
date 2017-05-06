@@ -2,23 +2,16 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
 using Guru.Middleware.Configuration;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.Components
 {
-    [DI(typeof(IDefaultUriComponent), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IDefaultUriComponent), Lifetime.Singleton)]
     internal class DefaultUriComponent : IDefaultUriComponent
     {
-        private readonly IFileManager _FileManager;
-
-        public DefaultUriComponent(IFileManager fileManager)
-        {
-            _FileManager = fileManager;
-        }
-
         public string Default()
         {
-            var routes = _FileManager.Single<IApplicationConfiguration>().Routes;
+            var routes = ContainerManager.Default.Resolve<IApplicationConfiguration>().Routes;
             if (routes.HasLength())
             {
                 var config = routes.FirstOrDefault(x => x.Key.EqualsWith("default"));

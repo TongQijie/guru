@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Formatter
 {
-    [DI(typeof(ITextFormatter), Lifetime = Lifetime.Transient)]
+    [Injectable(typeof(ITextFormatter), Lifetime.Transient)]
     public class TextFormatter : ITextFormatter
     {
         public Encoding DefaultEncoding { get; set; }

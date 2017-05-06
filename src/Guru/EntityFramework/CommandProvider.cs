@@ -4,11 +4,11 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.EntityFramework.Abstractions;
 using Guru.EntityFramework.Configuration;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.EntityFramework
 {
-    [DI(typeof(ICommandProvider), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(ICommandProvider), Lifetime.Singleton)]
     public class CommandProvider : ICommandProvider
     {
         private readonly IDatabaseProvider _DatabaseProvider;
@@ -49,20 +49,17 @@ namespace Guru.EntityFramework
 
         private CommandItemConfiguration GetCommandItem(string name)
         {
-            var configurations = (Container.Resolve(typeof(ICommandConfiguration)) as object[]).Select(x => x as ICommandConfiguration);
-            if (!configurations.HasLength())
+            var configuration = ContainerManager.Default.Resolve<ICommandConfiguration>();
+            if (!configuration.Items.HasLength())
             {
                 return null;
             }
 
-            foreach (var configuration in configurations.Subset(x => x.Items.HasLength()))
+            foreach (var command in configuration.Items)
             {
-                foreach (var command in configuration.Items)
+                if (command.Name.EqualsWith(name))
                 {
-                    if (command.Name.EqualsWith(name))
-                    {
-                        return command;
-                    }
+                    return command;
                 }
             }
 

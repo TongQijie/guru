@@ -1,8 +1,8 @@
-﻿using Guru.DependencyInjection;
+﻿using Guru.DependencyInjection.Attributes;
 
 namespace ConsoleApp.DependencyInjection
 {
-    [FileDI(typeof(ICherryInterface), "./dependencyinjection/cherry.json")]
+    [StaticFile(typeof(ICherryInterface), "./dependencyinjection/cherry.json")]
     public class CherryClass : ICherryInterface
     {
         public int A { get; set; }

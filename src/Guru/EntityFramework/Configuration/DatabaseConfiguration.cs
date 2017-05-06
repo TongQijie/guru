@@ -1,10 +1,10 @@
 using System.Xml.Serialization;
 
-using Guru.DependencyInjection;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.EntityFramework.Configuration
 {
-    [FileDI(typeof(IDatabaseConfiguration), "./Configuration/databases.xml", Format = FileFormat.Xml)]
+    [StaticFile(typeof(IDatabaseConfiguration), "./Configuration/databases.xml", Format = "xml")]
     [XmlRoot(ElementName = "databases")]
     public class DatabaseConfiguration : IDatabaseConfiguration
     {

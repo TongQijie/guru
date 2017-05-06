@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 using Guru.Middleware;
+using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
-using Guru.DependencyInjection.Abstractions;
 
 namespace AspNetCoreApp
 {
@@ -32,9 +32,9 @@ namespace AspNetCoreApp
 
         public class Lifetime : IMiddlewareLifetime
         {
-            public void Startup(IContainer container)
+            public void Startup()
             {
-                var handler = container.GetImplementation<IRESTfulServiceHandler>();
+                var handler = ContainerManager.Default.Resolve<IRESTfulServiceHandler>();
                 handler.JsonFormatter.OmitDefaultValue = true;
             }
         }

@@ -6,11 +6,11 @@ using System.Collections.Concurrent;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.DynamicProxy
 {
-    [DI(typeof(IDynamicProxyGenerator), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IDynamicProxyGenerator), Lifetime.Singleton)]
     internal class DynamicProxyGenerator : IDynamicProxyGenerator
     {
         private AssemblyBuilder _AssemblyBuilder = null;

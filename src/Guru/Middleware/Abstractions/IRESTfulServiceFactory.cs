@@ -1,13 +1,12 @@
 using System;
 
 using Guru.Middleware.RESTfulService;
-using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.Middleware.Abstractions
 {
     public interface IRESTfulServiceFactory
     {
-        void Init(IContainer container, IAssemblyLoader loader);
+        void Init();
 
         void RegisterService(Type serviceType);
 

@@ -4,23 +4,16 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
 using Guru.Middleware.Configuration;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.Components
 {
-    [DI(typeof(IUriRewriteComponent), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IUriRewriteComponent), Lifetime.Singleton)]
     internal class UriRewriteComponent : IUriRewriteComponent
     {
-        private readonly IFileManager _FileManager;
-
-        public UriRewriteComponent(IFileManager fileManager)
-        {
-            _FileManager = fileManager;
-        }
-
         public string Rewrite(string uri)
         {
-            var rules = _FileManager.Single<IApplicationConfiguration>().Rewrites;
+            var rules = ContainerManager.Default.Resolve<IApplicationConfiguration>().Rewrites;
             if (rules.HasLength())
             {
                 foreach (var rule in rules)

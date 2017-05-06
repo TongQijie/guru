@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Guru.Formatter.Json;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Formatter
 {
-    [DI(typeof(IJsonFormatter), Lifetime = Lifetime.Transient)]
+    [Injectable(typeof(IJsonFormatter), Lifetime.Transient)]
     public class JsonFormatter : FormatterBase, IJsonFormatter
     {
         public bool OmitDefaultValue { get; set; }

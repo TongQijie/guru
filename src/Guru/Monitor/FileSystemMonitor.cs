@@ -5,12 +5,12 @@ using Guru.ExtensionMethod;
 using Guru.Monitor.Internal;
 using Guru.DependencyInjection;
 using Guru.Monitor.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Monitor
 {
-    [DI(typeof(IFileSystemMonitor), Lifetime = Lifetime.Singleton)]
-    public class FileSystemMonitor : IFileSystemMonitor
+    [Injectable(typeof(IFileSystemMonitor), Lifetime.Singleton)]
+    internal class FileSystemMonitor : IFileSystemMonitor
     {
         private ConcurrentDictionary<string, FolderMonitor> _FolderMonitors = new ConcurrentDictionary<string, FolderMonitor>();
 

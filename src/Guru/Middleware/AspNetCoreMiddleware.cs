@@ -28,16 +28,13 @@ namespace Guru.Middleware
 
             try
             {
-                var loader = new DefaultAssemblyLoader();
-                Container.Init(loader);
-
-                _UriRewriteComponent = Container.Resolve<IUriRewriteComponent>();
-                _DefaultUriComponent = Container.Resolve<IDefaultUriComponent>();
-                _HttpHandlerComponent = Container.Resolve<IHttpHandlerComponent>();
+                _UriRewriteComponent = ContainerManager.Default.Resolve<IUriRewriteComponent>();
+                _DefaultUriComponent = ContainerManager.Default.Resolve<IDefaultUriComponent>();
+                _HttpHandlerComponent = ContainerManager.Default.Resolve<IHttpHandlerComponent>();
 
                 if (_Lifetime != null)
                 {
-                    _Lifetime.Startup(Container.Instance);
+                    _Lifetime.Startup();
                 }
 
                 Console.WriteLine("startup succeeded.");

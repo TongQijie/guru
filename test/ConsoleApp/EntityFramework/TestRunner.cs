@@ -13,7 +13,7 @@ namespace ConsoleApp.EntityFramework
 
         public TestRunner()
         {
-            _CommandProvider = Container.Resolve<ICommandProvider>();
+            _CommandProvider = ContainerManager.Default.Resolve<ICommandProvider>();
         }
 
         public void Run()

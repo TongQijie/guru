@@ -7,11 +7,6 @@ namespace Watchman
 {
     public class Program
     {
-        static Program()
-        {
-            Container.Init(new DefaultAssemblyLoader());
-        }
-
         public static void Main(string[] args)
         {
             if (args.Length != 2)
@@ -20,7 +15,7 @@ namespace Watchman
                 return;
             }
 
-            var context = Container.Resolve<IContext>();
+            var context = ContainerManager.Default.Resolve<IContext>();
             context.Source = args[0].FullPath();
             context.Target = args[1].FullPath();
 

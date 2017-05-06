@@ -12,12 +12,48 @@ namespace ConsoleApp.DependencyInjection
 
         public TestRunner()
         {
-            _JsonFormatter = Container.Resolve<IJsonFormatter>();
+            _JsonFormatter = ContainerManager.Default.Resolve<IJsonFormatter>();
         }
 
         public void Run()
         {
-            var apple = Container.Resolve<IAppleInterface>();
+            //var apple = Container.Resolve<IAppleInterface>();
+            //Assert.IsTrue(apple.Banana != null);
+
+            //"./dependencyinjection".EnsureFolder();
+
+            //using (var outputStream = new FileStream("./dependencyinjection/cherry.json".FullPath(), FileMode.Create, FileAccess.Write))
+            //{
+            //    _JsonFormatter.WriteObject(new CherryClass() { A = 100 }, outputStream);
+            //}
+
+            //using (var outputStream = new FileStream("./dependencyinjection/durian_1.json".FullPath(), FileMode.Create, FileAccess.Write))
+            //{
+            //    _JsonFormatter.WriteObject(new DurianClass() { B = "hello, 1!" }, outputStream);
+            //}
+
+            //using (var outputStream = new FileStream("./dependencyinjection/durian_2.json".FullPath(), FileMode.Create, FileAccess.Write))
+            //{
+            //    _JsonFormatter.WriteObject(new DurianClass() { B = "hello, 2!" }, outputStream);
+            //}
+
+            //var cherry = Container.Resolve<ICherryInterface>();
+            //Assert.IsTrue(cherry.A == 100);
+
+            //var durians = (Container.Resolve(typeof(IDurianInterface)) as object[]).Select(x => x as IDurianInterface);
+            //Assert.IsTrue(durians.Length == 2 && durians[0].B == "hello, 1!" && durians[1].B == "hello, 2!");
+
+            //Console.WriteLine("hit 'esc' to stop loop...");
+            //while (Console.ReadKey().Key != ConsoleKey.Escape)
+            //{
+            //    cherry = Container.Resolve<ICherryInterface>();
+            //    Console.WriteLine($"A: {cherry.A}");
+
+            //    durians = (Container.Resolve(typeof(IDurianInterface)) as object[]).Select(x => x as IDurianInterface)
+            //        .Each(x => Console.WriteLine($"B: {x.B}"));
+            //}
+
+            var apple = ContainerManager.Default.Resolve<IAppleInterface>();
             Assert.IsTrue(apple.Banana != null);
 
             "./dependencyinjection".EnsureFolder();
@@ -29,28 +65,27 @@ namespace ConsoleApp.DependencyInjection
 
             using (var outputStream = new FileStream("./dependencyinjection/durian_1.json".FullPath(), FileMode.Create, FileAccess.Write))
             {
-                _JsonFormatter.WriteObject(new DurianClass() { B = "hello, 1!" }, outputStream);
+                _JsonFormatter.WriteObject(new DurianClass() { "hello, 1!" }, outputStream);
             }
 
             using (var outputStream = new FileStream("./dependencyinjection/durian_2.json".FullPath(), FileMode.Create, FileAccess.Write))
             {
-                _JsonFormatter.WriteObject(new DurianClass() { B = "hello, 2!" }, outputStream);
+                _JsonFormatter.WriteObject(new DurianClass() { "hello, 2!" }, outputStream);
             }
 
-            var cherry = Container.Resolve<ICherryInterface>();
+            var cherry = ContainerManager.Default.Resolve<ICherryInterface>();
             Assert.IsTrue(cherry.A == 100);
 
-            var durians = (Container.Resolve(typeof(IDurianInterface)) as object[]).Select(x => x as IDurianInterface);
-            Assert.IsTrue(durians.Length == 2 && durians[0].B == "hello, 1!" && durians[1].B == "hello, 2!");
+            var durian = ContainerManager.Default.Resolve<IDurianInterface>();
+            Assert.IsTrue(durian.B.Length == 2 && durian.B[0] == "hello, 1!" && durian.B[1] == "hello, 2!");
 
             Console.WriteLine("hit 'esc' to stop loop...");
             while (Console.ReadKey().Key != ConsoleKey.Escape)
             {
-                cherry = Container.Resolve<ICherryInterface>();
+                cherry = ContainerManager.Default.Resolve<ICherryInterface>();
                 Console.WriteLine($"A: {cherry.A}");
 
-                durians = (Container.Resolve(typeof(IDurianInterface)) as object[]).Select(x => x as IDurianInterface)
-                    .Each(x => Console.WriteLine($"B: {x.B}"));
+                ContainerManager.Default.Resolve<IDurianInterface>().B.Each(x => Console.WriteLine($"B: {x}"));
             }
         }
     }

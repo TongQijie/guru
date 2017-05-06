@@ -1,9 +1,9 @@
 using Guru.Formatter.Json;
-using Guru.DependencyInjection;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.Configuration
 {
-    [FileDI(typeof(IApplicationConfiguration), "./Configuration/app.json", Format = FileFormat.Json)]
+    [StaticFile(typeof(IApplicationConfiguration), "./Configuration/app.json")]
     public class ApplicationConfiguration : IApplicationConfiguration
     {
         [JsonProperty(Alias = "wwwRoot")]

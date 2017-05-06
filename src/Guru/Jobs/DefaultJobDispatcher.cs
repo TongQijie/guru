@@ -9,22 +9,20 @@ using Guru.Jobs.Configuration;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Jobs
 {
-    [DI(typeof(IJobDispatcher), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IJobDispatcher), Lifetime.Singleton)]
     internal class DefaultJobDispatcher : IJobDispatcher
     {
         private ConcurrentDictionary<IJob, string[]> _Jobs = new ConcurrentDictionary<IJob, string[]>();
 
         private readonly IFileLogger _FileLogger;
 
-        private readonly IFileManager _FileManager;
-
-        public DefaultJobDispatcher(IFileLogger fileLogger, IFileManager fileManager)
+        public DefaultJobDispatcher(IFileLogger fileLogger)
         {
             _FileLogger = fileLogger;
-            _FileManager = fileManager;
         }
 
         public void Add(IJob job, string[] args)
@@ -134,7 +132,7 @@ namespace Guru.Jobs
 
         public void ReadConfig()
         {
-            var config = _FileManager.Single<IApplicationConfiguration>();
+            var config = ContainerManager.Default.Resolve<IApplicationConfiguration>();
             if (!config.Enabled)
             {
                 _IsAlive = false;

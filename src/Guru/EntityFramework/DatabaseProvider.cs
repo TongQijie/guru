@@ -7,11 +7,11 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.EntityFramework.Abstractions;
 using Guru.EntityFramework.Configuration;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.EntityFramework
 {
-    [DI(typeof(IDatabaseProvider), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IDatabaseProvider), Lifetime.Singleton)]
     public class DatabaseProvider : IDatabaseProvider
     {
         private ConcurrentDictionary<string, DbProviderFactory> _Caches = new ConcurrentDictionary<string, DbProviderFactory>();
@@ -52,7 +52,7 @@ namespace Guru.EntityFramework
 
         private DatabaseItemConfiguration GetDatabaseItem(string name)
         {
-            var configuration = Container.Resolve<IDatabaseConfiguration>();
+            var configuration = ContainerManager.Default.Resolve<IDatabaseConfiguration>();
             if (!configuration.Items.HasLength())
             {
                 return null;
@@ -63,7 +63,7 @@ namespace Guru.EntityFramework
 
         private Type GetFactoryType(string stringValue)
         {
-            foreach (var a in new DefaultAssemblyLoader().GetAssemblies())
+            foreach (var a in AssemblyLoader.Instance.GetAssemblies())
             {
                 var type = a.GetType(stringValue, false, true);
                 if (type != null)

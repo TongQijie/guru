@@ -25,12 +25,12 @@ namespace Crawler
 
         public PrisonBreakS05(string name) : base(name)
         {
-            _Request = Container.Resolve<IHttpClientBroker>()
+            _Request = ContainerManager.Default.Resolve<IHttpClientBroker>()
                 .Get(new DefaultHttpClientSettings("PrisonBreakS05"));
 
-            _Logger = Container.Resolve<IFileLogger>();
+            _Logger = ContainerManager.Default.Resolve<IFileLogger>();
 
-            _Formatter = Container.Resolve<IJsonFormatter>();
+            _Formatter = ContainerManager.Default.Resolve<IJsonFormatter>();
         }
 
         protected override async Task OnRunAsync(string[] args)

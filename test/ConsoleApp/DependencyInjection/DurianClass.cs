@@ -1,10 +1,11 @@
-﻿using Guru.DependencyInjection;
+﻿using Guru.DependencyInjection.Attributes;
+using System.Collections.Generic;
 
 namespace ConsoleApp.DependencyInjection
 {
-    [FileDI(typeof(IDurianInterface), "./dependencyinjection/durian_*.json", Multiply = true)]
-    internal class DurianClass : IDurianInterface
+    [StaticFile(typeof(IDurianInterface), "./dependencyinjection/durian_*.json", MultiFiles = true)]
+    internal class DurianClass : List<string>, IDurianInterface
     {
-        public string B { get; set; }
+        public string[] B { get { return this.ToArray(); } }
     }
 }

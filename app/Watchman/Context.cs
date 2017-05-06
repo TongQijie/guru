@@ -1,9 +1,9 @@
 using Guru.DependencyInjection;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Watchman
 {
-    [DI(typeof(IContext), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IContext), Lifetime.Singleton)]
     public class Context : IContext
     {
         public string Source { get; set; }

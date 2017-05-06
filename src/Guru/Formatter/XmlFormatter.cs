@@ -4,11 +4,11 @@ using System.Xml.Serialization;
 
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Formatter
 {
-    [DI(typeof(IXmlFormatter), Lifetime = Lifetime.Transient)]
+    [Injectable(typeof(IXmlFormatter), Lifetime.Transient)]
     public class XmlFormatter : FormatterBase, IXmlFormatter
     {
         public bool OmitNamespaces { get; set; }

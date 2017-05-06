@@ -9,11 +9,11 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
 using Guru.Middleware.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.RESTfulService
 {
-    [DI(typeof(IRESTfulServiceHandler), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IRESTfulServiceHandler), Lifetime.Singleton)]
     internal class RESTfulServiceHandler : IRESTfulServiceHandler
     {
         private readonly IRESTfulServiceFactory _Factory;
@@ -31,7 +31,7 @@ namespace Guru.Middleware.RESTfulService
             ITextFormatter textFormatter)
         {
             _Factory = factory;
-            _Factory.Init(Container.Instance, new DefaultAssemblyLoader());
+            _Factory.Init();
 
             _JsonFormatter = jsonFormatter;
             _XmlFormatter = xmlFormatter;

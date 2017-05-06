@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
 using Guru.Formatter.Json;
+using System.Collections;
+using System.Xml.Serialization;
 
 namespace ConsoleApp.Formatter
 {
@@ -12,9 +14,12 @@ namespace ConsoleApp.Formatter
     {
         private readonly IJsonFormatter _JsonFormatter;
 
+        private readonly IXmlFormatter _XmlFormatter;
+
         public TestRunner()
         {
-            _JsonFormatter = Container.Resolve<IJsonFormatter>();
+            _JsonFormatter = ContainerManager.Default.Resolve<IJsonFormatter>();
+            _XmlFormatter = ContainerManager.Default.Resolve<IXmlFormatter>();
 
             _JsonFormatter.DefaultEncoding = Encoding.UTF8;
             _JsonFormatter.OmitDefaultValue = false;
@@ -41,6 +46,12 @@ namespace ConsoleApp.Formatter
             var j1 = await _JsonFormatter.WriteStringAsync(o1, Encoding.UTF8);
 
             var d1 = await _JsonFormatter.ReadObjectAsync<Item>(j1, Encoding.UTF8);
+
+            var items = new ItemCollection();
+            items.Add(o1);
+            items.Add(o1);
+
+            Console.WriteLine(_XmlFormatter.WriteString(items, Encoding.UTF8));
 
 
             // var subItem = new SubItem();
@@ -82,6 +93,7 @@ namespace ConsoleApp.Formatter
             //var i = await _JsonFormatter.ReadObjectAsync<Item>(json, Encoding.UTF8);
         }
 
+        [XmlRoot("item")]
         public class Item
         {
             public string StringValue { get; set; }
@@ -106,6 +118,11 @@ namespace ConsoleApp.Formatter
             public DateTime? DateValue { get; set; }
 
             public bool? BooleanValue { get; set; }
+        }
+
+        [XmlRoot("items")]
+        public class ItemCollection : List<Item>
+        {
         }
     }
 }

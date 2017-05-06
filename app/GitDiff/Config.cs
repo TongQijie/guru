@@ -1,10 +1,10 @@
 using System;
 
-using Guru.DependencyInjection;
+using Guru.DependencyInjection.Attributes;
 
 namespace GitDiff
 {
-    [FileDI(typeof(IConfig), "./config.json", Format = FileFormat.Json)]
+    [StaticFile(typeof(IConfig), "./config.json")]
     public class Config : IConfig
     {
         public string GitPath { get; set; }

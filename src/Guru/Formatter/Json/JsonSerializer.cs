@@ -326,16 +326,6 @@ namespace Guru.Formatter.Json
         {
             stream.WriteByte(JsonConstants.Left_Bracket);
 
-            JType objectType;
-            if (value is Array)
-            {
-                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
-            }
-            else
-            {
-                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetGenericArguments()[0]);
-            }
-
             var collection = value as ICollection;
 
             var firstElement = true;
@@ -355,7 +345,7 @@ namespace Guru.Formatter.Json
                     stream.WriteByte(JsonConstants.Comma);
                 }
 
-                SerializeRegularValue(stream, element, objectType);
+                SerializeRegularValue(stream, element, JsonUtility.GetJsonObjectType(element.GetType()));
             }
 
             stream.WriteByte(JsonConstants.Right_Bracket);
@@ -364,16 +354,6 @@ namespace Guru.Formatter.Json
         private async Task SerializeJsonCollectionObjectAsync(IWriterStream stream, object value)
         {
             await stream.WriteAsync(JsonConstants.Left_Bracket);
-
-            JType objectType;
-            if (value is Array)
-            {
-                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetElementType());
-            }
-            else
-            {
-                objectType = JsonUtility.GetJsonObjectType(value.GetType().GetGenericArguments()[0]);
-            }
             
             var collection = value as ICollection;
 
@@ -394,7 +374,7 @@ namespace Guru.Formatter.Json
                     await stream.WriteAsync(JsonConstants.Comma);
                 }
 
-                await SerializeRegularValueAsync(stream, element, objectType);
+                await SerializeRegularValueAsync(stream, element, JsonUtility.GetJsonObjectType(element.GetType()));
             }
 
             await stream.WriteAsync(JsonConstants.Right_Bracket);

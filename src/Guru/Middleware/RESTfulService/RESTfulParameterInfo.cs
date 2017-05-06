@@ -47,11 +47,11 @@ namespace Guru.Middleware.RESTfulService
         {
             if (contentType == ContentType.Json)
             {
-                return Container.Resolve<IJsonFormatter>().ReadObject(_ParameterType, stream);
+                return ContainerManager.Default.Resolve<IJsonFormatter>().ReadObject(_ParameterType, stream);
             }
             else if (contentType == ContentType.Xml)
             {
-                return Container.Resolve<IXmlFormatter>().ReadObject(_ParameterType, stream);
+                return ContainerManager.Default.Resolve<IXmlFormatter>().ReadObject(_ParameterType, stream);
             }
             else
             {

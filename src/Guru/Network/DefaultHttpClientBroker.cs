@@ -2,11 +2,11 @@ using System.Collections.Concurrent;
 
 using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Network
 {
-    [DI(typeof(IHttpClientBroker), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IHttpClientBroker), Lifetime.Singleton)]
     internal class DefaultHttpClientBroker : IHttpClientBroker
     {
         private ConcurrentDictionary<string, IHttpClientRequest> _Requests = new ConcurrentDictionary<string, IHttpClientRequest>();

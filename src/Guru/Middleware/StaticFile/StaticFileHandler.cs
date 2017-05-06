@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Http;
 
 using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.StaticFile
 {
-    [DI(typeof(IStaticFileHandler), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IStaticFileHandler), Lifetime.Singleton)]
     internal class StaticFileHandler : IStaticFileHandler
     {
         private readonly IStaticFileFactory _Factory;

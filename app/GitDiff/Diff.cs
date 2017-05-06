@@ -4,21 +4,18 @@ using System.Linq;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace GitDiff
 {
-    [DI(typeof(IDiff), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IDiff), Lifetime.Singleton)]
     public class Diff : IDiff
     {
         private readonly IGit _Git;
 
-        private readonly IFileManager _FileManager;
-
-        public Diff(IGit git, IFileManager fileManager)
+        public Diff(IGit git)
         {
             _Git = git;
-            _FileManager = fileManager;
         }
 
         public void Execute()
@@ -220,7 +217,7 @@ namespace GitDiff
                                     }
                                 }
 
-                                var config = _FileManager.Single<IConfig>();
+                                var config = ContainerManager.Default.Resolve<IConfig>();
 
                                 new ProcessHelper(config.CompareTool).Add(config.CompareToolParams ?? string.Empty).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
                             }
@@ -248,7 +245,7 @@ namespace GitDiff
                                     }
                                 }
 
-                                var config = _FileManager.Single<IConfig>();
+                                var config = ContainerManager.Default.Resolve<IConfig>();
 
                                 new ProcessHelper(config.CompareTool).Add(config.CompareToolParams ?? string.Empty).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
                             }
@@ -276,7 +273,7 @@ namespace GitDiff
                                     using (var outputStream = new FileStream(latest, FileMode.Create, FileAccess.Write)) { }
                                 }
 
-                                var config = _FileManager.Single<IConfig>();
+                                var config = ContainerManager.Default.Resolve<IConfig>();
 
                                 new ProcessHelper(config.CompareTool).Add(config.CompareToolParams ?? string.Empty).Add($"\"{history}\"").Add($"\"{latest}\"").Execute();
                             }

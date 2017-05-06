@@ -1,14 +1,14 @@
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
-using Guru.DependencyInjection;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.EntityFramework.Configuration
 {
-    [FileDI(typeof(ICommandConfiguration), "./Configuration/commands_*.xml", Format = FileFormat.Xml, Multiply = true)]
+    [StaticFile(typeof(ICommandConfiguration), "./Configuration/commands_*.xml", Format = "xml", MultiFiles = true)]
     [XmlRoot(ElementName = "commands")]
-    public class CommandConfiguration : ICommandConfiguration
+    public class CommandConfiguration : List<CommandItemConfiguration>, ICommandConfiguration
     {
-        [XmlElement(ElementName = "command")]
-        public CommandItemConfiguration[] Items { get; set; }
+        public CommandItemConfiguration[] Items { get { return this.ToArray(); } }
     }
 }

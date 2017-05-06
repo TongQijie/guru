@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
-using Guru.DependencyInjection.Abstractions;
 using Guru.Middleware.Configuration;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.Components
 {
-    [DI(typeof(IHttpHandlerComponent), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IHttpHandlerComponent), Lifetime.Singleton)]
     internal class HttpHandlerComponent : IHttpHandlerComponent
     {
         private readonly IStaticFileHandler _StaticFileHandler;
@@ -20,18 +20,14 @@ namespace Guru.Middleware.Components
 
         private readonly IErrorHandler _ErrorHandler;
 
-        private readonly IFileManager _FileManager;
-
         public HttpHandlerComponent(
             IStaticFileHandler staticFileHandler,
             IRESTfulServiceHandler restfulServiceHandler,
-            IErrorHandler errorHandler,
-            IFileManager fileManager)
+            IErrorHandler errorHandler)
         {
             _StaticFileHandler = staticFileHandler;
             _RESTfulServiceHandler = restfulServiceHandler;
             _ErrorHandler = errorHandler;
-            _FileManager = fileManager;
         }
 
         public async Task Process(string uri, HttpContext context)
@@ -46,7 +42,7 @@ namespace Guru.Middleware.Components
 
             try
             {
-                var appConfig = _FileManager.Single<IApplicationConfiguration>();
+                var appConfig = ContainerManager.Default.Resolve<IApplicationConfiguration>();
 
                 if (appConfig.ServicePrefixes.HasLength())
                 {

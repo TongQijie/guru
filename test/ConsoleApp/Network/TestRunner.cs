@@ -16,7 +16,7 @@ namespace ConsoleApp.Network
 
         public TestRunner()
         {
-            _Broker = Container.Resolve<IHttpClientBroker>();
+            _Broker = ContainerManager.Default.Resolve<IHttpClientBroker>();
         }
 
         public void Run()

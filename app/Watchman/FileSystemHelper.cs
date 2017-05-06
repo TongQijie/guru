@@ -3,11 +3,11 @@ using System.IO;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Watchman
 {
-    [DI(typeof(IFileSystemHelper), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IFileSystemHelper), Lifetime.Singleton)]
     public class FileSystemHelper : IFileSystemHelper
     {
         private readonly IContext _Context;

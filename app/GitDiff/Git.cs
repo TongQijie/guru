@@ -3,23 +3,18 @@ using System.Linq;
 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace GitDiff
 {
-    [DI(typeof(IGit), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IGit), Lifetime.Singleton)]
     public class Git : IGit
     {
-        private readonly IFileManager _FileManager;
-
         private readonly string _Command;
 
-        public Git(IFileManager fileManager)
+        public Git()
         {
-            _FileManager = fileManager;
-
-            var config = _FileManager.Single<IConfig>();
-            _Command = config.GitPath;
+            _Command = ContainerManager.Default.Resolve<IConfig>().GitPath;
         }
 
         public Change[] GetCommitDetail(string commitId)
@@ -29,7 +24,7 @@ namespace GitDiff
                 .Add(commitId);
 
             var changes = new Change[0];
-            using (var reader = process.ReadStream(_FileManager.Single<IConfig>().LocalGitDirectory))
+            using (var reader = process.ReadStream(ContainerManager.Default.Resolve<IConfig>().LocalGitDirectory))
             {
                 string line = null;
                 while ((line = reader.ReadLine()) != null)
@@ -75,7 +70,7 @@ namespace GitDiff
         public string GetFileContent(string commitId, string path)
         {
             return new ProcessHelper(_Command).Add("show").Add($"{commitId}:\"{path}\"")
-                .ReadString(_FileManager.Single<IConfig>().LocalGitDirectory);
+                .ReadString(ContainerManager.Default.Resolve<IConfig>().LocalGitDirectory);
         }
 
         public Commit GetFileHistory(string path, Commit beforeCommit)
@@ -85,7 +80,7 @@ namespace GitDiff
                 .Add("--before").Add($"\"{beforeCommit.Date.AddSeconds(-1)}\"")
                 .Add("--").Add($"\"{path}\"");
 
-            using (var reader = process.ReadStream(_FileManager.Single<IConfig>().LocalGitDirectory))
+            using (var reader = process.ReadStream(ContainerManager.Default.Resolve<IConfig>().LocalGitDirectory))
             {
                 string line = reader.ReadLine();
                 if (line == null)
@@ -120,7 +115,7 @@ namespace GitDiff
 
         public Commit[] GetTotalCommits()
         {
-            var config = _FileManager.Single<IConfig>();
+            var config = ContainerManager.Default.Resolve<IConfig>();
 
             var process = new ProcessHelper(_Command).Add("log")
                 .Add("--after").Add($"\"{config.StartTime.ToString("yyyy-MM-dd HH:mm:ss")}\"")
@@ -129,7 +124,7 @@ namespace GitDiff
                 .Add(config.BranchName);
 
             var commits = new Commit[0];
-            using (var reader = process.ReadStream(_FileManager.Single<IConfig>().LocalGitDirectory))
+            using (var reader = process.ReadStream(ContainerManager.Default.Resolve<IConfig>().LocalGitDirectory))
             {
                 string line = null;
                 while ((line = reader.ReadLine()) != null)

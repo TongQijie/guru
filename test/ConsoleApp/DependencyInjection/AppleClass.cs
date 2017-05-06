@@ -1,11 +1,11 @@
 ﻿using System;
 
 using Guru.DependencyInjection;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace ConsoleApp.DependencyInjection
 {
-    [DI(typeof(IAppleInterface), Lifetime = Lifetime.Transient)]
+    [Injectable(typeof(IAppleInterface), Lifetime.Transient)]
     internal class AppleClass : IAppleInterface
     {
         private readonly IBananaInterface _Banana;

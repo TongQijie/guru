@@ -5,24 +5,20 @@ using System.Collections.Concurrent;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Middleware.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.RESTfulService
 {
-    [DI(typeof(IRESTfulServiceFactory), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IRESTfulServiceFactory), Lifetime.Singleton)]
     internal class RESTfulServiceFactory : IRESTfulServiceFactory
     {
         private static readonly ConcurrentDictionary<string, RESTfulServiceInfo> _ServiceInfos = new ConcurrentDictionary<string, RESTfulServiceInfo>();
 
         private static readonly ConcurrentDictionary<string, ServiceContext> _ServiceContexts = new ConcurrentDictionary<string, ServiceContext>();
         
-        private IContainer _Container;
-        
-        public void Init(IContainer container, IAssemblyLoader loader)
+        public void Init()
         {
-            _Container = container;
-
-            var assemblies = loader.GetAssemblies();
+            var assemblies = AssemblyLoader.Instance.GetAssemblies();
             
             if (!assemblies.HasLength())
             {
@@ -67,7 +63,7 @@ namespace Guru.Middleware.RESTfulService
             
             _ServiceInfos.AddOrUpdate(serviceInfo.Key, serviceInfo, (n, s) => serviceInfo);
             
-            _Container.RegisterSingleton(serviceType, serviceType, 0);
+            ContainerManager.Default.RegisterSingleton(serviceType, serviceType);
         }
 
         public ServiceContext GetService(string servicePrefix, string serviceName, string methodName, HttpVerb httpVerb)
@@ -95,7 +91,7 @@ namespace Guru.Middleware.RESTfulService
                 throw new Exception($"method '{methodName}' does not exist.");
             }
 
-            var serviceInstance = _Container.GetImplementation(serviceInfo.ServiceType);
+            var serviceInstance = ContainerManager.Default.Resolve(serviceInfo.ServiceType);
 
             serviceContext = new ServiceContext()
             {

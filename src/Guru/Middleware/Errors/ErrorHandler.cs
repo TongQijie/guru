@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 using Guru.Middleware.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Middleware.Errors
 {
-    [DI(typeof(IErrorHandler), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IErrorHandler), Lifetime.Singleton)]
     public class ErrorHandler : IErrorHandler
     {
         private readonly IFileLogger _FileLogger;

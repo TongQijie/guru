@@ -7,11 +7,11 @@ using System.Collections.Concurrent;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
-using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Logging
 {
-    [DI(typeof(IFileLogger), Lifetime = Lifetime.Singleton)]
+    [Injectable(typeof(IFileLogger), Lifetime.Singleton)]
     internal class FileLogger : IFileLogger
     {
         public FileLogger()
