@@ -1,6 +1,7 @@
-﻿using Guru.Formatter.Internal;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+
+using Guru.Formatter.Internal;
 
 namespace Guru.Formatter.Xml
 {
@@ -14,14 +15,14 @@ namespace Guru.Formatter.Xml
                 throw new Exception();
             }
 
-            var tagName = await stream.ReadBytesUntilAsync(XmlConstants.Gt);
+            var startTag = await stream.ReadBytesUntilAsync(XmlConstants.Gt);
 
             var xObject = new XObject()
             {
-                Key = tagName,
+                Key = startTag,
             };
 
-            while (!await xObject.FillAsync(stream, tagName))
+            while (!await xObject.FillAsync(stream, startTag))
             {
                 ;
             }

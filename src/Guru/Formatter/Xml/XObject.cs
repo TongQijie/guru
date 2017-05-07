@@ -12,7 +12,7 @@ namespace Guru.Formatter.Xml
 
         public byte[] Buffer { get; set; }
 
-        internal override async Task<bool> FillAsync(IReaderStream stream, byte[] terminators)
+        internal async Task<bool> FillAsync(IReaderStream stream, byte[] terminators)
         {
             var b = await stream.SeekBytesUntilVisiableCharAsync();
             if (b == -1)
