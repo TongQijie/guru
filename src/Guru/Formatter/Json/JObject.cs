@@ -5,7 +5,7 @@ using Guru.Formatter.Internal;
 
 namespace Guru.Formatter.Json
 {
-    internal class JObject : JBase
+    public class JObject : JBase
     {
         public JBase[] Elements { get; set; }
 

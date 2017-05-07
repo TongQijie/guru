@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 using Guru.DependencyInjection;
@@ -48,6 +50,16 @@ namespace Guru.Formatter
             {
                 new XmlSerializer(instance.GetType()).Serialize(stream, instance);
             }
+        }
+
+        public override async Task WriteObjectAsync(object instance, Stream stream)
+        {
+            await Xml.XmlSerializer.GetSerializer(instance.GetType(), Encoding.UTF8, false).SerializeAsync(instance, stream);
+        }
+
+        public override async Task<object> ReadObjectAsync(Type targetType, Stream stream)
+        {
+            return await Xml.XmlSerializer.GetSerializer(targetType, Encoding.UTF8, false).DeserializeAsync(stream);
         }
     }
 }

@@ -13,14 +13,14 @@ namespace Guru.Formatter.Json
             IsJsonObject = isJsonObject;
             
             DefaultValue = propertyInfo.PropertyType.GetDefaultValue();
-            ObjectType = JsonUtility.GetJsonObjectType(propertyInfo.PropertyType);
+            JsonType = JsonUtility.GetJsonType(propertyInfo.PropertyType);
         }
 
         public string Key { get { return Alias.HasValue() ? Alias : PropertyInfo.Name; } }
 
         public PropertyInfo PropertyInfo { get; private set; }
 
-        public JType ObjectType { get; private set; }
+        public JType JsonType { get; private set; }
 
         public object DefaultValue { get; private set; }
 

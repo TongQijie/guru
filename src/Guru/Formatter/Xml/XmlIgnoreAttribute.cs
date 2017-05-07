@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace Guru.Formatter.Json
+namespace Guru.Formatter.Xml
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class JsonIgnoreAttribute : Attribute
+    public class XmlIgnoreAttribute : Attribute
     {
     }
 }

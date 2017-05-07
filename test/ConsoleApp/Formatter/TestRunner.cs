@@ -29,7 +29,7 @@ namespace ConsoleApp.Formatter
         {
             var o1 = new Item()
             {
-                StringValue = "hello, world.",
+                StringValue = "hello, world.></<>!",
                 IntegerValue = 100,
                 DoubleValue = 100.111,
                 DateValue = DateTime.Now,
@@ -41,6 +41,23 @@ namespace ConsoleApp.Formatter
                     DateValue = DateTime.Now,
                     BooleanValue = true,
                 },
+                SubItems = new SubItem[]
+                {
+                    new SubItem()
+                {
+                    StringValue = "SubItem1",
+                    IntegerValue = 1,
+                    DateValue = DateTime.Now,
+                    BooleanValue = true,
+                },
+                    new SubItem()
+                {
+                    StringValue = "SubItem2",
+                    IntegerValue = 2,
+                    DateValue = DateTime.Now,
+                    BooleanValue = true,
+                },
+                }
             };
 
             var j1 = await _JsonFormatter.WriteStringAsync(o1, Encoding.UTF8);
@@ -51,7 +68,17 @@ namespace ConsoleApp.Formatter
             items.Add(o1);
             items.Add(o1);
 
-            Console.WriteLine(_XmlFormatter.WriteString(items, Encoding.UTF8));
+            var xml = await _XmlFormatter.WriteStringAsync(items, Encoding.UTF8);
+
+            Console.WriteLine(xml);
+
+            await _XmlFormatter.ReadObjectAsync<ItemCollection>(xml, Encoding.UTF8);
+
+            //Console.WriteLine(_XmlFormatter.WriteString(new Dictionary<string, string>()
+            //{
+            //    {"abc", "aaaaaa" },
+            //    {"def", "aaaaa" }
+            //}, Encoding.UTF8));
 
 
             // var subItem = new SubItem();
@@ -93,7 +120,6 @@ namespace ConsoleApp.Formatter
             //var i = await _JsonFormatter.ReadObjectAsync<Item>(json, Encoding.UTF8);
         }
 
-        [XmlRoot("item")]
         public class Item
         {
             public string StringValue { get; set; }
@@ -107,6 +133,9 @@ namespace ConsoleApp.Formatter
             public bool BooleanValue { get; set; }
 
             public SubItem SubItem { get; set; }
+
+            public SubItem[] SubItems { get; set; }
+
         }
 
         public class SubItem

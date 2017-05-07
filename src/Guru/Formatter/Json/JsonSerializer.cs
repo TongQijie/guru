@@ -20,7 +20,7 @@ namespace Guru.Formatter.Json
             Type = type;
             JsonSettings = new JsonSettings(encoding, omitDefaultValue);
 
-            JsonObjectType = JsonUtility.GetJsonObjectType(Type);
+            JsonType = JsonUtility.GetJsonType(Type);
             Initialize();
         }
 
@@ -28,7 +28,7 @@ namespace Guru.Formatter.Json
 
         public JsonSettings JsonSettings { get; private set; }
 
-        public JType JsonObjectType { get; private set; }
+        public JType JsonType { get; private set; }
 
         #region Initialization
 
@@ -51,10 +51,10 @@ namespace Guru.Formatter.Json
                 {
                     if (!_IsInitialized)
                     {
-                        var jsonObjectType = JsonUtility.GetJsonObjectType(Type);
+                        var jsonType = JsonUtility.GetJsonType(Type);
 
                         // only parse json dictionary object
-                        if (jsonObjectType == JType.Object)
+                        if (jsonType == JType.Object)
                         {
                             foreach (var propertyInfo in Type.GetTypeInfo().GetProperties().Where(x => x.CanRead && x.CanWrite && !x.IsDefined(typeof(JsonIgnoreAttribute))))
                             {
@@ -102,8 +102,8 @@ namespace Guru.Formatter.Json
 
         public static JsonSerializer GetSerializer(Type targetType, Encoding encoding, bool omitDefaultValue)
         {
-            var objectType = JsonUtility.GetJsonObjectType(targetType);
-            if (objectType == JType.Dynamic || objectType == JType.Value)
+            var jsonType = JsonUtility.GetJsonType(targetType);
+            if (jsonType == JType.Dynamic || jsonType == JType.Value)
             {
                 return null;
             }
@@ -136,15 +136,15 @@ namespace Guru.Formatter.Json
                 throw new ArgumentNullException("instance");
             }
 
-            if (JsonObjectType == JType.Object)
+            if (JsonType == JType.Object)
             {
                 SerializeJsonClassObject(stream, instance);
             }
-            else if (JsonObjectType == JType.Map)
+            else if (JsonType == JType.Map)
             {
                 SerializeJsonDictionaryObject(stream, instance);
             }
-            else if (JsonObjectType == JType.Array)
+            else if (JsonType == JType.Array)
             {
                 SerializeJsonCollectionObject(stream, instance);
             }
@@ -170,15 +170,15 @@ namespace Guru.Formatter.Json
 
         private async Task InternalSerializeAsync(object instance, IWriterStream stream)
         {
-            if (JsonObjectType == JType.Object)
+            if (JsonType == JType.Object)
             {
                 await SerializeJsonClassObjectAsync(stream, instance);
             }
-            else if (JsonObjectType == JType.Map)
+            else if (JsonType == JType.Map)
             {
                 await SerializeJsonDictionaryObjectAsync(stream, instance);
             }
-            else if (JsonObjectType == JType.Array)
+            else if (JsonType == JType.Array)
             {
                 await SerializeJsonCollectionObjectAsync(stream, instance);
             }
@@ -213,7 +213,7 @@ namespace Guru.Formatter.Json
                 var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{jsonProperty.Key}\":");
                 stream.Write(buf, 0, buf.Length);
 
-                SerializeRegularValue(stream, propertyValue, jsonProperty.ObjectType);
+                SerializeRegularValue(stream, propertyValue, jsonProperty.JsonType);
             }
 
             stream.WriteByte(JsonConstants.Right_Brace);
@@ -244,7 +244,7 @@ namespace Guru.Formatter.Json
                 var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{jsonProperty.Key}\":");
                 await stream.WriteAsync(buf, 0, buf.Length);
 
-                await SerializeRegularValueAsync(stream, propertyValue, jsonProperty.ObjectType);
+                await SerializeRegularValueAsync(stream, propertyValue, jsonProperty.JsonType);
             }
 
             await stream.WriteAsync(JsonConstants.Right_Brace);
@@ -260,8 +260,6 @@ namespace Guru.Formatter.Json
                 // TODO: log
                 return;
             }
-
-            var objectType = JsonUtility.GetJsonObjectType(args[1]);
 
             var dictionary = value as IDictionary;
 
@@ -280,7 +278,7 @@ namespace Guru.Formatter.Json
                 var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{key}\":");
                 stream.Write(buf, 0, buf.Length);
 
-                SerializeRegularValue(stream, dictionary[key], JsonUtility.GetJsonObjectType(dictionary[key].GetType()));
+                SerializeRegularValue(stream, dictionary[key], JsonUtility.GetJsonType(dictionary[key].GetType()));
             }
 
             stream.WriteByte(JsonConstants.Right_Brace);
@@ -296,8 +294,6 @@ namespace Guru.Formatter.Json
                 // TODO: log
                 return;
             }
-
-            var objectType = JsonUtility.GetJsonObjectType(args[1]);
 
             var dictionary = value as IDictionary;
 
@@ -316,7 +312,7 @@ namespace Guru.Formatter.Json
                 var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{key}\":");
                 await stream.WriteAsync(buf, 0, buf.Length);
 
-                await SerializeRegularValueAsync(stream, dictionary[key], JsonUtility.GetJsonObjectType(dictionary[key].GetType()));
+                await SerializeRegularValueAsync(stream, dictionary[key], JsonUtility.GetJsonType(dictionary[key].GetType()));
             }
 
             await stream.WriteAsync(JsonConstants.Right_Brace);
@@ -345,7 +341,7 @@ namespace Guru.Formatter.Json
                     stream.WriteByte(JsonConstants.Comma);
                 }
 
-                SerializeRegularValue(stream, element, JsonUtility.GetJsonObjectType(element.GetType()));
+                SerializeRegularValue(stream, element, JsonUtility.GetJsonType(element.GetType()));
             }
 
             stream.WriteByte(JsonConstants.Right_Bracket);
@@ -374,7 +370,7 @@ namespace Guru.Formatter.Json
                     await stream.WriteAsync(JsonConstants.Comma);
                 }
 
-                await SerializeRegularValueAsync(stream, element, JsonUtility.GetJsonObjectType(element.GetType()));
+                await SerializeRegularValueAsync(stream, element, JsonUtility.GetJsonType(element.GetType()));
             }
 
             await stream.WriteAsync(JsonConstants.Right_Bracket);
@@ -393,7 +389,7 @@ namespace Guru.Formatter.Json
             }
             else if (objectType == JType.Dynamic)
             {
-                SerializeRegularValue(stream, value, JsonUtility.GetJsonObjectType(value.GetType()));
+                SerializeRegularValue(stream, value, JsonUtility.GetJsonType(value.GetType()));
             }
             else
             {
@@ -414,7 +410,7 @@ namespace Guru.Formatter.Json
             }
             else if (objectType == JType.Dynamic)
             {
-                await SerializeRegularValueAsync(stream, value, JsonUtility.GetJsonObjectType(value.GetType()));
+                await SerializeRegularValueAsync(stream, value, JsonUtility.GetJsonType(value.GetType()));
             }
             else
             {
@@ -475,7 +471,7 @@ namespace Guru.Formatter.Json
 
         private object DeserializeJsonClassObject(JObject dictionaryObject)
         {
-            if (JsonObjectType == JType.Object)
+            if (JsonType == JType.Object)
             {
                 var instance = Activator.CreateInstance(Type);
 
@@ -496,12 +492,12 @@ namespace Guru.Formatter.Json
                         continue;
                     }
 
-                    if (jsonProperty.ObjectType == JType.Dynamic)
+                    if (jsonProperty.JsonType == JType.Dynamic)
                     {
                         continue;
                     }
 
-                    if (jsonProperty.ObjectType == JType.Object)
+                    if (jsonProperty.JsonType == JType.Object)
                     {
                         if (element is JObject)
                         {
@@ -520,7 +516,7 @@ namespace Guru.Formatter.Json
                             throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                         }
                     }
-                    else if (jsonProperty.ObjectType == JType.Array)
+                    else if (jsonProperty.JsonType == JType.Array)
                     {
                         if (element is JArray)
                         {
@@ -540,7 +536,7 @@ namespace Guru.Formatter.Json
                             throw new Errors.JsonSerializeFailedException(key, ".net runtime type does not match json type.");
                         }
                     }
-                    else if (jsonProperty.ObjectType == JType.Value && element is JValue)
+                    else if (jsonProperty.JsonType == JType.Value && element is JValue)
                     {
                         var value = JsonSettings.DeserializeValue(element as JValue, jsonProperty.PropertyInfo.PropertyType);
                         jsonProperty.PropertyInfo.SetValue(instance, value, null);
@@ -553,7 +549,7 @@ namespace Guru.Formatter.Json
 
                 return instance;
             }
-            else if (JsonObjectType == JType.Map)
+            else if (JsonType == JType.Map)
             {
                 var type = typeof(Dictionary<,>);
 
@@ -567,7 +563,7 @@ namespace Guru.Formatter.Json
 
                     object dictValue = null;
 
-                    var valueType = JsonUtility.GetJsonObjectType(args[1]);
+                    var valueType = JsonUtility.GetJsonType(args[1]);
 
                     if (valueType == JType.Dynamic)
                     {

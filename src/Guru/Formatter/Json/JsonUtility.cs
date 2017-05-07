@@ -6,7 +6,7 @@ namespace Guru.Formatter.Json
 {
     internal static class JsonUtility
     {
-        public static JType GetJsonObjectType(Type type)
+        public static JType GetJsonType(Type type)
         {
             if (type == typeof(object))
             {
