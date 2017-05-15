@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 using Guru.ExtensionMethod;
-using Guru.Formatter.Internal;
+using Guru.Formatter.Xml.Internal;
 
 namespace Guru.Formatter.Xml
 {
@@ -12,7 +12,24 @@ namespace Guru.Formatter.Xml
 
         public byte[] Buffer { get; set; }
 
-        internal async Task<bool> FillAsync(IReaderStream stream, byte[] terminators)
+        private byte[] _EndTagName = null;
+
+        public byte[] EndTagName
+        {
+            get
+            {
+                if (_EndTagName != null)
+                {
+                    return _EndTagName;
+                }
+
+                _EndTagName = new byte[] { XmlConstants.Slash }.Append(Key);
+
+                return _EndTagName;
+            }
+        }
+
+        internal async Task<bool> FillAsync(BufferedReaderStream stream, byte[] terminators)
         {
             var b = await stream.SeekBytesUntilVisiableCharAsync();
             if (b == -1)
@@ -22,28 +39,83 @@ namespace Guru.Formatter.Xml
 
             if (b == XmlConstants.Lt)
             {
-                var innerTagName = await stream.ReadBytesUntilAsync(XmlConstants.Gt);
-                if (!innerTagName.HasLength())
+                var hasAttributes = false;
+                var tagName = await stream.ReadBytesUntilMeetingAsync(x =>
+                {
+                    if (x == XmlConstants.Gt)
+                    {
+                        return true;
+                    }
+                    else if (!XmlConstants.IsPrintableChar(x))
+                    {
+                        hasAttributes = true;
+                        return true;
+                    }
+
+                    return false;
+                });
+
+                if (tagName == null)
                 {
                     throw new Exception("");
                 }
 
-                if (innerTagName[0] == XmlConstants.Slash && innerTagName.Subset(1).EqualsWith(Key))
+                tagName = tagName.Subset(0, tagName.Length - 1);
+
+                if (tagName.EqualsWith(EndTagName))
                 {
                     return true;
                 }
 
                 var xObject = new XObject()
                 {
-                    Key = innerTagName,
+                    Key = tagName,
                 };
 
-                Elements = Elements.Append(xObject);
+                if (hasAttributes)
+                {
+                    int k;
+                    while ((k = await stream.SeekBytesUntilVisiableCharAsync()) != XmlConstants.Gt)
+                    {
+                        var key = await stream.ReadBytesUntilAsync(XmlConstants.Eq);
+                        if (key == null)
+                        {
+                            throw new Exception("");
+                        }
 
-                while (!await xObject.FillAsync(stream, innerTagName))
+                        key = key.Append((byte)k);
+
+                        var val = await stream.SeekBytesUntilVisiableCharAsync();
+                        if (val != XmlConstants.Double_Quotes)
+                        {
+                            throw new Exception("");
+                        }
+
+                        var value = await stream.ReadBytesUntilAsync(XmlConstants.Double_Quotes);
+                        if (value == null)
+                        {
+                            throw new Exception("");
+                        }
+
+                        xObject.Elements = xObject.Elements.Append(new XAttribute()
+                        {
+                            Key = key,
+                            Value = value,
+                        });
+                    }
+
+                    if (k != XmlConstants.Gt)
+                    {
+                        throw new Exception("");
+                    }
+                }
+
+                while (!await xObject.FillAsync(stream, xObject.Key))
                 {
                     ;
                 }
+
+                Elements = Elements.Append(xObject);
 
                 return false;
             }

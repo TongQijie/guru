@@ -337,7 +337,7 @@ namespace Guru.Formatter.Xml
 
         public async Task<object> DeserializeAsync(Stream stream)
         {
-            var xObject = await XmlParser.ParseAsync(new BufferedReaderStream(stream, 8 * 1024));
+            var xObject = await XmlParser.ParseAsync(new Xml.Internal.BufferedReaderStream(stream, 8 * 1024));
 
             return null;
 

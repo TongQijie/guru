@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Guru.Formatter.Internal;
+using Guru.Formatter.Xml.Internal;
+using Guru.ExtensionMethod;
 
 namespace Guru.Formatter.Xml
 {
     internal static class XmlParser
     {
-        public static async Task<XObject> ParseAsync(IReaderStream stream)
+        public static async Task<XObject> ParseAsync(BufferedReaderStream stream)
         {
             var b = await stream.SeekBytesUntilVisiableCharAsync();
             if (b == -1 || b != XmlConstants.Lt)
@@ -15,14 +16,73 @@ namespace Guru.Formatter.Xml
                 throw new Exception();
             }
 
-            var startTag = await stream.ReadBytesUntilAsync(XmlConstants.Gt);
+            var hasAttributes = false;
+            var tagName = await stream.ReadBytesUntilMeetingAsync(x =>
+            {
+                if (x == XmlConstants.Gt)
+                {
+                    return true;
+                }
+                else if (!XmlConstants.IsPrintableChar(x))
+                {
+                    hasAttributes = true;
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (tagName == null)
+            {
+                throw new Exception("");
+            }
+
+            tagName = tagName.Subset(0, tagName.Length - 1);
 
             var xObject = new XObject()
             {
-                Key = startTag,
+                Key = tagName,
             };
 
-            while (!await xObject.FillAsync(stream, startTag))
+            if (hasAttributes)
+            {
+                int k;
+                while ((k = await stream.SeekBytesUntilVisiableCharAsync()) != XmlConstants.Gt)
+                {
+                    var key = await stream.ReadBytesUntilAsync(XmlConstants.Eq);
+                    if (key == null)
+                    {
+                        throw new Exception("");
+                    }
+
+                    key = key.Append((byte)k);
+
+                    var val = await stream.SeekBytesUntilVisiableCharAsync();
+                    if (val != XmlConstants.Double_Quotes)
+                    {
+                        throw new Exception("");
+                    }
+
+                    var value = await stream.ReadBytesUntilAsync(XmlConstants.Double_Quotes);
+                    if (value == null)
+                    {
+                        throw new Exception("");
+                    }
+
+                    xObject.Elements = xObject.Elements.Append(new XAttribute()
+                    {
+                        Key = key,
+                        Value = value,
+                    });
+                }
+
+                if (k != XmlConstants.Gt)
+                {
+                    throw new Exception("");
+                }
+            }
+
+            while (!await xObject.FillAsync(stream, xObject.Key))
             {
                 ;
             }

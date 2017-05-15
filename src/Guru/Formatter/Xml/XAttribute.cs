@@ -7,6 +7,6 @@ namespace Guru.Formatter.Xml
 {
     public class XAttribute : XBase
     {
-        public byte[] Buffer { get; set; }
+        public byte[] Value { get; set; }
     }
 }
