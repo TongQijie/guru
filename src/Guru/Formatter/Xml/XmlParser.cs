@@ -37,8 +37,6 @@ namespace Guru.Formatter.Xml
                 throw new Exception("");
             }
 
-            tagName = tagName.Subset(0, tagName.Length - 1);
-
             var xObject = new XObject()
             {
                 Key = tagName,
@@ -82,7 +80,7 @@ namespace Guru.Formatter.Xml
                 }
             }
 
-            while (!await xObject.FillAsync(stream, xObject.Key))
+            while (!await xObject.FillAsync(stream))
             {
                 ;
             }

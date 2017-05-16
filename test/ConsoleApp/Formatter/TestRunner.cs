@@ -72,7 +72,7 @@ namespace ConsoleApp.Formatter
 
             Console.WriteLine(xml);
 
-            await _XmlFormatter.ReadObjectAsync<ItemCollection>("<a d=\"dd\" e=\"ee\"><b f=\"ff\">bb</b><c>cc</c></a>", Encoding.UTF8);
+            await _XmlFormatter.ReadObjectAsync<ItemCollection>("<a d=\"d\\//><d\" e=\"ee\"><b f=\"ff\"><!--jj-->bb<i/></b><k><![CDATA[ll]]></k><c>cc</c><g/><h /></a>", Encoding.UTF8);
 
             //Console.WriteLine(_XmlFormatter.WriteString(new Dictionary<string, string>()
             //{

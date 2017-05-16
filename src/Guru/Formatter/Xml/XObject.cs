@@ -8,30 +8,25 @@ namespace Guru.Formatter.Xml
 {
     public class XObject : XBase
     {
+        public byte[] Key { get; set; }
+
         public XBase[] Elements { get; set; }
 
-        public byte[] Buffer { get; set; }
-
-        private byte[] _EndTagName = null;
-
-        public byte[] EndTagName
+        public override string ToString()
         {
-            get
-            {
-                if (_EndTagName != null)
-                {
-                    return _EndTagName;
-                }
-
-                _EndTagName = new byte[] { XmlConstants.Slash }.Append(Key);
-
-                return _EndTagName;
-            }
+            return System.Text.Encoding.UTF8.GetString(Key);
         }
 
-        internal async Task<bool> FillAsync(BufferedReaderStream stream, byte[] terminators)
+        private int _LastByte = -1;
+
+        internal async Task<bool> FillAsync(BufferedReaderStream stream)
         {
-            var b = await stream.SeekBytesUntilVisiableCharAsync();
+            int b = _LastByte;
+            if (b == -1)
+            {
+                b = await stream.SeekBytesUntilVisiableCharAsync();
+            }
+
             if (b == -1)
             {
                 throw new Exception("");
@@ -40,6 +35,8 @@ namespace Guru.Formatter.Xml
             if (b == XmlConstants.Lt)
             {
                 var hasAttributes = false;
+                var toEnd = false;
+                var beginComment = false;
                 var tagName = await stream.ReadBytesUntilMeetingAsync(x =>
                 {
                     if (x == XmlConstants.Gt)
@@ -51,6 +48,17 @@ namespace Guru.Formatter.Xml
                         hasAttributes = true;
                         return true;
                     }
+                    else if (x == XmlConstants.Slash)
+                    {
+                        hasAttributes = true;
+                        toEnd = true;
+                        return true;
+                    }
+                    else if (x == XmlConstants.Exclamation_Mark)
+                    {
+                        beginComment = true;
+                        return true;
+                    }
 
                     return false;
                 });
@@ -60,9 +68,67 @@ namespace Guru.Formatter.Xml
                     throw new Exception("");
                 }
 
-                tagName = tagName.Subset(0, tagName.Length - 1);
+                if (beginComment)
+                {
+                    var endByte = 0x00;
 
-                if (tagName.EqualsWith(EndTagName))
+                    var f2 = await stream.ReadBytesAsync(2);
+                    if (f2.EqualsWith(new byte[] { XmlConstants.Minus, XmlConstants.Minus }))
+                    {
+                        endByte = XmlConstants.Minus;
+                    }
+                    else if (f2.EqualsWith(new byte[] { XmlConstants.Left_Square_Bracket, XmlConstants.C }))
+                    {
+                        var f5 = await stream.ReadBytesAsync(5);
+                        if (f5.EqualsWith(new byte[] { XmlConstants.D, XmlConstants.A, XmlConstants.T, XmlConstants.A, XmlConstants.Left_Square_Bracket }))
+                        {
+                            endByte = XmlConstants.Right_Square_bracket;
+                        }
+                    }
+
+                    if (endByte == 0x00)
+                    {
+                        throw new Exception("");
+                    }
+
+                    var comment = new byte[0];
+                    while (!(comment.Length >= 2 && comment[comment.Length - 1] == endByte && comment[comment.Length - 2] == endByte))
+                    {
+                        var c = await stream.ReadBytesUntilAsync(XmlConstants.Gt);
+                        if (c == null)
+                        {
+                            throw new Exception("");
+                        }
+
+                        comment = comment.Append(c);
+                    }
+
+                    if (endByte == XmlConstants.Minus)
+                    {
+                        Elements = Elements.Append(new XComment()
+                        {
+                            Value = comment.Subset(0, comment.Length - 2),
+                        });
+                    }
+                    else if (endByte == XmlConstants.Right_Square_bracket)
+                    {
+                        Elements = Elements.Append(new XData()
+                        {
+                            Value = comment.Subset(0, comment.Length - 2),
+                        });
+                    }
+
+                    _LastByte = -1;
+
+                    return false;
+                }
+
+                if (toEnd && tagName.Length == 0)
+                {
+                    tagName = await stream.ReadBytesUntilAsync(XmlConstants.Gt);
+                }
+
+                if (tagName.EqualsWith(Key))
                 {
                     return true;
                 }
@@ -77,6 +143,12 @@ namespace Guru.Formatter.Xml
                     int k;
                     while ((k = await stream.SeekBytesUntilVisiableCharAsync()) != XmlConstants.Gt)
                     {
+                        if (k == XmlConstants.Slash)
+                        {
+                            toEnd = true;
+                            continue;
+                        }
+
                         var key = await stream.ReadBytesUntilAsync(XmlConstants.Eq);
                         if (key == null)
                         {
@@ -110,30 +182,35 @@ namespace Guru.Formatter.Xml
                     }
                 }
 
-                while (!await xObject.FillAsync(stream, xObject.Key))
+                while (!toEnd && !await xObject.FillAsync(stream))
                 {
                     ;
                 }
 
                 Elements = Elements.Append(xObject);
 
+                _LastByte = -1;
+
                 return false;
             }
             else
             {
-                Buffer = new byte[] { (byte)b };
-
                 var value = await stream.ReadBytesUntilAsync(XmlConstants.Lt);
-
-                Buffer = Buffer.Append(value);
-
-                var endTag = await stream.ReadBytesUntilAsync(XmlConstants.Gt);
-                if (!endTag.HasLength() || endTag[0] != XmlConstants.Slash || !endTag.Subset(1).EqualsWith(Key))
+                if (value == null)
                 {
                     throw new Exception("");
                 }
 
-                return true;
+                var xValue = new XValue()
+                {
+                    Value = new byte[] { (byte)b }.Append(value),
+                };
+
+                Elements = Elements.Append(xValue);
+
+                _LastByte = XmlConstants.Lt;
+
+                return false;
             }
         }
     }

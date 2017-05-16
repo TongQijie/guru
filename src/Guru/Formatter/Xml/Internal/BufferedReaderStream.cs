@@ -250,7 +250,7 @@ namespace Guru.Formatter.Xml.Internal
             {
                 if (predicate(_InternalBuffer[_Index++]))
                 {
-                    return Concat(byteValues, 0, byteValues.Length, _InternalBuffer, startIndex, _Index - startIndex);
+                    return Concat(byteValues, 0, byteValues.Length, _InternalBuffer, startIndex, _Index - startIndex - 1);
                 }
             }
 

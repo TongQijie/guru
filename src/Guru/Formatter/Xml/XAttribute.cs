@@ -1,12 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
-
-using Guru.Formatter.Internal;
-
-namespace Guru.Formatter.Xml
+﻿namespace Guru.Formatter.Xml
 {
     public class XAttribute : XBase
     {
+        public byte[] Key { get; set; }
+
         public byte[] Value { get; set; }
+
+        public override string ToString()
+        {
+            return System.Text.Encoding.UTF8.GetString(Key) + "=" + System.Text.Encoding.UTF8.GetString(Value);
+        }
     }
 }

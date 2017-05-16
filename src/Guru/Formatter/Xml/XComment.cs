@@ -1,6 +1,6 @@
 ﻿namespace Guru.Formatter.Xml
 {
-    public class XValue : XBase
+    public class XComment : XBase
     {
         public byte[] Value { get; set; }
 
