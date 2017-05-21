@@ -1,20 +1,20 @@
-﻿using System.Reflection;
-using Guru.ExtensionMethod;
-using System;
+﻿using System;
+using System.Reflection;
 using System.Collections;
+
+using Guru.ExtensionMethod;
 
 namespace Guru.Formatter.Xml
 {
     internal class XmlProperty
     {
-        public XmlProperty(PropertyInfo propertyInfo, string alias, bool attribute, bool array, bool arrayItem, string arrayItemAlias)
+        public XmlProperty(PropertyInfo propertyInfo, string alias, bool isAttr, bool isArrayItem, string arrayItemName)
         {
             PropertyInfo = propertyInfo;
             Alias = alias;
-            Attribute = attribute;
-            Array = array;
-            ArrayItem = arrayItem;
-            ArrayItemAlias = arrayItemAlias;
+            IsAttr = isAttr;
+            IsArrayElement = isArrayItem;
+            ArrayElementName = arrayItemName;
 
             DefaultValue = propertyInfo.PropertyType.GetDefaultValue();
             XmlType = XmlUtility.GetXmlType(propertyInfo.PropertyType);
@@ -34,9 +34,9 @@ namespace Guru.Formatter.Xml
                     throw new Exception("");
                 }
 
-                if (!ArrayItemAlias.HasValue())
+                if (!ArrayElementName.HasValue())
                 {
-                    ArrayItemAlias = ArrayElementType.Name;
+                    ArrayElementName = ArrayElementType.Name;
                 }
             }
         }
@@ -45,9 +45,9 @@ namespace Guru.Formatter.Xml
         {
             get
             {
-                if (ArrayItem)
+                if (IsArrayElement)
                 {
-                    return ArrayItemAlias.HasValue() ? ArrayItemAlias : ArrayElementType?.Name;
+                    return ArrayElementName.HasValue() ? ArrayElementName : ArrayElementType?.Name;
                 }
 
                 return Alias.HasValue() ? Alias : PropertyInfo.Name;
@@ -62,13 +62,11 @@ namespace Guru.Formatter.Xml
 
         public string Alias { get; private set; }
 
-        public bool Attribute { get; private set; }
+        public bool IsAttr { get; private set; }
 
-        public bool Array { get; private set; }
+        public bool IsArrayElement { get; private set; }
 
-        public bool ArrayItem { get; private set; }
-
-        public string ArrayItemAlias { get; private set; }
+        public string ArrayElementName { get; private set; }
 
         public Type ArrayElementType { get; private set; }
     }

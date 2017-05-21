@@ -8,6 +8,9 @@ using Guru.Formatter.Json;
 using System.Collections;
 using System.Xml.Serialization;
 using Guru.Formatter.Xml;
+using System.Reflection;
+using Guru.ExtensionMethod;
+using System.Threading.Tasks;
 
 namespace ConsoleApp.Formatter
 {
@@ -26,8 +29,10 @@ namespace ConsoleApp.Formatter
             _JsonFormatter.OmitDefaultValue = false;
         }
 
-        public async void Run()
+        public void Run()
         {
+            Xml().GetAwaiter().GetResult();
+
             //var o1 = new Item()
             //{
             //    StringValue = "hello, world.></<>!",
@@ -69,13 +74,17 @@ namespace ConsoleApp.Formatter
             //items.Add(o1);
             //items.Add(o1);
 
+            //var d = typeof(ICollection).GetTypeInfo().IsAssignableFrom(items.GetType());
+
             //var xml = await _XmlFormatter.WriteStringAsync(items, Encoding.UTF8);
 
             //Console.WriteLine(xml);
 
+            
+
             //await _XmlFormatter.ReadObjectAsync<ItemCollection>("<a d=\"d\\//><d\" e=\"ee\"><b f=\"ff\"><!--jj-->bb<i/></b><k><![CDATA[ll]]></k><c>cc</c><g/><h /></a>", Encoding.UTF8);
 
-            var item = await _XmlFormatter.ReadObjectAsync<Item>("<Item d=\"123.1222\" b=\"true\"><s>abc</s><i>21</i><DateValue>2017-10-01</DateValue><sub><s>abdss</s></sub><subs><SubItem><s>ac</s></SubItem><SubItem><s>acfff</s></SubItem></subs></Item>", Encoding.UTF8);
+            //var item = await _XmlFormatter.ReadObjectAsync<Item>("<Item d=\"123.1222\" b=\"true\"><s>abc</s><i>21</i><DateValue>2017-10-01</DateValue><sub><s>abdss</s></sub><subs><SubItem><s>ac</s></SubItem><SubItem><s>acfff</s></SubItem></subs></Item>", Encoding.UTF8);
 
 
             //Console.WriteLine(_XmlFormatter.WriteString(new Dictionary<string, string>()
@@ -124,6 +133,11 @@ namespace ConsoleApp.Formatter
             //var i = await _JsonFormatter.ReadObjectAsync<Item>(json, Encoding.UTF8);
         }
 
+        private async Task Xml()
+        {
+            var items = await _XmlFormatter.ReadObjectAsync<ItemCollection>("./test.xml".FullPath());
+        }
+
         public class Item
         {
             [XmlProperty(Alias = "s")]
@@ -132,18 +146,18 @@ namespace ConsoleApp.Formatter
             [XmlProperty(Alias = "i")]
             public int IntegerValue { get; set; }
 
-            [XmlProperty(Attribute = true, Alias = "d")]
+            [XmlProperty(IsAttr = true, Alias = "d")]
             public double DoubleValue { get; set; }
 
             public DateTime DateValue { get; set; }
 
-            [XmlProperty(Attribute = true, Alias = "b")]
+            [XmlProperty(IsAttr = true, Alias = "b")]
             public bool BooleanValue { get; set; }
 
             [XmlProperty(Alias = "sub")]
             public SubItem SubItem { get; set; }
 
-            [XmlProperty(Alias = "subs")]
+            [XmlProperty(Alias = "subs", ArrayElementName = "subele", IsArrayElement = true)]
             public SubItem[] SubItems { get; set; }
 
         }
@@ -152,7 +166,7 @@ namespace ConsoleApp.Formatter
         {
             [XmlProperty(Alias = "s")]
             public string StringValue { get; set; }
-
+            
             public int? IntegerValue { get; set; }
 
             public DateTime? DateValue { get; set; }
@@ -160,7 +174,7 @@ namespace ConsoleApp.Formatter
             public bool? BooleanValue { get; set; }
         }
 
-        [XmlRoot("items")]
+        [XmlClass(ArrayElementName = "item", ArrayElementType = typeof(Item))]
         public class ItemCollection : List<Item>
         {
         }

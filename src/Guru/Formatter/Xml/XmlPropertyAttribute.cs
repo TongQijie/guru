@@ -14,12 +14,10 @@ namespace Guru.Formatter.Xml
 
         public string Alias { get; set; }
 
-        public bool Attribute { get; set; }
+        public bool IsAttr { get; set; }
 
-        public bool Array { get; set; }
+        public bool IsArrayElement { get; set; }
 
-        public bool ArrayItem { get; set; }
-
-        public string ArrayItemAlias { get; set; }
+        public string ArrayElementName { get; set; }
     }
 }
