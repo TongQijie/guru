@@ -3,6 +3,7 @@ using Guru.Formatter.Internal;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -61,11 +62,11 @@ namespace Guru.Formatter.Xml
                                 var attribute = propertyInfo.GetCustomAttribute<XmlPropertyAttribute>();
                                 if (attribute == null)
                                 {
-                                    xmlProperty = new XmlProperty(propertyInfo, null);
+                                    xmlProperty = new XmlProperty(propertyInfo, null, false, false, false, null);
                                 }
                                 else
                                 {
-                                    xmlProperty = new XmlProperty(propertyInfo, attribute.Alias);
+                                    xmlProperty = new XmlProperty(propertyInfo, attribute.Alias, attribute.Attribute, attribute.Array, attribute.ArrayItem, attribute.ArrayItemAlias);
                                 }
 
                                 XmlProperties.TryAdd(xmlProperty.Key, xmlProperty);
@@ -337,11 +338,215 @@ namespace Guru.Formatter.Xml
 
         public async Task<object> DeserializeAsync(Stream stream)
         {
-            var xObject = await XmlParser.ParseAsync(new Xml.Internal.BufferedReaderStream(stream, 8 * 1024));
+            var xObject = await XmlParser.ParseAsync(new Internal.BufferedReaderStream(stream, 8 * 1024));
+
+            return InternalDeserialize(xObject);
+        }
+
+        private object InternalDeserialize(XObject xObject)
+        {
+            var instance = Activator.CreateInstance(Type);
+
+            if (! xObject.Elements.HasLength())
+            {
+                return instance;
+            }
+
+            foreach (var kv in xObject.Elements.OfType<XAttribute>().GroupBy(x => XmlSettings.CurrentEncoding.GetString(x.Key)))
+            {
+                if (kv.Count() == 1 && XmlProperties.ContainsKey(kv.Key))
+                {
+                    var property = XmlProperties[kv.Key];
+                    if (property.Attribute)
+                    {
+                        property.PropertyInfo.SetValue(instance, XmlSettings.CurrentEncoding.GetString(kv.First().Value).ConvertTo(property.PropertyInfo.PropertyType));
+                    }
+                }
+            }
+
+            foreach (var kv in xObject.Elements.OfType<XObject>().GroupBy(x => XmlSettings.CurrentEncoding.GetString(x.Key)))
+            {
+                if (XmlProperties.ContainsKey(kv.Key))
+                {
+                    var property = XmlProperties[kv.Key];
+                    property.PropertyInfo.SetValue(instance, InternalDeserialize(property, kv.ToArray()));
+                }
+            }
+
+            return instance;
+        }
+
+        private object InternalDeserialize(XmlProperty xmlProperty, XObject[] xObjects)
+        {
+            if (xmlProperty.XmlType == XType.Object && xObjects.Length == 1)
+            {
+                return GetSerializer(xmlProperty.PropertyInfo.PropertyType, XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalDeserialize(xObjects[0]);
+            }
+            else if (xmlProperty.XmlType == XType.Array || xmlProperty.ArrayElementType != null)
+            {
+                if (xmlProperty.ArrayItem)
+                {
+                    var targetType = xmlProperty.PropertyInfo.PropertyType;
+
+                    if (targetType.IsArray)
+                    {
+                        var elementType = targetType.GetElementType();
+                        var array = Array.CreateInstance(elementType, xObjects.Length);
+                        for (var i = 0; i < array.Length; i++)
+                        {
+                            var xObject = xObjects[i];
+                            var value = GetSerializer(elementType, XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalDeserialize(xObject);
+                            array.SetValue(value, i);
+                        }
+
+                        return array;
+                    }
+                    else if (typeof(IList).GetTypeInfo().IsAssignableFrom(targetType))
+                    {
+                        var elementType = targetType.GetTypeInfo().GetGenericArguments().FirstOrDefault() ?? typeof(object);
+                        var collection = Activator.CreateInstance(targetType) as IList;
+                        for (int i = 0; i < xObjects.Length; i++)
+                        {
+                            var xObject = xObjects[i];
+                            var value = GetSerializer(elementType, XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalDeserialize(xObject);
+                            collection.Add(value);
+                        }
+
+                        return collection;
+                    }
+                    else
+                    {
+                        throw new Exception("");
+                    }
+                }
+                else
+                {
+                    if (xObjects.Length != 1)
+                    {
+                        throw new Exception("");
+                    }
+
+                    if (!xObjects[0].Elements.HasLength())
+                    {
+                        var targetType = xmlProperty.PropertyInfo.PropertyType;
+
+                        if (targetType.IsArray)
+                        {
+                            var elementType = targetType.GetElementType();
+                            var array = Array.CreateInstance(elementType, xObjects.Length);
+                            return array;
+                        }
+                        else if (typeof(IList).GetTypeInfo().IsAssignableFrom(targetType))
+                        {
+                            var elementType = targetType.GetTypeInfo().GetGenericArguments().FirstOrDefault() ?? typeof(object);
+                            var collection = Activator.CreateInstance(targetType) as IList;
+                            return collection;
+                        }
+                        else
+                        {
+                            throw new Exception("");
+                        }
+                    }
+
+                    var xmlType = XmlUtility.GetXmlType(xmlProperty.ArrayElementType);
+                    if (xmlType == XType.Object)
+                    {
+                        var elements = xObjects[0].Elements.OfType<XObject>().Where(x => XmlSettings.CurrentEncoding.GetString(x.Key) == xmlProperty.ArrayItemAlias).ToArray();
+
+                        var targetType = xmlProperty.PropertyInfo.PropertyType;
+
+                        if (targetType.IsArray)
+                        {
+                            var array = Array.CreateInstance(xmlProperty.ArrayElementType, elements.Length);
+                            for (var i = 0; i < array.Length; i++)
+                            {
+                                var xObject = elements[i];
+                                var value = GetSerializer(xmlProperty.ArrayElementType, XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalDeserialize(xObject);
+                                array.SetValue(value, i);
+                            }
+
+                            return array;
+                        }
+                        else if (typeof(IList).GetTypeInfo().IsAssignableFrom(targetType))
+                        {
+                            var collection = Activator.CreateInstance(targetType) as IList;
+                            for (int i = 0; i < elements.Length; i++)
+                            {
+                                var xObject = elements[i];
+                                var value = GetSerializer(xmlProperty.ArrayElementType, XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalDeserialize(xObject);
+                                collection.Add(value);
+                            }
+
+                            return collection;
+                        }
+                        else
+                        {
+                            throw new Exception("");
+                        }
+                    }
+                    else if (xmlType == XType.Value)
+                    {
+                        var elements = xObjects[0].Elements.OfType<XObject>().Where(x => XmlSettings.CurrentEncoding.GetString(x.Key) == xmlProperty.ArrayItemAlias).ToArray();
+
+                        var targetType = xmlProperty.PropertyInfo.PropertyType;
+
+                        if (targetType.IsArray)
+                        {
+                            var array = Array.CreateInstance(xmlProperty.ArrayElementType, elements.Length);
+                            for (var i = 0; i < array.Length; i++)
+                            {
+                                array.SetValue(DeserializeValue(elements[0], xmlProperty.ArrayElementType), i);
+                            }
+
+                            return array;
+                        }
+                        else if (typeof(IList).GetTypeInfo().IsAssignableFrom(targetType))
+                        {
+                            var collection = Activator.CreateInstance(targetType) as IList;
+                            for (int i = 0; i < elements.Length; i++)
+                            {
+                                collection.Add(DeserializeValue(elements[0], xmlProperty.ArrayElementType));
+                            }
+
+                            return collection;
+                        }
+                        else
+                        {
+                            throw new Exception("");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("");
+                    }
+                    
+                }
+            }
+            else if (xmlProperty.XmlType == XType.Value && xObjects.Length == 1)
+            {
+                return DeserializeValue(xObjects[0], xmlProperty.PropertyInfo.PropertyType);
+            }
 
             return null;
+        }
 
-            //return InternalDeserialize(args.InternalObject);
+        private object DeserializeValue(XObject xObject, Type targetType)
+        {
+            if (!xObject.Elements.HasLength())
+            {
+                return string.Empty.ConvertTo(targetType);
+            }
+
+            var values = xObject.Elements.Subset(x => !(x is XComment));
+
+            if (values.Length == 0 || values.Length > 1 || !(values[0] is XValue))
+            {
+                throw new Exception("");
+            }
+
+            var value = values[0] as XValue;
+
+            return XmlSettings.CurrentEncoding.GetString(value.Value).ConvertTo(targetType);
         }
 
         //public object Deserialize(JBase jsonObject)

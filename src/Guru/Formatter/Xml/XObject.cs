@@ -155,7 +155,7 @@ namespace Guru.Formatter.Xml
                             throw new Exception("");
                         }
 
-                        key = key.Append((byte)k);
+                        key = new byte[] { (byte)k }.Append(key);
 
                         var val = await stream.SeekBytesUntilVisiableCharAsync();
                         if (val != XmlConstants.Double_Quotes)
@@ -201,7 +201,7 @@ namespace Guru.Formatter.Xml
                     throw new Exception("");
                 }
 
-                var xValue = new XValue()
+                var xValue = new XText()
                 {
                     Value = new byte[] { (byte)b }.Append(value),
                 };

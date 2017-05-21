@@ -1,6 +1,6 @@
 ﻿namespace Guru.Formatter.Xml
 {
-    public class XComment : XValue
+    public class XText : XValue
     {
     }
 }
