@@ -135,9 +135,45 @@ namespace ConsoleApp.Formatter
 
         private async Task Xml()
         {
-            var items = await _XmlFormatter.ReadObjectAsync<ItemCollection>("./test.xml".FullPath());
+            //var items = await _XmlFormatter.ReadObjectAsync<ItemCollection>("./test.xml".FullPath());
+
+            var item = new Item()
+            {
+                StringValue = "hello, world.></<>!",
+                IntegerValue = 100,
+                DoubleValue = 100.111,
+                DateValue = DateTime.Now,
+                BooleanValue = true,
+                SubItem = new SubItem()
+                {
+                    StringValue = "SubItem",
+                    IntegerValue = null,
+                    DateValue = DateTime.Now,
+                    BooleanValue = true,
+                },
+                SubItems = new SubItem[]
+                {
+                    new SubItem()
+                    {
+                        StringValue = "SubItem1",
+                        IntegerValue = 1,
+                        DateValue = DateTime.Now,
+                        BooleanValue = true,
+                    },
+                    new SubItem()
+                    {
+                        StringValue = "SubItem2",
+                        IntegerValue = 2,
+                        DateValue = DateTime.Now,
+                        BooleanValue = true,
+                    },
+                }
+            };
+
+            var xml = await _XmlFormatter.WriteStringAsync(item, Encoding.UTF8);
         }
 
+        [XmlClass(RootName = "item")]
         public class Item
         {
             [XmlProperty(Alias = "s")]
@@ -157,7 +193,7 @@ namespace ConsoleApp.Formatter
             [XmlProperty(Alias = "sub")]
             public SubItem SubItem { get; set; }
 
-            [XmlProperty(Alias = "subs", ArrayElementName = "subele", IsArrayElement = true)]
+            [XmlProperty(Alias = "subitems", ArrayElementName = "element")]
             public SubItem[] SubItems { get; set; }
 
         }

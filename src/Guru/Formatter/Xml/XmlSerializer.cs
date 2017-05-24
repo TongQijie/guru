@@ -71,13 +71,19 @@ namespace Guru.Formatter.Xml
 
                                 XmlProperties.TryAdd(xmlProperty.Key, xmlProperty);
                             }
+
+                            var xmlClassAttr = Type.GetTypeInfo().GetCustomAttribute<XmlClassAttribute>();
+                            if (xmlClassAttr != null)
+                            {
+                                XmlClass = new XmlClass(Type, xmlClassAttr.RootName);
+                            }
                         }
                         else if (XmlType == XType.Array)
                         {
                             var attribute = Type.GetTypeInfo().GetCustomAttribute<XmlClassAttribute>();
                             if (attribute != null)
                             {
-                                XmlClass = new XmlClass(Type, attribute.ArrayElementName, attribute.ArrayElementType);
+                                XmlClass = new XmlClass(Type, attribute.ArrayElementName, attribute.ArrayElementType, attribute.RootName);
                             }
                         }
 
@@ -132,200 +138,115 @@ namespace Guru.Formatter.Xml
 
         #region Serialization
 
-        //public void Serialize(object instance, Stream stream)
-        //{
-        //    if (instance == null)
-        //    {
-        //        throw new ArgumentNullException("instance");
-        //    }
+        public void Serialize(object instance, Stream stream)
+        {
+            if (instance == null)
+            {
+                throw new ArgumentNullException(nameof(instance));
+            }
 
-        //    if (XmlType == XType.Object)
-        //    {
-        //        SerializeJsonClassObject(stream, instance);
-        //    }
-        //    else if (XmlType == XType.Map)
-        //    {
-        //        SerializeJsonDictionaryObject(stream, instance);
-        //    }
-        //    else if (XmlType == XType.Array)
-        //    {
-        //        SerializeJsonCollectionObject(stream, instance);
-        //    }
-        //    else
-        //    {
-        //        throw new Exception(string.Format("failed to serialize object '{0}'.", instance));
-        //    }
-        //}
+            var bufferedStream = new BufferedWriterStream(stream, 8 * 1024);
+
+            InternalSerializeXmlObjectAsync(bufferedStream, instance, XmlClass == null ? instance.GetType().Name : XmlClass.Key).GetAwaiter().GetResult();
+
+            bufferedStream.EndWrite().GetAwaiter().GetResult();
+        }
 
         public async Task SerializeAsync(object instance, Stream stream)
         {
             if (instance == null)
             {
-                throw new ArgumentNullException("instance");
+                throw new ArgumentNullException(nameof(instance));
             }
 
             var bufferedStream = new BufferedWriterStream(stream, 8 * 1024);
 
-            await InternalSerializeAsync(instance, bufferedStream, instance.GetType().Name);
+            await InternalSerializeXmlObjectAsync(bufferedStream, instance, XmlClass == null ? instance.GetType().Name : XmlClass.Key);
 
             await bufferedStream.EndWrite();
         }
 
-        private async Task InternalSerializeAsync(object instance, IWriterStream stream, string tagName)
+        private async Task InternalSerializeXmlObjectAsync(IWriterStream stream, object instance, string tagName)
         {
-            await stream.WriteAsync(XmlSettings.StartTag(tagName));
+            await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"<{tagName}"));
 
-            if (XmlType == XType.Object)
+            var attributes = XmlProperties.Values.ToArray().Subset(x => x.IsAttr);
+            foreach (var attribute in attributes)
             {
-                await SerializeJsonClassObjectAsync(stream, instance);
-            }
-            else if (XmlType == XType.Array)
-            {
-                await SerializeJsonCollectionObjectAsync(stream, instance);
-            }
-            else
-            {
-                throw new Exception(string.Format("failed to serialize object '{0}'.", instance));
+                var value = attribute.PropertyInfo.GetValue(instance);
+                await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($" {attribute.Key}=\"{value}\""));
             }
 
-            await stream.WriteAsync(XmlSettings.EndTag(tagName));
-        }
+            await stream.WriteAsync(XmlConstants.Gt);
 
-        //private void SerializeJsonClassObject(Stream stream, object value)
-        //{
-
-
-        //    stream.WriteByte(XmlSettings.StartTag();
-
-        //    var firstElement = true;
-        //    foreach (var jsonProperty in JsonProperties.Values.ToArray())
-        //    {
-        //        var propertyValue = jsonProperty.PropertyInfo.GetValue(value, null);
-        //        if (JsonSettings.OmitDefaultValue && jsonProperty.DefaultValue.EqualsWith(propertyValue))
-        //        {
-        //            continue;
-        //        }
-
-        //        if (firstElement)
-        //        {
-        //            firstElement = false;
-        //        }
-        //        else
-        //        {
-        //            stream.WriteByte(JsonConstants.Comma);
-        //        }
-
-        //        var buf = JsonSettings.CurrentEncoding.GetBytes($"\"{jsonProperty.Key}\":");
-        //        stream.Write(buf, 0, buf.Length);
-
-        //        SerializeRegularValue(stream, propertyValue, jsonProperty.JsonType);
-        //    }
-
-        //    stream.WriteByte(JsonConstants.Right_Brace);
-        //}
-
-        private async Task SerializeJsonClassObjectAsync(IWriterStream stream, object value)
-        {
-            foreach (var xmlProperty in XmlProperties.Values)
+            var propertis = XmlProperties.Values.ToArray().Subset(x => !x.IsAttr);
+            foreach (var property in propertis)
             {
-                var propertyValue = xmlProperty.PropertyInfo.GetValue(value, null);
-                if (propertyValue == null)
+                var value = property.PropertyInfo.GetValue(instance);
+                if (value == null)
                 {
                     continue;
                 }
 
-                if (XmlSettings.OmitDefaultValue && xmlProperty.DefaultValue.EqualsWith(propertyValue))
+                var xmlType = property.XmlType;
+                if (xmlType == XType.Dynamic)
                 {
-                    continue;
+                    xmlType = XmlUtility.GetXmlType(value.GetType());
                 }
 
-                await SerializeRegularValueAsync(stream, propertyValue, xmlProperty.XmlType, xmlProperty.Key);
+                if (xmlType == XType.Object)
+                {
+                    await GetSerializer(value.GetType(), XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalSerializeXmlObjectAsync(stream, value, property.Key);
+                }
+                else if (xmlType == XType.Array)
+                {
+                    await InternalSerializeXmlArrayAsync(stream, value, property.IsArrayElement ? null : property.Key, property.ArrayElementName);
+                }
+                else if (xmlType == XType.Value)
+                {
+                    await InternalSerializeXmlValueAsync(stream, value, property.Key);
+                }
             }
+
+            await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"</{tagName}>"));
         }
 
-        //private void SerializeJsonCollectionObject(Stream stream, object value)
-        //{
-        //    stream.WriteByte(JsonConstants.Left_Bracket);
-
-        //    var collection = value as ICollection;
-
-        //    var firstElement = true;
-        //    foreach (var element in collection)
-        //    {
-        //        if (element == null)
-        //        {
-        //            continue;
-        //        }
-
-        //        if (firstElement)
-        //        {
-        //            firstElement = false;
-        //        }
-        //        else
-        //        {
-        //            stream.WriteByte(JsonConstants.Comma);
-        //        }
-
-        //        SerializeRegularValue(stream, element, JsonUtility.GetJsonType(element.GetType()));
-        //    }
-
-        //    stream.WriteByte(JsonConstants.Right_Bracket);
-        //}
-
-        private async Task SerializeJsonCollectionObjectAsync(IWriterStream stream, object value)
+        private async Task InternalSerializeXmlArrayAsync(IWriterStream stream, object array, string outerTagName, string innerTagName)
         {
-            var collection = value as ICollection;
+            if (outerTagName.HasValue())
+            {
+                await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"<{outerTagName}>"));
+            }
 
+            var collection = array as ICollection;
             foreach (var element in collection)
             {
-                if (element == null)
-                {
-                    continue;
-                }
+                var elementType = element.GetType();
+                var xmlType = XmlUtility.GetXmlType(elementType);
 
-                await SerializeRegularValueAsync(stream, element, XmlUtility.GetXmlType(element.GetType()), element.GetType().Name);
+                if (xmlType == XType.Object)
+                {
+                    await GetSerializer(elementType, XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalSerializeXmlObjectAsync(stream, element, innerTagName);
+                }
+                else if (xmlType == XType.Value)
+                {
+                    await InternalSerializeXmlValueAsync(stream, element, innerTagName);
+                }
+            }
+
+            if (outerTagName.HasValue())
+            {
+                await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"</{outerTagName}>"));
             }
         }
 
-        //private void SerializeRegularValue(Stream stream, object value, JType objectType)
-        //{
-        //    if (objectType == JType.Value)
-        //    {
-        //        var buf = JsonSettings.SerializeValue(value);
-        //        stream.Write(buf, 0, buf.Length);
-        //    }
-        //    else if (value == null)
-        //    {
-        //        stream.Write(JsonConstants.NullValueBytes, 0, JsonConstants.NullValueBytes.Length);
-        //    }
-        //    else if (objectType == JType.Dynamic)
-        //    {
-        //        SerializeRegularValue(stream, value, JsonUtility.GetJsonType(value.GetType()));
-        //    }
-        //    else
-        //    {
-        //        GetSerializer(value.GetType(), JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).Serialize(value, stream);
-        //    }
-        //}
-
-        private async Task SerializeRegularValueAsync(IWriterStream stream, object value, XType xmlType, string tagName)
+        private async Task InternalSerializeXmlValueAsync(IWriterStream stream, object value, string tagName)
         {
-            if (xmlType == XType.Value)
-            {
-                await stream.WriteAsync(XmlSettings.StartTag(tagName));
+            await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"<{tagName}>"));
 
-                await stream.WriteAsync(XmlSettings.SerializeValue(value));
+            await stream.WriteAsync(XmlSettings.SerializeValue(value));
 
-                await stream.WriteAsync(XmlSettings.EndTag(tagName));
-            }
-            else if (xmlType == XType.Dynamic)
-            {
-                await SerializeRegularValueAsync(stream, value, XmlUtility.GetXmlType(value.GetType()), tagName);
-            }
-            else
-            {
-                await GetSerializer(value.GetType(), XmlSettings.CurrentEncoding, XmlSettings.OmitDefaultValue).InternalSerializeAsync(value, stream, tagName);
-            }
+            await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"</{tagName}>"));
         }
 
         #endregion

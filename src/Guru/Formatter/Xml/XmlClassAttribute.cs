@@ -8,5 +8,7 @@ namespace Guru.Formatter.Xml
         public string ArrayElementName { get; set; }
 
         public Type ArrayElementType { get; set; }
+
+        public string RootName { get; set; }
     }
 }

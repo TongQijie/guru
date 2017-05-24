@@ -11,10 +11,16 @@ namespace Guru.Formatter.Xml
             XmlType = XmlUtility.GetXmlType(ClassType);
         }
 
-        public XmlClass(Type classType, string arrayElementName, Type arrayElementType) : this(classType)
+        public XmlClass(Type classType, string arrayElementName, Type arrayElementType, string rootName) : this(classType)
         {
             ArrayElementName = arrayElementName;
             ArrayElementType = arrayElementType;
+            RootName = rootName;
+        }
+
+        public XmlClass(Type classType, string rootName)
+        {
+            RootName = rootName;
         }
 
         public string Key
@@ -25,8 +31,10 @@ namespace Guru.Formatter.Xml
                 {
                     return ArrayElementName.HasValue() ? ArrayElementName : ArrayElementType.Name;
                 }
-
-                return string.Empty;
+                else
+                {
+                    return RootName.HasValue() ? RootName : ClassType.Name;
+                }
             }
         }
 
@@ -37,5 +45,7 @@ namespace Guru.Formatter.Xml
         public string ArrayElementName { get; private set; }
 
         public Type ArrayElementType { get; private set; }
+
+        public string RootName { get; set; }
     }
 }

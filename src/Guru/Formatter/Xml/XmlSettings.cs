@@ -26,16 +26,6 @@ namespace Guru.Formatter.Xml
 
         public bool OmitDefaultValue => _OmitDefaultValue;
 
-        public byte[] StartTag(string name)
-        {
-            return _CurrentEncoding.GetBytes($"<{name}>");
-        }
-
-        public byte[] EndTag(string name)
-        {
-            return _CurrentEncoding.GetBytes($"</{name}>");
-        }
-
         public byte[] SerializeValue(object value)
         {
             var valueType = value.GetType();
