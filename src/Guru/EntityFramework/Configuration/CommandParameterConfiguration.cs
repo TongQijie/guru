@@ -1,20 +1,21 @@
 using System.Data;
-using System.Xml.Serialization;
+
+using Guru.Formatter.Xml;
 
 namespace Guru.EntityFramework.Configuration
 {
     public class CommandParameterConfiguration
     {
-        [XmlAttribute(AttributeName = "name")]
+        [XmlProperty(Alias = "name", IsAttr = true)]
         public string Name { get; set; }
 
-        [XmlAttribute(AttributeName = "type")]
+        [XmlProperty(Alias = "type", IsAttr = true)]
         public DbType DbType { get; set; }
 
-        [XmlAttribute(AttributeName = "direction")]
+        [XmlProperty(Alias = "direction", IsAttr = true)]
         public ParameterDirection Direction { get; set; }
 
-        [XmlAttribute(AttributeName = "size")]
+        [XmlProperty(Alias = "size", IsAttr = true)]
         public int Size { get; set; }
     }
 }

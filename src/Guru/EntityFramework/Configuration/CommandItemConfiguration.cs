@@ -1,24 +1,24 @@
 using System.Data;
-using System.Xml.Serialization;
+
+using Guru.Formatter.Xml;
 
 namespace Guru.EntityFramework.Configuration
 {
     public class CommandItemConfiguration
     {
-        [XmlAttribute(AttributeName = "name")]
+        [XmlProperty(Alias = "name", IsAttr = true)]
         public string Name { get; set; }
 
-        [XmlAttribute(AttributeName = "database")]
+        [XmlProperty(Alias = "database", IsAttr = true)]
         public string Database { get; set; }
 
-        [XmlAttribute(AttributeName = "commandType")]
+        [XmlProperty(Alias = "commandType", IsAttr = true)]
         public CommandType CommandType { get; set; }
 
-        [XmlElement(ElementName = "commandText")]
+        [XmlProperty(Alias = "commandText")]
         public string CommandText { get; set; }
 
-        [XmlArray(ElementName = "params")]
-        [XmlArrayItem(ElementName = "param")]
+        [XmlProperty(Alias = "params", ArrayElementName = "param")]
         public CommandParameterConfiguration[] Parameters { get; set; }
     }
 }

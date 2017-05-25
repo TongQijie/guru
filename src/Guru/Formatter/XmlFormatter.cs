@@ -2,8 +2,8 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
+using Guru.Formatter.Xml;
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection.Attributes;
@@ -13,43 +13,23 @@ namespace Guru.Formatter
     [Injectable(typeof(IXmlFormatter), Lifetime.Transient)]
     public class XmlFormatter : FormatterBase, IXmlFormatter
     {
-        public bool OmitNamespaces { get; set; }
+        public bool OmitDefaultValue { get; set; }
+
+        public Encoding DefaultEncoding { get; set; }
 
         public XmlFormatter()
         {
-            OmitNamespaces = true;
-        }
-
-        private static XmlSerializerNamespaces _EmptyNamespaces = null;
-
-        public static XmlSerializerNamespaces EmptyNamespaces
-        {
-            get
-            {
-                if (_EmptyNamespaces == null)
-                {
-                    _EmptyNamespaces = new XmlSerializerNamespaces();
-                    _EmptyNamespaces.Add("", "");
-                }
-                return _EmptyNamespaces;
-            }
+            DefaultEncoding = Encoding.UTF8;
         }
 
         public override object ReadObject(Type targetType, Stream stream)
         {
-            return new XmlSerializer(targetType).Deserialize(stream);
+            return XmlSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue).Deserialize(stream);
         }
 
         public override void WriteObject(object instance, Stream stream)
         {
-            if (OmitNamespaces)
-            {
-                new XmlSerializer(instance.GetType()).Serialize(stream, instance, EmptyNamespaces);
-            }
-            else
-            {
-                new XmlSerializer(instance.GetType()).Serialize(stream, instance);
-            }
+            Xml.XmlSerializer.GetSerializer(instance.GetType(), DefaultEncoding, OmitDefaultValue).Serialize(instance, stream);
         }
 
         public override async Task WriteObjectAsync(object instance, Stream stream)

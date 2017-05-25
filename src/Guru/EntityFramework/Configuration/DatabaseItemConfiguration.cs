@@ -1,16 +1,16 @@
-using System.Xml.Serialization;
+using Guru.Formatter.Xml;
 
 namespace Guru.EntityFramework.Configuration
 {
     public class DatabaseItemConfiguration
     {
-        [XmlAttribute(AttributeName = "name")]
+        [XmlProperty(Alias = "name", IsAttr = true)]
         public string Name { get; set; }
 
-        [XmlAttribute(AttributeName = "connectionString")]
+        [XmlProperty(Alias = "connectionString", IsAttr = true)]
         public string ConnectionString { get; set; }
 
-        [XmlAttribute(AttributeName = "provider")]
+        [XmlProperty(Alias = "provider", IsAttr = true)]
         public string Provider { get; set; }
     }
 }
