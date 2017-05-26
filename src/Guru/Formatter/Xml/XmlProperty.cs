@@ -31,7 +31,7 @@ namespace Guru.Formatter.Xml
                 }
                 else
                 {
-                    throw new Exception("");
+
                 }
 
                 if (!ArrayElementName.HasValue())

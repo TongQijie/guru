@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 using Guru.ExtensionMethod;
-using Guru.Formatter.Xml.Internal;
+using Guru.Formatter.Internal;
 
 namespace Guru.Formatter.Xml
 {
@@ -19,7 +19,7 @@ namespace Guru.Formatter.Xml
 
         private int _LastByte = -1;
 
-        internal async Task<bool> FillAsync(BufferedReaderStream stream)
+        internal async Task<bool> FillAsync(IReaderStream stream)
         {
             int b = _LastByte;
             if (b == -1)

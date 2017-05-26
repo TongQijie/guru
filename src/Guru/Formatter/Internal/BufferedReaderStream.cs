@@ -211,6 +211,60 @@ namespace Guru.Formatter.Internal
             }
         }
 
+        public byte[] ReadBytesUntilMeeting(Predicate<byte> predicate)
+        {
+            return InternalReadBytesUntilMeeting(new byte[0], predicate);
+        }
+
+        public async Task<byte[]> ReadBytesUntilMeetingAsync(Predicate<byte> predicate)
+        {
+            return await InternalReadBytesUntilMeetingAsync(new byte[0], predicate);
+        }
+
+        private byte[] InternalReadBytesUntilMeeting(byte[] byteValues, Predicate<byte> predicate)
+        {
+            var startIndex = _Index;
+            while (_Index < _Count)
+            {
+                if (predicate(_InternalBuffer[_Index++]))
+                {
+                    return Concat(byteValues, 0, byteValues.Length, _InternalBuffer, startIndex, _Index - startIndex);
+                }
+            }
+
+            byteValues = Concat(byteValues, 0, byteValues.Length, _InternalBuffer, startIndex, _Count - startIndex);
+            if (Fill())
+            {
+                return InternalReadBytesUntilMeeting(byteValues, predicate);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private async Task<byte[]> InternalReadBytesUntilMeetingAsync(byte[] byteValues, Predicate<byte> predicate)
+        {
+            var startIndex = _Index;
+            while (_Index < _Count)
+            {
+                if (predicate(_InternalBuffer[_Index++]))
+                {
+                    return Concat(byteValues, 0, byteValues.Length, _InternalBuffer, startIndex, _Index - startIndex - 1);
+                }
+            }
+
+            byteValues = Concat(byteValues, 0, byteValues.Length, _InternalBuffer, startIndex, _Count - startIndex);
+            if (await FillAsync())
+            {
+                return await InternalReadBytesUntilMeetingAsync(byteValues, predicate);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         private byte[] InternalReadBytesUntil(byte[] byteValues, byte terminator)
         {
             var index = InternalIndexOf(terminator, _Index, _Count - _Index);

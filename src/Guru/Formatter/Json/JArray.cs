@@ -34,7 +34,7 @@ namespace Guru.Formatter.Json
                 return true;
             }
 
-            throw new Errors.JsonParseFailedException(stream.Position, "collection element has invalid terminal byte.");
+            throw new Errors.JsonDeserializeFailedException(stream.Position, "collection element has invalid terminal byte.");
         }
 
         internal override async Task<bool> FillAsync(IReaderStream stream, byte[] seperators, byte[] terminators)
@@ -59,7 +59,7 @@ namespace Guru.Formatter.Json
                 return true;
             }
 
-            throw new Errors.JsonParseFailedException(stream.Position, "collection element has invalid terminal byte.");
+            throw new Errors.JsonDeserializeFailedException(stream.Position, "collection element has invalid terminal byte.");
         }
 
         private bool Parse(IReaderStream stream)

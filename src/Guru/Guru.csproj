@@ -8,6 +8,7 @@
     <PackageId>Guru</PackageId>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <Authors>tongqijie</Authors>
   </PropertyGroup>
 
   <ItemGroup>

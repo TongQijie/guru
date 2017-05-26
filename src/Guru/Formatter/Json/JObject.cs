@@ -34,7 +34,7 @@ namespace Guru.Formatter.Json
                 return true;
             }
 
-            throw new Errors.JsonParseFailedException(stream.Position, "dictionary element has invalid terminal byte.");
+            throw new Errors.JsonDeserializeFailedException(stream.Position, "dictionary element has invalid terminal byte.");
         }
 
         internal override async Task<bool> FillAsync(IReaderStream stream, byte[] seperators, byte[] terminators)
@@ -59,7 +59,7 @@ namespace Guru.Formatter.Json
                 return true;
             }
 
-            throw new Errors.JsonParseFailedException(stream.Position, "dictionary element has invalid terminal byte.");
+            throw new Errors.JsonDeserializeFailedException(stream.Position, "dictionary element has invalid terminal byte.");
         }
 
         private bool Parse(IReaderStream stream)
@@ -71,7 +71,7 @@ namespace Guru.Formatter.Json
             }
             else if (b != JsonConstants.Double_Quotes)
             {
-                throw new Errors.JsonParseFailedException(stream.Position, "dictionary name is invalid.");
+                throw new Errors.JsonDeserializeFailedException(stream.Position, "dictionary name is invalid.");
             }
 
             var buf = stream.ReadBytesUntil(JsonConstants.Double_Quotes);
@@ -82,7 +82,7 @@ namespace Guru.Formatter.Json
 
             if (!buf.HasLength())
             {
-                throw new Errors.JsonParseFailedException(stream.Position, "dictionary element name is empty.");
+                throw new Errors.JsonDeserializeFailedException(stream.Position, "dictionary element name is empty.");
             }
 
             stream.SeekBytesUntilEqual(JsonConstants.Colon);
@@ -112,7 +112,7 @@ namespace Guru.Formatter.Json
             }
             else if (b != JsonConstants.Double_Quotes)
             {
-                throw new Errors.JsonParseFailedException(stream.Position, "dictionary name is invalid.");
+                throw new Errors.JsonDeserializeFailedException(stream.Position, "dictionary name is invalid.");
             }
 
             var buf = await stream.ReadBytesUntilAsync(JsonConstants.Double_Quotes);
@@ -123,7 +123,7 @@ namespace Guru.Formatter.Json
 
             if (!buf.HasLength())
             {
-                throw new Errors.JsonParseFailedException(stream.Position, "dictionary element name is empty.");
+                throw new Errors.JsonDeserializeFailedException(stream.Position, "dictionary element name is empty.");
             }
 
             await stream.SeekBytesUntilEqualAsync(JsonConstants.Colon);

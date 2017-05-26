@@ -25,7 +25,7 @@ namespace Guru.Formatter.Json
 
                 if (Buffer == null)
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value cannot be empty.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value cannot be empty.");
                 }
 
                 var b = stream.SeekBytesUntilVisiableChar();
@@ -43,7 +43,7 @@ namespace Guru.Formatter.Json
                 }
                 else
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value object has invalid terminal byte.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value object has invalid terminal byte.");
                 }
             }
             else
@@ -61,7 +61,7 @@ namespace Guru.Formatter.Json
                 var buf = stream.ReadBytesUntil(ends);
                 if (buf == null || buf.Length == 0)
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value cannot be empty.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value cannot be empty.");
                 }
 
                 if (Buffer != null && Buffer.Length > 0)
@@ -84,7 +84,7 @@ namespace Guru.Formatter.Json
                 }
                 else
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value object has invalid terminal byte.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value object has invalid terminal byte.");
                 }
             }
 
@@ -105,7 +105,7 @@ namespace Guru.Formatter.Json
 
                 if (Buffer == null)
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value cannot be empty.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value cannot be empty.");
                 }
 
                 var b = await stream.SeekBytesUntilVisiableCharAsync();
@@ -123,7 +123,7 @@ namespace Guru.Formatter.Json
                 }
                 else
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value object has invalid terminal byte.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value object has invalid terminal byte.");
                 }
             }
             else
@@ -141,7 +141,7 @@ namespace Guru.Formatter.Json
                 var buf = await stream.ReadBytesUntilAsync(ends);
                 if (buf == null || buf.Length == 0)
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value cannot be empty.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value cannot be empty.");
                 }
 
                 if (Buffer != null && Buffer.Length > 0)
@@ -164,7 +164,7 @@ namespace Guru.Formatter.Json
                 }
                 else
                 {
-                    throw new Errors.JsonParseFailedException(stream.Position, "plain value object has invalid terminal byte.");
+                    throw new Errors.JsonDeserializeFailedException(stream.Position, "plain value object has invalid terminal byte.");
                 }
             }
 

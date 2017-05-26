@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Guru.Formatter.Internal
 {
@@ -60,6 +61,10 @@ namespace Guru.Formatter.Internal
         int SeekBytesUntilVisiableChar();
 
         Task<int> SeekBytesUntilVisiableCharAsync();
+
+        byte[] ReadBytesUntilMeeting(Predicate<byte> predicate);
+
+        Task<byte[]> ReadBytesUntilMeetingAsync(Predicate<byte> predicate);
     }
 }
 

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Guru.Formatter.Xml.Internal;
 using Guru.ExtensionMethod;
+using Guru.Formatter.Internal;
 
 namespace Guru.Formatter.Xml
 {
     internal static class XmlParser
     {
-        public static async Task<XObject> ParseAsync(BufferedReaderStream stream)
+        public static async Task<XObject> ParseAsync(IReaderStream stream)
         {
             var b = await stream.SeekBytesUntilVisiableCharAsync();
             if (b == -1 || b != XmlConstants.Lt)
