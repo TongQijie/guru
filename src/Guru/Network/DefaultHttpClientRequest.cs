@@ -1,10 +1,12 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
 using System.Collections.Generic;
 
 using Microsoft.AspNetCore.WebUtilities;
 
+using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
@@ -60,28 +62,39 @@ namespace Guru.Network
             return new DefaultHttpClientResponse(await _Client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead));
         }
 
-        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body) where TFormatter : IFormatter
+        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : IFormatter
         {
-            return await InternalPostAsync<TFormatter>(uri, body); 
+            return await InternalPostAsync<TFormatter>(uri, body, contentHeaders); 
         }
 
-        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body) where TFormatter : IFormatter
+        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : IFormatter
         {
             if (queryString != null)
             {
                 uri = QueryHelpers.AddQueryString(uri, queryString);
             }
 
-            return await InternalPostAsync<TFormatter>(uri, body);
+            return await InternalPostAsync<TFormatter>(uri, body, contentHeaders);
         }
 
-        private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body) where TFormatter : IFormatter
+        private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : IFormatter
         {
             var bytes = ContainerManager.Default.Resolve<TFormatter>().WriteBytes(body);
 
             using (var content = new ByteArrayContent(bytes))
             {
                 content.Headers.ContentLength = bytes.Length;
+
+                if (contentHeaders != null)
+                {
+                    foreach (var contentHeader in contentHeaders)
+                    {
+                        if (contentHeader.Key.EqualsIgnoreCase("Content-Type") && MediaTypeHeaderValue.TryParse(contentHeader.Value, out var parsedValue))
+                        {
+                            content.Headers.ContentType = parsedValue;
+                        }
+                    }
+                }
 
                 var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
                 requestMessage.Content = content;
