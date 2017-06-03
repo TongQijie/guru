@@ -1,4 +1,7 @@
 using System;
+using System.Net;
+using System.Linq;
+using System.Text;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
@@ -75,6 +78,17 @@ namespace Guru.Network
             }
 
             return await InternalPostAsync<TFormatter>(uri, body, contentHeaders);
+        }
+
+        public async Task<IHttpClientResponse> PostAsync(string uri, IDictionary<string, string> queryString, Dictionary<string, string> formData, Dictionary<string, string> contentHeaders = null)
+        {
+            var body = string.Empty;
+            if (formData != null)
+            {
+                 body = string.Join("&", formData.Select(x => $"{WebUtility.UrlEncode(x.Key)}={WebUtility.UrlEncode(x.Value)}"));
+            }
+
+            return await PostAsync<ITextFormatter>(uri, queryString, body, contentHeaders);
         }
 
         private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : IFormatter
