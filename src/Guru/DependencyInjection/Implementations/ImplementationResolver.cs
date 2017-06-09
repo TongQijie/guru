@@ -13,21 +13,29 @@ namespace Guru.DependencyInjection.Implementations
 
         private object _SingletonObject = null;
 
+        private object _Locker = new object();
+
         public object Resolve()
         {
-            if (Decorator.Lifetime == Lifetime.Singleton && _SingletonObject != null)
-            {
-                return _SingletonObject;
-            }
-
-            var obj = CreateInstanceFactory.Instance.GetInstance(Decorator.ImplementationType);
-
             if (Decorator.Lifetime == Lifetime.Singleton)
             {
-                _SingletonObject = obj;
-            }
+                if (_SingletonObject == null)
+                {
+                    lock (_Locker)
+                    {
+                        if (_SingletonObject == null)
+                        {
+                            _SingletonObject = CreateInstanceFactory.Instance.GetInstance(Decorator.ImplementationType);
+                        }
+                    }
+                }
 
-            return obj;
+                return _SingletonObject;
+            }
+            else
+            {
+                return CreateInstanceFactory.Instance.GetInstance(Decorator.ImplementationType);
+            }
         }
     }
 }
