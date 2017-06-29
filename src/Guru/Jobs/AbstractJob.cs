@@ -77,6 +77,8 @@ namespace Guru.Jobs
 
                 NextExecTime = GetNextExecTime((DateTime)PrevExecTime);
 
+                _Logger.LogEvent("Job", Severity.Information, $"job '{Name}' starts to run. next time to run: {NextExecTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+
                 try
                 {
                     await OnRunAsync(args);

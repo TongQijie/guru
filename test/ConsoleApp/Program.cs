@@ -17,9 +17,9 @@ namespace ConsoleApp
 
             //new DependencyInjection.TestRunner().Run();
 
-            new Formatter.TestRunner().Run();
+            //new Formatter.TestRunner().Run();
 
-            // new Network.TestRunner().Run();
+            new Network.TestRunner().Run();
 
             // new Network.UnsplashCrawler().Run();
 
@@ -34,9 +34,7 @@ namespace ConsoleApp
             //new Markdown.TestRunner().Run();
 
             stopwatch.Stop();
-            Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");
+            //Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");
         }
-
-        private static ConcurrentDictionary<object, string> _ImplementationResolvers = new ConcurrentDictionary<object, string>();
     }
 }

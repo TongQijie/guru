@@ -7,7 +7,9 @@ namespace Crawler
     {
         static void Main(string[] args)
         {
-            ContainerManager.Default.Resolve<IJobDispatcher>().Run();
+            //ContainerManager.Default.Resolve<IJobDispatcher>().Run();
+
+            new GoogleMap().Run();
         }
     }
 }
