@@ -86,10 +86,7 @@ namespace Guru.Logging
         {
             try
             {
-                if (!Directory.Exists(Folder))
-                {
-                    Directory.CreateDirectory(Folder);
-                }
+                Folder.EnsureFolder();
 
                 var fileName = string.Format("{0}.log", DateTime.Now.ToString("yyyy-MM-dd"));
                 using (var outputStream = new FileStream(Path.Combine(Folder, fileName), FileMode.Append, FileAccess.Write))
@@ -149,7 +146,7 @@ namespace Guru.Logging
             public override string ToString()
             {
                 var stringBuilder = new StringBuilder();
-                stringBuilder.AppendFormat("{0}|{1,-12}|{2}", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"), Severity, Category);
+                stringBuilder.AppendFormat("{0}|{1,-12}|{2}", Timestamp.ToString("yyyy/MM/dd HH:mm:ss.fff"), Severity, Category);
                 stringBuilder.AppendLine();
                 if (Parameters != null)
                 {
