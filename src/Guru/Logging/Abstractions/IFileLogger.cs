@@ -1,7 +1,11 @@
-﻿namespace Guru.Logging.Abstractions
+﻿using System;
+
+namespace Guru.Logging.Abstractions
 {
     public interface IFileLogger : ILogger
     {
-        string Folder { get; }
+        string Folder { get; set; }
+
+        int Interval { get; set; }
     }
 }

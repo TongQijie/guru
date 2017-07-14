@@ -17,9 +17,14 @@ namespace Guru.Logging
         public FileLogger()
         {
             Folder = "./log".FullPath();
+            Interval = 3000;
         }
 
-        public string Folder { get; private set; }
+        public string Folder { get; set; }
+
+        public int Interval { get; set; }
+
+        private bool HasItems => _Items.Count > 0;
 
         public void LogEvent(string category, Severity severity, params object[] parameters)
         {
@@ -35,6 +40,8 @@ namespace Guru.Logging
 
         private bool _IsAlive = false;
 
+        private bool _IsThreadRunning = false;
+
         private object _SyncLocker = new object();
 
         private void StartThread()
@@ -45,28 +52,31 @@ namespace Guru.Logging
                 {
                     if (!_IsAlive)
                     {
+                        _IsAlive = true;
+
                         new Thread(() =>
                         {
-                            while (true)
+                            _IsThreadRunning = true;
+
+                            while (_IsAlive)
                             {
-                                while (_Items.Count > 0)
+                                while (HasItems)
                                 {
-                                    Item item;
-                                    if (_Items.TryDequeue(out item))
+                                    if (_Items.TryDequeue(out var item))
                                     {
                                         Flush(item);
                                     }
                                 }
 
-                                Thread.Sleep(3000);
+                                Thread.Sleep(Interval);
                             }
+
+                            _IsThreadRunning = false;
                         })
                         {
                             IsBackground = true,
                             Name = "FileLogger",
                         }.Start();
-
-                        _IsAlive = true;
                     }
                 }
             }
@@ -89,10 +99,33 @@ namespace Guru.Logging
                         sw.WriteLine(item.ToString());
                     }
                 }
-
-
             }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                Console.WriteLine($"failed to flush in file logger. {e.Message}");
+            }
+        }
+
+        public void Dispose()
+        {
+            _IsAlive = false;
+
+            Console.WriteLine("file logger is disposing...");
+
+            while (_IsThreadRunning)
+            {
+                Thread.Sleep(500);
+            }
+
+            while (HasItems)
+            {
+                if (_Items.TryDequeue(out var item))
+                {
+                    Flush(item);
+                }
+            }
+
+            Console.WriteLine("file logger is disposed.");
         }
 
         class Item
