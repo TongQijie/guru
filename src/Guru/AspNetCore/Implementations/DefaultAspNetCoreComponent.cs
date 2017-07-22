@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
-using Microsoft.AspNetCore.Http;
+using Guru.AspNetCore.Abstractions;
 
 namespace Guru.AspNetCore.Implementations
 {
