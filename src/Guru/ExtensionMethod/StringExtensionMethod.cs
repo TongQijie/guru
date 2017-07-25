@@ -171,5 +171,17 @@ namespace Guru.ExtensionMethod
 
             return stringValue.FullPath().EqualsWith(anotherPath.FullPath());
         }
+
+        public static string Alternate(this string stringValue, string alternate)
+        {
+            if (stringValue.HasValue())
+            {
+                return stringValue;
+            }
+            else
+            {
+                return alternate;
+            }
+        }
     }
 }

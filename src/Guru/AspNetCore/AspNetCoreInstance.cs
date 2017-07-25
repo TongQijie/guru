@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Guru.AspNetCore.Abstractions;
+using Guru.AspNetCore.Delegates;
 
 namespace Guru.AspNetCore
 {

@@ -9,9 +9,20 @@ namespace Guru.AspNetCore.Implementations
     [Injectable(typeof(IAspNetCoreComponent), Lifetime.Singleton)]
     public class DefaultAspNetCoreComponent : IAspNetCoreComponent
     {
-        public Task Process(CallingContext context)
+        private readonly IAspNetCoreRouter _Router;
+
+        private readonly IAspNetCoreProcessor _Processor;
+
+        public DefaultAspNetCoreComponent(IAspNetCoreRouter router, IAspNetCoreProcessor processor)
         {
-            throw new NotImplementedException();
+            _Router = router;
+            _Processor = processor;
+        }
+
+        public async Task Process(CallingContext context)
+        {
+            _Router.GetRouteData(context);
+            await _Processor.Process(context);
         }
     }
 }
