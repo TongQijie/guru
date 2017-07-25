@@ -1,6 +1,6 @@
 using System;
 using Guru.DependencyInjection;
-using Guru.Executive.Abstractions;
+using Guru.Executable.Abstractions;
 using Guru.Logging.Abstractions;
 
 namespace Guru.Executable

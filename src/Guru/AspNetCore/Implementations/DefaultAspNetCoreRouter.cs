@@ -1,4 +1,3 @@
-using System;
 using System.Text.RegularExpressions;
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Configuration;

@@ -1,4 +1,4 @@
-namespace Guru.Executive.Abstractions
+namespace Guru.Executable.Abstractions
 {
     public interface IConsoleExecutable
     {

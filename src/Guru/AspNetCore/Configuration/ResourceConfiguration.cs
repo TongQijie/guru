@@ -1,3 +1,4 @@
+using Guru.Formatter.Json;
 using System.Collections.Generic;
 
 namespace Guru.AspNetCore.Configuration
@@ -10,10 +11,13 @@ namespace Guru.AspNetCore.Configuration
             Directory = "./wwwroot";
         }
 
+        [JsonProperty("prefix")]
         public string Prefix { get; set; }
 
+        [JsonProperty("dir")]
         public string Directory { get; set; }
 
+        [JsonProperty("mineTypes")]
         public Dictionary<string, string> MineTypes { get; set; }
     }
 }

@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
-using Guru.Executive.Abstractions;
+using Guru.Executable.Abstractions;
 
 namespace ConsoleApp
 {

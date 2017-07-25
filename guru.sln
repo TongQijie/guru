@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guru", "src\Guru\Guru.csproj", "{328705FC-CA04-4D3E-BB4C-ED612BDBBC85}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitDiff", "app\GitDiff\GitDiff.csproj", "{199077DB-C250-47C8-B564-A2891DAF1AF1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crawler", "app\Crawler\Crawler.csproj", "{CA9B1486-B202-46AB-AD74-D36458093652}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCoreAppII", "test\AspNetCoreAppII\AspNetCoreAppII.csproj", "{82F84DBE-844D-4244-868B-87CD58EBFD02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{CA9B1486-B202-46AB-AD74-D36458093652}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA9B1486-B202-46AB-AD74-D36458093652}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA9B1486-B202-46AB-AD74-D36458093652}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82F84DBE-844D-4244-868B-87CD58EBFD02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82F84DBE-844D-4244-868B-87CD58EBFD02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82F84DBE-844D-4244-868B-87CD58EBFD02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82F84DBE-844D-4244-868B-87CD58EBFD02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,5 +68,6 @@ Global
 		{5CD976D6-B90A-4A27-B018-CD59481086F8} = {6077BD0A-3A30-41D1-9171-3D5CA4320BAE}
 		{199077DB-C250-47C8-B564-A2891DAF1AF1} = {6077BD0A-3A30-41D1-9171-3D5CA4320BAE}
 		{CA9B1486-B202-46AB-AD74-D36458093652} = {6077BD0A-3A30-41D1-9171-3D5CA4320BAE}
+		{82F84DBE-844D-4244-868B-87CD58EBFD02} = {E5879043-41AC-4FF0-8AFF-96FE0234FFCB}
 	EndGlobalSection
 EndGlobal

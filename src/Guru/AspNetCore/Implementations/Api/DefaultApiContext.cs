@@ -1,4 +1,3 @@
-using System;
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Delegates;
 

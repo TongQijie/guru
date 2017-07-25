@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Delegates;
+using Guru.DependencyInjection;
 
 namespace Guru.AspNetCore
 {
@@ -19,9 +20,11 @@ namespace Guru.AspNetCore
 
             try
             {
-                if (startup != null)
+                startup?.Invoke(this);
+
+                if (_Component == null)
                 {
-                    startup(this);
+                    _Component = ContainerManager.Default.Resolve<IAspNetCoreComponent>();
                 }
 
                 Console.WriteLine($"instance({name ?? string.Empty}) startup succeeded.");

@@ -1,0 +1,10 @@
+﻿{
+  "router": {
+    "default": "res/index.html"
+  },
+  "res": {
+    "mineTypes": {
+      "html": "text/html"
+    }
+  }
+}

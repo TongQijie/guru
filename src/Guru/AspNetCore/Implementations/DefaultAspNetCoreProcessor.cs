@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;

@@ -1,3 +1,5 @@
+using Guru.Formatter.Json;
+
 namespace Guru.AspNetCore.Configuration
 {
     public class ApiConfiguration
@@ -7,6 +9,7 @@ namespace Guru.AspNetCore.Configuration
             Prefix = "api";
         }
 
+        [JsonProperty("prefix")]
         public string Prefix { get; set; }
     }
 }

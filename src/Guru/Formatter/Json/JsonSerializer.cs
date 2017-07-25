@@ -497,7 +497,7 @@ namespace Guru.Formatter.Json
                         continue;
                     }
 
-                    if (jsonProperty.JsonType == JType.Object)
+                    if (jsonProperty.JsonType == JType.Object || jsonProperty.JsonType == JType.Map)
                     {
                         if (element is JObject)
                         {

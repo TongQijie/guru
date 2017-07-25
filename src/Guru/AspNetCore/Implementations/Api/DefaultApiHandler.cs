@@ -1,10 +1,8 @@
-using System;
 using System.Threading.Tasks;
 using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
-using Guru.Formatter.Abstractions;
 
 namespace Guru.AspNetCore.Implementations.Api
 {
