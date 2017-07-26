@@ -83,7 +83,7 @@ namespace Guru.Network
             }
         }
 
-        public async Task<Stream> GetStream()
+        public async Task<Stream> GetStreamAsync()
         {
             return await _Response.Content.ReadAsStreamAsync();
         }

@@ -41,7 +41,7 @@ namespace Crawler
             {
                 if (response.StatusCode == 200)
                 {
-                    using (var stream = await response.GetStream())
+                    using (var stream = await response.GetStreamAsync())
                     {
                         doc.Load(stream);
                     }

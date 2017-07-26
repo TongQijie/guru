@@ -19,6 +19,6 @@ namespace Guru.Network.Abstractions
 
         Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4 * 1024);
 
-        Task<Stream> GetStream();
+        Task<Stream> GetStreamAsync();
     }
 }

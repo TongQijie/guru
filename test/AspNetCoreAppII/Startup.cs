@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Guru.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Guru.AspNetCore.Delegates;
 
 namespace AspNetCoreAppII
 {
@@ -18,8 +17,8 @@ namespace AspNetCoreAppII
         {
             new WebHostBuilder()
                 .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
+                .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureServices(x => x.AddSingleton<IHttpContextAccessor, HttpContextAccessor>())
                 .Configure(x =>
                 {

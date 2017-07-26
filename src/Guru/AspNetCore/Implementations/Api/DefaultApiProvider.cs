@@ -22,6 +22,7 @@ namespace Guru.AspNetCore.Implementations.Api
         public DefaultApiProvider(IApiFormatter apiFormatter)
         {
             _ApiFormatter = apiFormatter;
+            Init();
         }
 
         public async Task<IApiContext> GetApi(CallingContext context)
@@ -72,11 +73,11 @@ namespace Guru.AspNetCore.Implementations.Api
 
                 if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName.ToLower()))
                 {
-                    parameterValues[i] = context.InputParameters[apiParameterInfo.ParameterName.ToLower()].ConvertTo(apiParameterInfo.Prototype.ParameterType);
+                    parameterValues[i] = context.InputParameters[apiParameterInfo.ParameterName.ToLower()].Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
                 }
                 else
                 {
-                    if (apiParameterInfo.Prototype.ParameterType.GetTypeInfo().IsClass)
+                    if (typeof(string) != apiParameterInfo.Prototype.ParameterType && apiParameterInfo.Prototype.ParameterType.GetTypeInfo().IsClass)
                     {
                         IFormatter formatter = _ApiFormatter.GetFormatter("json");
                         if (context.InputParameters.ContainsKey("formatter"))
@@ -153,7 +154,10 @@ namespace Guru.AspNetCore.Implementations.Api
 
             ContainerManager.Default.RegisterSingleton(serviceType, serviceType);
 
-            _ApiServiceInfos.Add(apiServiceInfo.ServiceName.ToLower(), apiServiceInfo);
+            if (!_ApiServiceInfos.ContainsKey(apiServiceInfo.ServiceName.ToLower()))
+            {
+                _ApiServiceInfos.Add(apiServiceInfo.ServiceName.ToLower(), apiServiceInfo);
+            }
         }
 
         #region Api Information

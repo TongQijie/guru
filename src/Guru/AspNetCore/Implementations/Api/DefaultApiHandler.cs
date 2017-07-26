@@ -36,18 +36,18 @@ namespace Guru.AspNetCore.Implementations.Api
             }
 
             var contentType = "application/json";
-            if (context.InputParameters.ContainsKey("accept"))
+            if (context.InputParameters.ContainsKey("formatter"))
             {
-                var accept = context.InputParameters["accept"].Value;
-                if (accept.ContainsIgnoreCase("application/json"))
+                var formatter = context.InputParameters["formatter"].Value;
+                if (formatter.ContainsIgnoreCase("json"))
                 {
                     contentType = "application/json";
                 }
-                else if (accept.ContainsIgnoreCase("application/xml"))
+                else if (formatter.ContainsIgnoreCase("xml"))
                 {
                     contentType = "application/xml";
                 }
-                else if (accept.ContainsIgnoreCase("plain/text"))
+                else if (formatter.ContainsIgnoreCase("text"))
                 {
                     contentType = "plain/text";
                 }

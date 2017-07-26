@@ -39,7 +39,7 @@ namespace Guru.DependencyInjection
                 {
                     var assemblyName = AssemblyLoadContext.GetAssemblyName(fileInfo.FullName);
 
-                    if (!assemblyNames.Exists(x => x.Name == assemblyName.Name))
+                    if (!assemblyNames.Exists(x => x.Name.EqualsIgnoreCase(assemblyName.Name)))
                     {
                         assemblyNames = assemblyNames.Append(assemblyName);
                     }

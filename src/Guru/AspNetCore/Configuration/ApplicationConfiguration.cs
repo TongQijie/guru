@@ -7,6 +7,12 @@ namespace Guru.AspNetCore.Configuration
     [StaticFile(typeof(IApplicationConfiguration), "./Configuration/app.json")]
     public class ApplicationConfiguration : IApplicationConfiguration
     {
+        public ApplicationConfiguration()
+        {
+            Resource = new ResourceConfiguration();
+            Api = new ApiConfiguration();
+        }
+
         [JsonProperty(Alias = "router")]
         public RouterConfiguration Router { get; set; }
 
