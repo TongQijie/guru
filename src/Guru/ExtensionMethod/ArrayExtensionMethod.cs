@@ -162,12 +162,12 @@ namespace Guru.ExtensionMethod
 
         public static T[] Subset<T>(this T[] source, int offset, int count)
         {
-            if (source == null || offset < 0 || (offset + count) > source.Length)
+            if (source == null || offset < 0 || count < 0)
             {
                 throw new Exception("");
             }
 
-            var buffer = new T[count];
+            var buffer = new T[Math.Min(count, source.Length - offset)];
             Array.Copy(source, offset, buffer, 0, buffer.Length);
             return buffer;
         }

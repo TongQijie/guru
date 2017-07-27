@@ -3,6 +3,7 @@ using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
+using System;
 
 namespace Guru.AspNetCore.Implementations.Api
 {
@@ -28,8 +29,12 @@ namespace Guru.AspNetCore.Implementations.Api
                 return;
             }
 
-            var result = apiContext.ApiExecute(apiContext.Parameters);
-            if (result == null)
+            object executionResult = null;
+            try
+            {
+                executionResult = apiContext.ApiExecute(apiContext.Parameters);
+            }
+            catch(Exception e)
             {
                 // TODO: log error
                 return;
@@ -62,15 +67,15 @@ namespace Guru.AspNetCore.Implementations.Api
             
             if (contentType == "application/json")
             {
-                await _ApiFormatter.GetFormatter("json").WriteObjectAsync(result, context.OutputStream);
+                await _ApiFormatter.GetFormatter("json").WriteObjectAsync(executionResult, context.OutputStream);
             }
             else if (contentType == "application/xml")
             {
-                await _ApiFormatter.GetFormatter("xml").WriteObjectAsync(result, context.OutputStream);
+                await _ApiFormatter.GetFormatter("xml").WriteObjectAsync(executionResult, context.OutputStream);
             }
             else
             {
-                await _ApiFormatter.GetFormatter("text").WriteObjectAsync(result, context.OutputStream);
+                await _ApiFormatter.GetFormatter("text").WriteObjectAsync(executionResult, context.OutputStream);
             }
         }
     }

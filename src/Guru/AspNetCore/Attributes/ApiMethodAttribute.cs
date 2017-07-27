@@ -11,5 +11,7 @@ namespace Guru.AspNetCore.Attributes
         }
 
         public string MethodName { get; set; }
+
+        public bool DefaultMethod { get; set; } 
     }
 }

@@ -8,7 +8,7 @@ namespace ClassLib
     [ApiService("weather")]
     public class WeatherApi
     {
-        [ApiMethod("moment")]
+        [ApiMethod("moment", DefaultMethod = true)]
         public async Task<MomentRecord.MODataObject> GetMomentRecord(string regionCode)
         {
             return (await WeatherHttpClient.Instance.Request<MomentRecord>(WeatherHttpClient.InterfaceEnum.Moment, regionCode)).MOData;

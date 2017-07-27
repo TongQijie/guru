@@ -32,14 +32,9 @@ namespace Guru.AspNetCore.Implementations.Api
                 return null;
             }
 
-            var key = string.Join("/", context.RouteData.Select(x => x.ToLower()));
+            var key = string.Join("/", context.RouteData.Subset(0, 2).Select(x => x.ToLower()));
             if (!_ApiContextCaches.ContainsKey(key))
             {
-                if (context.RouteData.Length != 2)
-                {
-                    return null;
-                }
-
                 if (!_ApiServiceInfos.ContainsKey(context.RouteData[0].ToLower()))
                 {
                     return null;
@@ -47,7 +42,9 @@ namespace Guru.AspNetCore.Implementations.Api
 
                 var apiServiceInfo = _ApiServiceInfos[context.RouteData[0].ToLower()];
 
-                var apiMethodInfo = apiServiceInfo.MethodInfos.FirstOrDefault(x => x.MethodName.EqualsIgnoreCase(context.RouteData[1]));
+                var apiMethodInfo = apiServiceInfo.MethodInfos.FirstOrDefault(x => 
+                    (context.RouteData.Length == 1 && x.DefaultMethod) ||
+                    (context.RouteData.Length >= 2 && x.MethodName.EqualsIgnoreCase(context.RouteData[1])));
                 if (apiMethodInfo == null)
                 {
                     return null;
@@ -71,7 +68,11 @@ namespace Guru.AspNetCore.Implementations.Api
             {
                 var apiParameterInfo = cache.MethodInfo.Parameters[i];
 
-                if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName.ToLower()))
+                if (context.RouteData.Length > 2 && i < (context.RouteData.Length - 2))
+                {
+                    parameterValues[i] = context.RouteData[2 + i].ConvertTo(apiParameterInfo.Prototype.ParameterType);
+                }
+                else if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName.ToLower()))
                 {
                     parameterValues[i] = context.InputParameters[apiParameterInfo.ParameterName.ToLower()].Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
                 }
@@ -100,6 +101,8 @@ namespace Guru.AspNetCore.Implementations.Api
                 ApiExecute = cache.ApiExecute,
             };
         }
+
+        #region Initialization
 
         private void Init()
         {
@@ -138,7 +141,7 @@ namespace Guru.AspNetCore.Implementations.Api
                     continue;
                 }
 
-                var apiMethodInfo = new ApiMethodInfo(methodInfo, methodAttribute.MethodName.Alternate(methodInfo.Name));
+                var apiMethodInfo = new ApiMethodInfo(methodInfo, methodAttribute.MethodName.Alternate(methodInfo.Name), methodAttribute.DefaultMethod);
 
                 foreach (var parameterInfo in methodInfo.GetParameters())
                 {
@@ -159,6 +162,8 @@ namespace Guru.AspNetCore.Implementations.Api
                 _ApiServiceInfos.Add(apiServiceInfo.ServiceName.ToLower(), apiServiceInfo);
             }
         }
+
+        #endregion
 
         #region Api Information
 
@@ -185,15 +190,15 @@ namespace Guru.AspNetCore.Implementations.Api
 
             private readonly Type[] _ReturnTypeGenericParameters;
             
-            public ApiMethodInfo(MethodInfo prototype, string methodName)
+            public ApiMethodInfo(MethodInfo prototype, string methodName, bool defaultMethod)
             {
                 Prototype = prototype;
                 MethodName = methodName;
+                DefaultMethod = defaultMethod;
 
                 _IsAsyncMethod = prototype.IsDefined(typeof(AsyncStateMachineAttribute));
                 if (_IsAsyncMethod)
                 {
-                    // async method, get return type: Task or Task<T>
                     if (!prototype.ReturnType.GetTypeInfo().IsGenericType)
                     {
                         _ReturnTypeGenericParameters = new Type[0];
@@ -230,6 +235,8 @@ namespace Guru.AspNetCore.Implementations.Api
             }
 
             public string MethodName { get; set; }
+
+            public bool DefaultMethod { get; set; }
 
             public ApiParameterInfo[] Parameters { get; set; }
 

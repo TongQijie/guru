@@ -1,14 +1,11 @@
 using System;
 using System.Net;
 using System.Linq;
-using System.Text;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
-
-using Microsoft.AspNetCore.WebUtilities;
-
+ 
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
@@ -59,7 +56,7 @@ namespace Guru.Network
         {
             if (queryString != null)
             {
-                uri = QueryHelpers.AddQueryString(uri, queryString);
+                uri = AddQueryString(uri, queryString);
             }
 
             return new DefaultHttpClientResponse(await _Client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead));
@@ -74,7 +71,7 @@ namespace Guru.Network
         {
             if (queryString != null)
             {
-                uri = QueryHelpers.AddQueryString(uri, queryString);
+                uri = AddQueryString(uri, queryString);
             }
 
             return await InternalPostAsync<TFormatter>(uri, body, contentHeaders);
@@ -89,6 +86,22 @@ namespace Guru.Network
             }
 
             return await PostAsync<ITextFormatter>(uri, queryString, body, contentHeaders);
+        }
+
+        private string AddQueryString(string uri, IDictionary<string, string> queryString)
+        {
+            uri = uri.TrimEnd('/', '?');
+
+            if (uri.ContainsIgnoreCase("?"))
+            {
+                uri = uri + "&";
+            }
+            else
+            {
+                uri = uri + "?";
+            }
+
+            return uri + string.Join("&", queryString.Select(x => $"{WebUtility.UrlEncode(x.Key)}={WebUtility.UrlEncode(x.Value)}"));
         }
 
         private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : IFormatter

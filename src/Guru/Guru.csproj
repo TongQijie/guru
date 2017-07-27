@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
     <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.0.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
