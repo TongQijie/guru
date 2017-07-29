@@ -13,8 +13,6 @@ namespace Guru.AspNetCore
 
         public string[] RouteData { get; set; }
 
-        public Dictionary<string, ContextParameter> OutputParameters { get; set; }
-
         public Stream OutputStream { get; set; }
 
         public SetOutputParameterDelegate SetOutputParameter = null;

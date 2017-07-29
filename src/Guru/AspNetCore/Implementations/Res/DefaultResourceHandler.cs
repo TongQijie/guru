@@ -14,26 +14,36 @@ namespace Guru.AspNetCore.Implementations.Res
         {
             if (context.RouteData.Length == 0)
             {
-                // 404
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "404",
+                });
                 return;
             }
 
-            if (context.ApplicationConfiguration.Resource == null)
+            if (context.ApplicationConfiguration.Resource == null ||
+                !context.ApplicationConfiguration.Resource.Directory.IsFolder())
             {
-                // TODO: log error
-                return;
-            }
-
-            if (!context.ApplicationConfiguration.Resource.Directory.IsFolder())
-            {
-                // TODO: log error
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "500",
+                });
                 return;
             }
 
             var resourcePath = context.ApplicationConfiguration.Resource.Directory.FullPath() + "/" + string.Join("/", context.RouteData);
             if (!resourcePath.IsFile())
             {
-                // 404
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "404",
+                });
                 return;
             }
 

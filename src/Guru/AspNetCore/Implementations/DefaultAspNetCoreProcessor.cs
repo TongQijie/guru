@@ -23,7 +23,12 @@ namespace Guru.AspNetCore.Implementations
         {
             if (!context.RouteData.HasLength())
             {
-                // 404
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "400",
+                });
                 return;
             }
 
@@ -47,7 +52,12 @@ namespace Guru.AspNetCore.Implementations
                 return;
             }
 
-            // 404
+            context.SetOutputParameter(new ContextParameter()
+            {
+                Name = "StatusCode",
+                Source = ContextParameterSource.Http,
+                Value = "400",
+            });
             return;
         }
     }

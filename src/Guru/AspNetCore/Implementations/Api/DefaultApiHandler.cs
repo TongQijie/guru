@@ -1,9 +1,11 @@
+using System;
 using System.Threading.Tasks;
+
 using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
-using System;
+using Guru.Logging.Abstractions;
 
 namespace Guru.AspNetCore.Implementations.Api
 {
@@ -14,10 +16,13 @@ namespace Guru.AspNetCore.Implementations.Api
 
         private readonly IApiFormatter _ApiFormatter;
 
-        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater)
+        private readonly ILogger _Logger;
+
+        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater, IFileLogger fileLogger)
         {
             _ApiProvider = apiHandler;
             _ApiFormatter = apiFormater;
+            _Logger = fileLogger;
         }
 
         public async Task ProcessRequest(CallingContext context)
@@ -25,7 +30,12 @@ namespace Guru.AspNetCore.Implementations.Api
             var apiContext = await _ApiProvider.GetApi(context);
             if (apiContext == null)
             {
-                // TODO: log error
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "404",
+                });
                 return;
             }
 
@@ -36,7 +46,13 @@ namespace Guru.AspNetCore.Implementations.Api
             }
             catch(Exception e)
             {
-                // TODO: log error
+                _Logger.LogEvent(nameof(DefaultApiHandler), Severity.Error, "an error occurred when processing api request.", e);
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "500",
+                });
                 return;
             }
 

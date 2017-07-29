@@ -80,9 +80,16 @@ namespace Guru.AspNetCore
             {
                 if (p.Source == ContextParameterSource.Header)
                 {
-                    if (p.Name.EqualsIgnoreCase("Content-Type"))
+                    if (p.Name.EqualsIgnoreCase("Content-Type") && p.Source == ContextParameterSource.Header)
                     {
                         httpContext.Response.ContentType = p.Value;
+                    }
+                    else if (p.Name.EqualsIgnoreCase("StatusCode") && p.Source == ContextParameterSource.Http)
+                    {
+                        if (int.TryParse(p.Value, out var statusCode))
+                        {
+                            httpContext.Response.StatusCode = statusCode;
+                        }
                     }
                     else
                     {
