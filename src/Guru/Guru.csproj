@@ -9,6 +9,7 @@
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <Authors>tongqijie</Authors>
+    <Description>GURU lib for .net core</Description>
   </PropertyGroup>
 
   <ItemGroup>
