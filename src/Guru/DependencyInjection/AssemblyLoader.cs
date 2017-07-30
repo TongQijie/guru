@@ -25,14 +25,7 @@ namespace Guru.DependencyInjection
             if (_Assemblies == null)
             {
                 var assemblyNames = new AssemblyName[0];
-
-                // load from runtime libraries
-                var dependencies = DependencyContext.Default.RuntimeLibraries;
-                foreach (var library in dependencies.Where(x => Filter(x.Name)))
-                {
-                    assemblyNames = assemblyNames.Append(new AssemblyName(library.Name));
-                }
-
+                
                 // load from base directory
                 var directoryInfo = new DirectoryInfo("./".FullPath());
                 foreach (var fileInfo in directoryInfo.GetFiles("*.dll", SearchOption.TopDirectoryOnly).Where(x => Filter(x.Name)))
@@ -43,6 +36,13 @@ namespace Guru.DependencyInjection
                     {
                         assemblyNames = assemblyNames.Append(assemblyName);
                     }
+                }
+
+                // load from runtime libraries
+                var dependencies = DependencyContext.Default.RuntimeLibraries;
+                foreach (var library in dependencies.Where(x => Filter(x.Name)))
+                {
+                    assemblyNames = assemblyNames.Append(new AssemblyName(library.Name));
                 }
 
                 foreach (var assemblyName in assemblyNames)
