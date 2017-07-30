@@ -16,52 +16,67 @@ namespace Guru.AspNetCore
                 ApplicationConfiguration = ContainerManager.Default.Resolve<IApplicationConfiguration>(),
             };
 
-            context.InputParameters.Add("host", new ContextParameter()
+            if (httpContext.Request.Host != null)
             {
-                Name = "host",
-                Source = ContextParameterSource.Http,
-                Value = httpContext.Request.Host.Value,
-            });
-            context.InputParameters.Add("requestpath", new ContextParameter()
-            {
-                Name = "requestpath",
-                Source = ContextParameterSource.Http,
-                Value = httpContext.Request.Path.Value,
-            });
-            context.InputParameters.Add("httpmethod", new ContextParameter()
-            {
-                Name = "httpmethod",
-                Source = ContextParameterSource.Http,
-                Value = httpContext.Request.Method.ToUpper(),
-            });
-
-            foreach (var kv in httpContext.Request.Query)
-            {
-                if (!context.InputParameters.ContainsKey(kv.Key.ToLower()) && kv.Value.Count > 0)
+                context.InputParameters.Add("host", new ContextParameter()
                 {
-                    context.InputParameters.Add(kv.Key.ToLower(), new ContextParameter()
+                    Name = "host",
+                    Source = ContextParameterSource.Http,
+                    Value = httpContext.Request.Host.Value,
+                });
+            }
+            if (httpContext.Request.Path != null)
+            {
+                context.InputParameters.Add("requestpath", new ContextParameter()
+                {
+                    Name = "requestpath",
+                    Source = ContextParameterSource.Http,
+                    Value = httpContext.Request.Path.Value,
+                });
+            }
+            if (!string.IsNullOrEmpty(httpContext.Request.Method))
+            {
+                context.InputParameters.Add("httpmethod", new ContextParameter()
+                {
+                    Name = "httpmethod",
+                    Source = ContextParameterSource.Http,
+                    Value = httpContext.Request.Method.ToUpper(),
+                });
+            }
+
+            if (httpContext.Request.Query != null)
+            {
+                foreach (var kv in httpContext.Request.Query)
+                {
+                    if (!context.InputParameters.ContainsKey(kv.Key.ToLower()) && kv.Value.Count > 0)
                     {
-                        Name = kv.Key.ToLower(),
-                        Source = ContextParameterSource.QueryString,
-                        Value = kv.Value[0],
-                    });
+                        context.InputParameters.Add(kv.Key.ToLower(), new ContextParameter()
+                        {
+                            Name = kv.Key.ToLower(),
+                            Source = ContextParameterSource.QueryString,
+                            Value = kv.Value[0],
+                        });
+                    }
                 }
             }
 
-            foreach (var header in httpContext.Request.Headers)
+            if (httpContext.Request.Headers != null)
             {
-                if (!context.InputParameters.ContainsKey(header.Key.ToLower()))
+                foreach (var header in httpContext.Request.Headers)
                 {
-                    context.InputParameters.Add(header.Key.ToLower(), new ContextParameter()
+                    if (!context.InputParameters.ContainsKey(header.Key.ToLower()))
                     {
-                        Name = header.Key.ToLower(),
-                        Source = ContextParameterSource.Header,
-                        Value = string.Join(";", header.Value),
-                    });
+                        context.InputParameters.Add(header.Key.ToLower(), new ContextParameter()
+                        {
+                            Name = header.Key.ToLower(),
+                            Source = ContextParameterSource.Header,
+                            Value = string.Join(";", header.Value),
+                        });
+                    }
                 }
             }
 
-            if (httpContext.Request.HasFormContentType)
+            if (httpContext.Request.HasFormContentType && httpContext.Request.Form != null)
             {
                 foreach (var kv in httpContext.Request.Form)
                 {
