@@ -45,8 +45,6 @@ namespace Guru.AspNetCore
 
         public async Task Invoke(HttpContext context)
         {
-            Console.WriteLine($"request enter: {context.Request.Host}/{context.Request.Path}");
-
             if (_Component == null)
             {
                 Console.WriteLine("AspNetCoreComponent is not initialized.");

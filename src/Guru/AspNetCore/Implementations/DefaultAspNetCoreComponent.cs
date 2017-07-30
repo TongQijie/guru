@@ -25,8 +25,6 @@ namespace Guru.AspNetCore.Implementations
 
         public async Task Process(CallingContext context)
         {
-            System.Console.WriteLine($"Component enter");
-
             LogRequest(context);
             _Router.GetRouteData(context);
             await _Processor.Process(context);
