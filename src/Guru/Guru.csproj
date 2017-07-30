@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>1.0.22</VersionPrefix>
+    <VersionPrefix>1.0.23</VersionPrefix>
     <TargetFramework>netstandard1.6</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>Guru</AssemblyName>
@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
     <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.0.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.0.0" />

@@ -4,8 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 
-using Microsoft.Extensions.DependencyModel;
-
 using Guru.ExtensionMethod;
 
 namespace Guru.DependencyInjection
@@ -36,13 +34,6 @@ namespace Guru.DependencyInjection
                     {
                         assemblyNames = assemblyNames.Append(assemblyName);
                     }
-                }
-
-                // load from runtime libraries
-                var dependencies = DependencyContext.Default.RuntimeLibraries;
-                foreach (var library in dependencies.Where(x => Filter(x.Name)))
-                {
-                    assemblyNames = assemblyNames.Append(new AssemblyName(library.Name));
                 }
 
                 foreach (var assemblyName in assemblyNames)
