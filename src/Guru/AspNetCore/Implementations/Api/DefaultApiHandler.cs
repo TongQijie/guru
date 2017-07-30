@@ -27,9 +27,13 @@ namespace Guru.AspNetCore.Implementations.Api
 
         public async Task ProcessRequest(CallingContext context)
         {
+            System.Console.WriteLine($"Handler enter");
+
             var apiContext = await _ApiProvider.GetApi(context);
             if (apiContext == null)
             {
+                System.Console.WriteLine($"apiContext is empty.");
+
                 context.SetOutputParameter(new ContextParameter()
                 {
                     Name = "StatusCode",

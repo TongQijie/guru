@@ -21,6 +21,8 @@ namespace Guru.AspNetCore.Implementations
 
         public async Task Process(CallingContext context)
         {
+            System.Console.WriteLine($"Processor enter");
+
             if (!context.RouteData.HasLength())
             {
                 context.SetOutputParameter(new ContextParameter()
