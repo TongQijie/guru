@@ -45,7 +45,19 @@ namespace Guru.AspNetCore
 
         public async Task Invoke(HttpContext context)
         {
-            await _Component?.Process(CallingContextBuilder.Build(context));
+            if (_Component == null)
+            {
+                Console.WriteLine("AspNetCoreComponent is not initialized.");
+            }
+
+            try
+            {
+                await _Component?.Process(CallingContextBuilder.Build(context));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"fatal error: {e.Message}");
+            }
         }
     }
 }
