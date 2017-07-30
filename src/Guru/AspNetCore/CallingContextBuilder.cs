@@ -16,6 +16,12 @@ namespace Guru.AspNetCore
                 ApplicationConfiguration = ContainerManager.Default.Resolve<IApplicationConfiguration>(),
             };
 
+            context.InputParameters.Add("host", new ContextParameter()
+            {
+                Name = "host",
+                Source = ContextParameterSource.Http,
+                Value = httpContext.Request.Host.Value,
+            });
             context.InputParameters.Add("requestpath", new ContextParameter()
             {
                 Name = "requestpath",
