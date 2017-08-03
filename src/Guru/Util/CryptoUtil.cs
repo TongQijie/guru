@@ -5,7 +5,7 @@ namespace Guru.Util
 {
     public static class CryptoUtil
     {
-        public static string Md5Crypto(string plainText)
+        public static string Md5(string plainText)
         {
             using (var algorithm = MD5.Create())
             {
@@ -13,7 +13,7 @@ namespace Guru.Util
             }
         }
 
-        public static string Sha1Crypto(string plainText)
+        public static string Sha1(string plainText)
         {
             using (var algorithm = SHA1.Create())
             {
