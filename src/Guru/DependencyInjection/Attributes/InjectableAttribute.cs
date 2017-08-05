@@ -12,7 +12,7 @@ namespace Guru.DependencyInjection.Attributes
         public InjectableAttribute(Type abstraction, Lifetime lifetime)
         {
             Abstraction = abstraction;
-            Lifetime = Lifetime;
+            Lifetime = lifetime;
         }
 
         public Type Abstraction { get; set; }

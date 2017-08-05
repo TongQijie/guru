@@ -13,7 +13,7 @@ namespace AspNetCoreAppII
     [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
     public class Startup : IConsoleExecutable
     {
-        public void Run(string[] args)
+        public int Run(string[] args)
         {
             new WebHostBuilder()
                 .UseKestrel()
@@ -27,6 +27,8 @@ namespace AspNetCoreAppII
                 })
                 .Build()
                 .Run();
+
+            return 0;
         }
     }
 }

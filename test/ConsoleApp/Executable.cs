@@ -15,50 +15,8 @@ namespace ConsoleApp
     [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
     public class Executable : IConsoleExecutable
     {
-        public void Run(string[] args)
+        public int Run(string[] args)
         {
-            var parameters = new Dictionary<string, string>()
-            {
-                { "Format", "JSON" },
-                { "Version", "2015-01-09" },
-                { "Timestamp", DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") },
-                { "SignatureMethod", "HMAC-SHA1" },
-                { "SignatureVersion", "1.0" },
-                { "SignatureNonce", Guid.NewGuid().ToString() },
-                { "AccessKeyId", "LTAIfovT8kFSRmVk" },
-                { "RegionId", "cn-hangzhou" },
-            };
-
-            //parameters.Add("Action", "AddDomainRecord");
-            //parameters.Add("DomainName", "hephap.com");
-            //parameters.Add("RR", "test");
-            //parameters.Add("Type", "A");
-            //parameters.Add("Value", "101.86.236.162");
-
-            //parameters.Add("Action", "DeleteDomainRecord");
-            //parameters.Add("RecordId", "3481792745052160");
-
-            //parameters.Add("Action", "DescribeDomainRecords");
-            //parameters.Add("DomainName", "hephap.com");
-
-            //parameters.Add("Action", "UpdateDomainRecord");
-            //parameters.Add("RecordId", "3481327461193728");
-            //parameters.Add("RR", "blog");
-            //parameters.Add("Type", "A");
-            //parameters.Add("Value", "101.86.236.100");
-
-            var sortedParameters = new SortedDictionary<string, string>(parameters, StringComparer.Ordinal);
-
-            var queries = string.Join("&", sortedParameters.Select(x => string.Format("{0}={1}", PercentEncode(x.Key), PercentEncode(x.Value))));
-
-            var stringToSign = "GET&" + PercentEncode("/") + "&" + PercentEncode(queries);
-
-            var signature = SignString(stringToSign, "VJ1EsKwugLsuWPWSrPNnajEYy9ls07&");
-
-            parameters.Add("Signature", signature);
-
-            var url = "http://alidns.aliyuncs.com/?" + string.Join("&", parameters.Select(x => string.Format("{0}={1}", WebUtil.UrlEncode(x.Key), WebUtil.UrlEncode(x.Value))));
-
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -82,6 +40,8 @@ namespace ConsoleApp
 
             stopwatch.Stop();
             //Console.WriteLine($"test done. cost: {stopwatch.Elapsed.TotalMilliseconds}ms.");
+
+            return 0;
         }
 
         public static string PercentEncode(string value)

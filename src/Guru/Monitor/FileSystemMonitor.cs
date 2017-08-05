@@ -23,7 +23,7 @@ namespace Guru.Monitor
             var p = path.FullPath();
             if (!p.IsFolder())
             {
-                throw new Exception($"monitor folder '{p}' does not exist.");
+                throw new Exception($"monitor folder '{path}' does not exist.");
             }
 
             var key = p.ToLower();

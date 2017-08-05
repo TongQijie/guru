@@ -2,6 +2,6 @@ namespace Guru.Executable.Abstractions
 {
     public interface IConsoleExecutable
     {
-        void Run(string[] args);
+        int Run(string[] args);
     }
 }

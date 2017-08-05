@@ -2,6 +2,7 @@ using System;
 using Guru.DependencyInjection;
 using Guru.Executable.Abstractions;
 using Guru.Logging.Abstractions;
+using System.Threading;
 
 namespace Guru.Executable
 {
@@ -16,22 +17,43 @@ namespace Guru.Executable
             _Logger = ContainerManager.Default.Resolve<IFileLogger>();
         }
 
-        private readonly ILogger _Logger = null; 
+        private readonly ILogger _Logger = null;
 
-        public void Run(string[] args)
+        private bool _InstanceAlive = false;
+
+        public void Run(string[] args, bool loop = false)
         {
-            _Logger.LogEvent("ConsoleInstance", Severity.Information, "console app started.");
+            _Logger.LogEvent("ConsoleInstance", Severity.Information, "Application started.");
 
             try
             {
-                ContainerManager.Default.Resolve<IConsoleExecutable>().Run(args);
+                if (ContainerManager.Default.Resolve<IConsoleExecutable>().Run(args) == 0)
+                {
+                    if (loop)
+                    {
+                        _InstanceAlive = true;
+
+                        Console.CancelKeyPress += (sender, eventArgs) =>
+                        {
+                            _InstanceAlive = false;
+                            eventArgs.Cancel = true;
+                        };
+
+                        Console.WriteLine("Application started. Press Ctrl+C to shut down.");
+                        while (_InstanceAlive)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
-                _Logger.LogEvent("ConsoleInstance", Severity.Information, "console app occurred an unhandled exception.", e);
+                _Logger.LogEvent("ConsoleInstance", Severity.Information, "Application occurred an unhandled exception.", e);
+                Console.WriteLine($"Application aborted. {e.Message}");
             }
 
-            _Logger.LogEvent("ConsoleInstance", Severity.Information, "console app stopped.");
+            _Logger.LogEvent("ConsoleInstance", Severity.Information, "Application stopped.");
 
             _Logger.Dispose();
         }

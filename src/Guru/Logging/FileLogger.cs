@@ -107,7 +107,7 @@ namespace Guru.Logging
         {
             _IsAlive = false;
 
-            Console.WriteLine("logger is disposing...");
+            Console.WriteLine("Logger is disposing...");
 
             while (_IsThreadRunning)
             {
@@ -122,7 +122,7 @@ namespace Guru.Logging
                 }
             }
 
-            Console.WriteLine("logger is disposed.");
+            Console.WriteLine("Logger disposed.");
         }
 
         class Item
