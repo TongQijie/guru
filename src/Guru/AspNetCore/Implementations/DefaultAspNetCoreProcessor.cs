@@ -34,21 +34,25 @@ namespace Guru.AspNetCore.Implementations
 
             var applicationConfiguration = context.ApplicationConfiguration;
 
-            if (applicationConfiguration.Resource != null && 
-                applicationConfiguration.Resource.Prefix.EqualsIgnoreCase(context.RouteData[0]))
-            {
-                // Resource Request
-                context.RouteData = context.RouteData.Subset(1);
-                await _ResourceHandler.ProcessRequest(context);
-                return;
-            }
-            
             if (applicationConfiguration.Api != null &&
                 applicationConfiguration.Api.Prefix.EqualsIgnoreCase(context.RouteData[0]))
             {
                 // Api Request
                 context.RouteData = context.RouteData.Subset(1);
                 await _ApiHandler.ProcessRequest(context);
+                return;
+            }
+
+            if (applicationConfiguration.Resource != null)
+            {
+                // Resource Request
+                if (applicationConfiguration.Resource.Prefix.HasValue() &&
+                    applicationConfiguration.Resource.Prefix.EqualsIgnoreCase(context.RouteData[0]))
+                {
+                    context.RouteData = context.RouteData.Subset(1);
+                }
+
+                await _ResourceHandler.ProcessRequest(context);
                 return;
             }
 
