@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Reflection;
 using System.Collections;
 using System.Text.RegularExpressions;
 
@@ -91,12 +92,19 @@ namespace Guru.DependencyInjection.Implementations
                                 {
                                     var collection = Activator.CreateInstance(decorator.ImplementationType) as IList;
 
+                                    var collectionType = decorator.ImplementationType;
+                                    Type elementType = null;
+                                    while ((elementType = collectionType.GetTypeInfo().GetGenericArguments().FirstOrDefault()) == null)
+                                    {
+                                        collectionType = collectionType.GetTypeInfo().BaseType;
+                                    }
+
                                     var folder = decorator.Path.Folder();
                                     foreach (var fileInfo in new DirectoryInfo(folder).GetFiles())
                                     {
                                         if (Regex.IsMatch(fileInfo.Name, _PathExpression))
                                         {
-                                            var elements = _Formatter.ReadObject(decorator.ImplementationType, fileInfo.FullName) as IList;
+                                            var elements = _Formatter.ReadObject(collectionType, fileInfo.FullName) as IList;
                                             foreach (var element in elements)
                                             {
                                                 collection.Add(element);
