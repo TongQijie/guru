@@ -28,7 +28,9 @@ namespace Guru.Jobs
 
         public bool Enabled { get; private set; }
 
-        public bool IsRunning { get; private set; }
+        private volatile bool _IsRunning = false;
+
+        public bool IsRunning { get { return _IsRunning; } }
 
         public Schedule Schedule { get; private set; }
 
@@ -69,9 +71,9 @@ namespace Guru.Jobs
 
         public async Task RunAsync(string[] args)
         {
-            if (!IsRunning)
+            if (!_IsRunning)
             {
-                IsRunning = true;
+                _IsRunning = true;
 
                 PrevExecTime = DateTime.Now;
 
@@ -91,7 +93,7 @@ namespace Guru.Jobs
                 _Logger.LogEvent("Job", Severity.Information, 
                     $"job '{Name}' done and cost {(DateTime.Now - (DateTime)PrevExecTime).TotalMilliseconds} milliseconds.");
 
-                IsRunning = false;
+                _IsRunning = false;
             }
         }
 
@@ -183,13 +185,13 @@ namespace Guru.Jobs
         private bool SafeStop()
         {
             var retry = 1;
-            while (IsRunning && retry < 10)
+            while (_IsRunning && retry < 10)
             {
                 Thread.Sleep(1000);
                 retry++;
             }
 
-            return !IsRunning;
+            return !_IsRunning;
         }
     }
 }
