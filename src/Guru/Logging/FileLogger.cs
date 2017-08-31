@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 using Guru.ExtensionMethod;
@@ -23,8 +24,6 @@ namespace Guru.Logging
         public string Folder { get; set; }
 
         public int Interval { get; set; }
-
-        private bool HasItems => _Items.Count > 0;
 
         public void LogEvent(string category, Severity severity, params object[] parameters)
         {
@@ -60,12 +59,15 @@ namespace Guru.Logging
 
                             while (_IsAlive)
                             {
-                                while (HasItems)
+                                var items = new List<Item>();
+                                while (_Items.TryDequeue(out var item))
                                 {
-                                    if (_Items.TryDequeue(out var item))
-                                    {
-                                        Flush(item);
-                                    }
+                                    items.Add(item);
+                                }
+
+                                if (items.Count > 0)
+                                {
+                                    Flush(items);
                                 }
 
                                 Thread.Sleep(Interval);
@@ -82,7 +84,7 @@ namespace Guru.Logging
             }
         }
 
-        private void Flush(Item item)
+        private void Flush(IEnumerable<Item> items)
         {
             try
             {
@@ -93,7 +95,10 @@ namespace Guru.Logging
                 {
                     using (var sw = new StreamWriter(outputStream, Encoding.UTF8))
                     {
-                        sw.WriteLine(item.ToString());
+                        foreach (var item in items)
+                        {
+                            sw.WriteLine(item.ToString());
+                        }
                     }
                 }
             }
@@ -114,12 +119,15 @@ namespace Guru.Logging
                 Thread.Sleep(500);
             }
 
-            while (HasItems)
+            var items = new List<Item>();
+            while (_Items.TryDequeue(out var item))
             {
-                if (_Items.TryDequeue(out var item))
-                {
-                    Flush(item);
-                }
+                items.Add(item);
+            }
+
+            if (items.Count > 0)
+            {
+                Flush(items);
             }
 
             Console.WriteLine("Logger disposed.");

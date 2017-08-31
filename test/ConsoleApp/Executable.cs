@@ -9,15 +9,31 @@ using System.Text;
 using System.Globalization;
 using System.Security.Cryptography;
 using Guru.Util;
+using System.Threading;
+using Guru.Logging.Abstractions;
+using System.Threading.Tasks;
 
 namespace ConsoleApp
 {
     [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
     public class Executable : IConsoleExecutable
     {
+        private readonly ILogger _Logger;
+
+        public Executable(IFileLogger fileLogger)
+        {
+            _Logger = fileLogger;
+        }
+
         public int Run(string[] args)
         {
-            new DependencyInjection.TestRunner().Run();
+            _Logger.LogEvent("test", Severity.Information, "first line");
+
+            RunAsync().GetAwaiter().GetResult();
+
+            _Logger.LogEvent("test", Severity.Information, "third line");
+
+            //new DependencyInjection.TestRunner().Run();
 
             //new Formatter.TestRunner().Run();
 
@@ -36,6 +52,13 @@ namespace ConsoleApp
             //new Markdown.TestRunner().Run();
             
             return 0;
+        }
+
+        private async Task RunAsync()
+        {
+            await Task.Delay(200);
+
+            _Logger.LogEvent("test", Severity.Information, "second line");
         }
     }
 }
