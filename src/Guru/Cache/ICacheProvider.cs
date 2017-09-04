@@ -6,10 +6,10 @@ namespace Guru.Cache
     {
          bool Set<T>(string key, T value);
 
-         bool Set<T>(string key, T value, DateTime expireTime);
+         bool Set<T>(string key, T value, TimeSpan expiry);
 
          T Get<T>(string key);
 
-         T GetOrSet<T>(string key, SetDelegate<T> setDelegate);
+         T GetOrSet<T>(string key, SetDelegate setDelegate);
     }
 }

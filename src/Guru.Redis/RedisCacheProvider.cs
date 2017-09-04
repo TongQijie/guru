@@ -1,7 +1,126 @@
+using System;
+using System.Text;
+
+using Guru.Cache;
+using Guru.DependencyInjection.Attributes;
+using Guru.DependencyInjection;
+using Guru.Redis.Configuration;
+using Guru.Logging.Abstractions;
+using Guru.ExtensionMethod;
+using Guru.Formatter.Abstractions;
+
+using StackExchange.Redis;
+
 namespace Guru.Redis
 {
-    public class RedisCacheProvider
+    [Injectable(typeof(IRedisCacheProvider), Lifetime.Singleton)]
+    public class RedisCacheProvider : IRedisCacheProvider
     {
-        
+        private readonly IRedisConfiguration _RedisConfiguration;
+
+        private readonly ILogger _Logger;
+
+        private readonly IFormatter _Formatter;
+
+        private ConnectionMultiplexer _ConnectionMultiplexer;
+
+        private IDatabase _Databse;
+
+        public RedisCacheProvider(IRedisConfiguration redisConfiguration, IFileLogger fileLogger, IJsonFormatter jsonFormatter)
+        {
+            _RedisConfiguration = redisConfiguration;
+            _Logger = fileLogger;
+            _Formatter = jsonFormatter;
+        }
+
+        private IDatabase GetDatabase()
+        {
+            if (!_RedisConfiguration.Connection.HasValue())
+            {
+                _Logger.LogEvent("RedisCacheProvider", Severity.Error, "failed to connect to redis server.", "connection string is empty.");
+                return null;
+            }
+
+            if (_ConnectionMultiplexer == null || !_ConnectionMultiplexer.IsConnected)
+            {
+                try
+                {
+                    _ConnectionMultiplexer = ConnectionMultiplexer.Connect(_RedisConfiguration.Connection);
+                }
+                catch (Exception e)
+                {
+                    _Logger.LogEvent("RedisCacheProvider", Severity.Error, "failed to connect to redis server.", _RedisConfiguration.Connection, e);
+                    return null;
+                }
+
+                _Databse = null;
+            }
+
+            if (_Databse == null)
+            {
+                _Databse = _ConnectionMultiplexer.GetDatabase(_RedisConfiguration.DbIndex);
+            }
+
+            return _Databse;
+        }
+
+        public T Get<T>(string key)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return default(T);
+            }
+
+            if (!db.KeyExists(key))
+            {
+                return default(T);
+            }
+
+            return _Formatter.ReadObject<T>(db.StringGet(key), Encoding.UTF8);
+        }
+
+        public T GetOrSet<T>(string key, SetDelegate setDelegate)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return default(T);
+            }
+
+            if (!db.KeyExists(key))
+            {
+                setDelegate(this);
+            }
+
+            if (!db.KeyExists(key))
+            {
+                return default(T);
+            }
+
+            return _Formatter.ReadObject<T>(db.StringGet(key), Encoding.UTF8);
+        }
+
+        public bool Set<T>(string key, T value)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return false;
+            }
+
+            return db.StringSet(key, _Formatter.WriteString(value, Encoding.UTF8));
+        }
+
+        public bool Set<T>(string key, T value, TimeSpan expiry)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return false;
+            }
+
+            return db.StringSet(key, _Formatter.WriteString(value, Encoding.UTF8), expiry);
+        }
     }
 }
