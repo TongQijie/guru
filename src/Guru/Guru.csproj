@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>1.0.29</VersionPrefix>
+    <Version>1.0.29</Version>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <DebugType>portable</DebugType>
-    <AssemblyName>Guru</AssemblyName>
     <PackageId>Guru</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <Authors>tongqijie</Authors>
-    <Description>GURU lib for .net core</Description>
+    <Description>GURU for .net core</Description>
   </PropertyGroup>
 
   <ItemGroup>

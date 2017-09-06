@@ -65,7 +65,7 @@ namespace ClassLib.Weather
                     }
                 }
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 // TODO: log
             }

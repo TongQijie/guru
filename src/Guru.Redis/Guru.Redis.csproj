@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
+    <Version>1.0.29</Version>
+    <Authors>tongqijie</Authors>
+    <Description>Redis with GURU</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Guru/Guru.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
+    <PackageReference Include="Guru" Version="1.0.29" />
   </ItemGroup>
 </Project>
