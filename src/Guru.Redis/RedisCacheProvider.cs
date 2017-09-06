@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 using Guru.Cache;
 using Guru.DependencyInjection.Attributes;
@@ -121,6 +122,65 @@ namespace Guru.Redis
             }
 
             return db.StringSet(key, _Formatter.WriteString(value, Encoding.UTF8), expiry);
+        }
+
+        public async Task<T> GetAsync<T>(string key)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return default(T);
+            }
+
+            if (!db.KeyExists(key))
+            {
+                return default(T);
+            }
+
+            return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key), Encoding.UTF8);
+        }
+
+        public async Task<T> GetOrSetAsync<T>(string key, SetAsyncDelegate setAsyncDelegate)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return default(T);
+            }
+
+            if (!db.KeyExists(key))
+            {
+                await setAsyncDelegate(this);
+            }
+
+            if (!db.KeyExists(key))
+            {
+                return default(T);
+            }
+
+            return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key), Encoding.UTF8);
+        }
+
+        public async Task<bool> SetAsync<T>(string key, T value)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return false;
+            }
+
+            return await db.StringSetAsync(key, await _Formatter.WriteStringAsync(value, Encoding.UTF8));
+        }
+
+        public async Task<bool> SetAsync<T>(string key, T value, TimeSpan expiry)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return false;
+            }
+
+            return await db.StringSetAsync(key, await _Formatter.WriteStringAsync(value, Encoding.UTF8), expiry);
         }
     }
 }
