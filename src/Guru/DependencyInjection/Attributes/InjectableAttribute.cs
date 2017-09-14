@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Guru.DependencyInjection.Abstractions;
-
 namespace Guru.DependencyInjection.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
