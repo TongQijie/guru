@@ -8,5 +8,10 @@
         {
             return System.Text.Encoding.UTF8.GetString(Value);
         }
+
+        public string ValueString
+        {
+            get { return System.Text.Encoding.UTF8.GetString(Value); }
+        }
     }
 }

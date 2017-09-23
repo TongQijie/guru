@@ -17,6 +17,11 @@ namespace Guru.Formatter.Xml
             return System.Text.Encoding.UTF8.GetString(Key);
         }
 
+        public string KeyString
+        {
+            get { return System.Text.Encoding.UTF8.GetString(Key); }
+        }
+
         private int _LastByte = -1;
 
         internal async Task<bool> FillAsync(IReaderStream stream)
