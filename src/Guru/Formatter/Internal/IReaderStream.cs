@@ -62,6 +62,10 @@ namespace Guru.Formatter.Internal
 
         Task<int> SeekBytesUntilVisiableCharAsync();
 
+        int SeekBytesUntilText();
+
+        Task<int> SeekBytesUntilTextAsync();
+
         byte[] ReadBytesUntilMeeting(Predicate<byte> predicate);
 
         Task<byte[]> ReadBytesUntilMeetingAsync(Predicate<byte> predicate);

@@ -29,7 +29,7 @@ namespace Guru.Formatter.Xml
             int b = _LastByte;
             if (b == -1)
             {
-                b = await stream.SeekBytesUntilVisiableCharAsync();
+                b = await stream.SeekBytesUntilTextAsync();
             }
 
             if (b == -1)

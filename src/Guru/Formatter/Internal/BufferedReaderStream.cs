@@ -211,6 +211,54 @@ namespace Guru.Formatter.Internal
             }
         }
 
+        public int SeekBytesUntilText()
+        {
+            while (_Index < _Count)
+            {
+                if ((_InternalBuffer[_Index] > 0x20 && _InternalBuffer[_Index] <= 0x7E) || (_InternalBuffer[_Index] > 0x7E))
+                {
+                    return _InternalBuffer[_Index++];
+                }
+                else
+                {
+                    _Index++;
+                }
+            }
+
+            if (Fill())
+            {
+                return SeekBytesUntilText();
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        public async Task<int> SeekBytesUntilTextAsync()
+        {
+            while (_Index < _Count)
+            {
+                if ((_InternalBuffer[_Index] > 0x20 && _InternalBuffer[_Index] <= 0x7E) || (_InternalBuffer[_Index] > 0x7E))
+                {
+                    return _InternalBuffer[_Index++];
+                }
+                else
+                {
+                    _Index++;
+                }
+            }
+
+            if (await FillAsync())
+            {
+                return await SeekBytesUntilTextAsync();
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
         public byte[] ReadBytesUntilMeeting(Predicate<byte> predicate)
         {
             return InternalReadBytesUntilMeeting(new byte[0], predicate);
