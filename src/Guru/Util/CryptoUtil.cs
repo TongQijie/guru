@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Guru.Util
 {
-    public static class CryptoUtil
+    internal static class CryptoUtil
     {
         public static string Md5(string plainText)
         {
@@ -26,7 +26,7 @@ namespace Guru.Util
             var stringBuilder = new StringBuilder();
             foreach (var b in bytes)
             {
-                stringBuilder.Append("x2");
+                stringBuilder.Append(b.ToString("x2"));
             }
             return stringBuilder.ToString();
         }

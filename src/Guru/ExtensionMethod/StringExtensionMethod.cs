@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using Guru.Util;
 
 namespace Guru.ExtensionMethod
 {
@@ -182,6 +183,16 @@ namespace Guru.ExtensionMethod
             {
                 return alternate;
             }
+        }
+
+        public static string Md5(this string stringValue, bool lowercase = true)
+        {
+            return lowercase ? CryptoUtil.Md5(stringValue) : CryptoUtil.Md5(stringValue).ToUpper();
+        }
+
+        public static string Sha1(this string stringValue, bool lowercase = true)
+        {
+            return lowercase ? CryptoUtil.Sha1(stringValue) : CryptoUtil.Sha1(stringValue).ToUpper();
         }
     }
 }
