@@ -72,9 +72,9 @@ namespace Guru.AspNetCore.Implementations.Api
                 {
                     parameterValues[i] = context.RouteData[2 + i].ConvertTo(apiParameterInfo.Prototype.ParameterType);
                 }
-                else if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName.ToLower()))
+                else if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName))
                 {
-                    parameterValues[i] = context.InputParameters[apiParameterInfo.ParameterName.ToLower()].Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
+                    parameterValues[i] = context.InputParameters.Get(apiParameterInfo.ParameterName).Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace Guru.AspNetCore.Implementations.Api
                         IFormatter formatter = _ApiFormatter.GetFormatter("json");
                         if (context.InputParameters.ContainsKey("formatter"))
                         {
-                            formatter = _ApiFormatter.GetFormatter(context.InputParameters["formatter"].Value.ToLower());
+                            formatter = _ApiFormatter.GetFormatter(context.InputParameters.Get("formatter").Value.ToLower());
                         }
 
                         parameterValues[i] = await formatter.ReadObjectAsync(apiParameterInfo.Prototype.ParameterType, context.InputStream);

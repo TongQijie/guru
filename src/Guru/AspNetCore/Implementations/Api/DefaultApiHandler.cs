@@ -59,7 +59,7 @@ namespace Guru.AspNetCore.Implementations.Api
             var contentType = "application/json";
             if (context.InputParameters.ContainsKey("formatter"))
             {
-                var formatter = context.InputParameters["formatter"].Value;
+                var formatter = context.InputParameters.Get("formatter").Value;
                 if (formatter.ContainsIgnoreCase("json"))
                 {
                     contentType = "application/json";

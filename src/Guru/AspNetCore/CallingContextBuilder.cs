@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Guru.DependencyInjection;
 using Guru.AspNetCore.Abstractions;
 using Guru.ExtensionMethod;
+using Guru.Foundation;
 
 namespace Guru.AspNetCore
 {
@@ -12,33 +13,33 @@ namespace Guru.AspNetCore
         {
             var context = new CallingContext()
             {
-                InputParameters = new Dictionary<string, ContextParameter>(),
+                InputParameters = new DictionaryIgnoreCase<ContextParameter>(),
                 ApplicationConfiguration = ContainerManager.Default.Resolve<IApplicationConfiguration>(),
             };
 
             if (httpContext.Request.Host != null)
             {
-                context.InputParameters.Add("host", new ContextParameter()
+                context.InputParameters.AddOrUpdate("RequestHost", new ContextParameter()
                 {
-                    Name = "host",
+                    Name = "RequestHost",
                     Source = ContextParameterSource.Http,
                     Value = httpContext.Request.Host.Value,
                 });
             }
             if (httpContext.Request.Path != null)
             {
-                context.InputParameters.Add("requestpath", new ContextParameter()
+                context.InputParameters.AddOrUpdate("RequestPath", new ContextParameter()
                 {
-                    Name = "requestpath",
+                    Name = "RequestPath",
                     Source = ContextParameterSource.Http,
                     Value = httpContext.Request.Path.Value,
                 });
             }
             if (!string.IsNullOrEmpty(httpContext.Request.Method))
             {
-                context.InputParameters.Add("httpmethod", new ContextParameter()
+                context.InputParameters.AddOrUpdate("HttpMethod", new ContextParameter()
                 {
-                    Name = "httpmethod",
+                    Name = "HttpMethod",
                     Source = ContextParameterSource.Http,
                     Value = httpContext.Request.Method.ToUpper(),
                 });
@@ -48,11 +49,11 @@ namespace Guru.AspNetCore
             {
                 foreach (var kv in httpContext.Request.Query)
                 {
-                    if (!context.InputParameters.ContainsKey(kv.Key.ToLower()) && kv.Value.Count > 0)
+                    if (!context.InputParameters.ContainsKey(kv.Key) && kv.Value.Count > 0)
                     {
-                        context.InputParameters.Add(kv.Key.ToLower(), new ContextParameter()
+                        context.InputParameters.AddOrUpdate(kv.Key, new ContextParameter()
                         {
-                            Name = kv.Key.ToLower(),
+                            Name = kv.Key,
                             Source = ContextParameterSource.QueryString,
                             Value = kv.Value[0],
                         });
@@ -64,11 +65,11 @@ namespace Guru.AspNetCore
             {
                 foreach (var header in httpContext.Request.Headers)
                 {
-                    if (!context.InputParameters.ContainsKey(header.Key.ToLower()))
+                    if (!context.InputParameters.ContainsKey(header.Key))
                     {
-                        context.InputParameters.Add(header.Key.ToLower(), new ContextParameter()
+                        context.InputParameters.AddOrUpdate(header.Key, new ContextParameter()
                         {
-                            Name = header.Key.ToLower(),
+                            Name = header.Key,
                             Source = ContextParameterSource.Header,
                             Value = string.Join(";", header.Value),
                         });
@@ -80,11 +81,11 @@ namespace Guru.AspNetCore
             {
                 foreach (var kv in httpContext.Request.Form)
                 {
-                    if (!context.InputParameters.ContainsKey(kv.Key.ToLower()) && kv.Value.Count > 0)
+                    if (!context.InputParameters.ContainsKey(kv.Key) && kv.Value.Count > 0)
                     {
-                        context.InputParameters.Add(kv.Key.ToLower(), new ContextParameter()
+                        context.InputParameters.AddOrUpdate(kv.Key, new ContextParameter()
                         {
-                            Name = kv.Key.ToLower(),
+                            Name = kv.Key,
                             Source = ContextParameterSource.Form,
                             Value = kv.Value[0],
                         });

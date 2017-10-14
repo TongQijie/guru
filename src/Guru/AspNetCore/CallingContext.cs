@@ -2,12 +2,13 @@ using System.Collections.Generic;
 using System.IO;
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Delegates;
+using Guru.Foundation;
 
 namespace Guru.AspNetCore
 {
     public class CallingContext
     {
-        public Dictionary<string, ContextParameter> InputParameters { get; set; }
+        public DictionaryIgnoreCase<ContextParameter> InputParameters { get; set; }
 
         public Stream InputStream { get; set; }
 

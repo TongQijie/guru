@@ -33,7 +33,7 @@ namespace Guru.AspNetCore.Implementations
         private void LogRequest(CallingContext context)
         {
             var stringBuilder = new StringBuilder();
-            foreach (var parameter in context.InputParameters)
+            foreach (var parameter in context.InputParameters.GetDictionary())
             {
                 stringBuilder.AppendLine($"[{parameter.Value.Source.ToString()}] {parameter.Key}={parameter.Value.Value}");
             }
