@@ -189,12 +189,15 @@ namespace Guru.AspNetCore.Implementations.Api
             private readonly bool _IsAsyncMethod;
 
             private readonly Type[] _ReturnTypeGenericParameters;
+
+            private readonly HandlingBeforeAttribute HandlingBefore;
             
             public ApiMethodInfo(MethodInfo prototype, string methodName, bool defaultMethod)
             {
                 Prototype = prototype;
                 MethodName = methodName;
                 DefaultMethod = defaultMethod;
+                HandlingBefore = prototype.GetCustomAttribute<HandlingBeforeAttribute>();
 
                 _IsAsyncMethod = prototype.IsDefined(typeof(AsyncStateMachineAttribute));
                 if (_IsAsyncMethod)
@@ -212,6 +215,20 @@ namespace Guru.AspNetCore.Implementations.Api
 
             public object Invoke(object instance, params object[] parameters)
             {
+                if (HandlingBefore != null)
+                {
+                    var result = HandlingBefore.Handle(parameters);
+                    if (result == null)
+                    {
+                        return null;
+                    }
+
+                    if (!result.Succeeded)
+                    {
+                        return result.ResultObject;
+                    }
+                }
+
                 if (!_IsAsyncMethod)
                 {
                     return Prototype.Invoke(instance, parameters);

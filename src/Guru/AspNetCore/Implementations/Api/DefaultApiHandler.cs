@@ -81,17 +81,31 @@ namespace Guru.AspNetCore.Implementations.Api
                 Value = contentType,
             });
             
-            if (contentType == "application/json")
+            try
             {
-                await _ApiFormatter.GetFormatter("json").WriteObjectAsync(executionResult, context.OutputStream);
+                if (contentType == "application/json")
+                {
+                    await _ApiFormatter.GetFormatter("json").WriteObjectAsync(executionResult, context.OutputStream);
+                }
+                else if (contentType == "application/xml")
+                {
+                    await _ApiFormatter.GetFormatter("xml").WriteObjectAsync(executionResult, context.OutputStream);
+                }
+                else
+                {
+                    await _ApiFormatter.GetFormatter("text").WriteObjectAsync(executionResult, context.OutputStream);
+                }
             }
-            else if (contentType == "application/xml")
+            catch (Exception e)
             {
-                await _ApiFormatter.GetFormatter("xml").WriteObjectAsync(executionResult, context.OutputStream);
-            }
-            else
-            {
-                await _ApiFormatter.GetFormatter("text").WriteObjectAsync(executionResult, context.OutputStream);
+                _Logger.LogEvent(nameof(DefaultApiHandler), Severity.Error, "an error occurred when processing api request.", e);
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "500",
+                });
+                return;
             }
         }
     }

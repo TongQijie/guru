@@ -25,5 +25,12 @@ namespace ClassLib
         {
             return (await WeatherHttpClient.Instance.Request<DailyRecords>(WeatherHttpClient.InterfaceEnum.Daily, regionCode)).DFData;
         }
+
+        [DefaultHandlingBefore]
+        [ApiMethod("get")]
+        public string  GetString(string a, string b)
+        {
+            return a + b;
+        }
     }
 }
