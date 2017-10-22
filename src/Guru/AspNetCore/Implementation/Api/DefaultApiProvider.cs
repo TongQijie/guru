@@ -12,7 +12,7 @@ using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
 using Guru.Formatter.Abstractions;
 
-namespace Guru.AspNetCore.Implementations.Api
+namespace Guru.AspNetCore.Implementation.Api
 {
     [Injectable(typeof(IApiProvider), Lifetime.Singleton)]
     public class DefaultApiProvider : IApiProvider
@@ -190,14 +190,17 @@ namespace Guru.AspNetCore.Implementations.Api
 
             private readonly Type[] _ReturnTypeGenericParameters;
 
-            private readonly HandlingBeforeAttribute HandlingBefore;
+            private readonly HandlingBeforeAttribute _HandlingBefore;
+
+            private readonly HandlingAfterAttribute _HandlingAfter;
             
             public ApiMethodInfo(MethodInfo prototype, string methodName, bool defaultMethod)
             {
                 Prototype = prototype;
                 MethodName = methodName;
                 DefaultMethod = defaultMethod;
-                HandlingBefore = prototype.GetCustomAttribute<HandlingBeforeAttribute>();
+                _HandlingBefore = prototype.GetCustomAttribute<HandlingBeforeAttribute>();
+                _HandlingAfter = prototype.GetCustomAttribute<HandlingAfterAttribute>();
 
                 _IsAsyncMethod = prototype.IsDefined(typeof(AsyncStateMachineAttribute));
                 if (_IsAsyncMethod)
@@ -215,28 +218,47 @@ namespace Guru.AspNetCore.Implementations.Api
 
             public object Invoke(object instance, params object[] parameters)
             {
-                if (HandlingBefore != null)
+                var id = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
+
+                if (_HandlingBefore != null)
                 {
-                    var result = HandlingBefore.Handle(parameters);
-                    if (result == null)
+                    var rst = _HandlingBefore.Handle(id, parameters);
+                    if (rst == null)
                     {
                         return null;
                     }
 
-                    if (!result.Succeeded)
+                    if (!rst.Succeeded)
                     {
-                        return result.ResultObject;
+                        return rst.ResultObject;
                     }
                 }
 
+                object result;
                 if (!_IsAsyncMethod)
                 {
-                    return Prototype.Invoke(instance, parameters);
+                    result = Prototype.Invoke(instance, parameters);
                 }
                 else
                 {
-                    return _HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters).Invoke(this, new object[] { Prototype.Invoke(instance, parameters) });
+                    result = _HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters).Invoke(this, new object[] { Prototype.Invoke(instance, parameters) });
                 }
+
+                if (_HandlingAfter != null)
+                {
+                    var rst = _HandlingAfter.Handle(id, result);
+                    if (rst == null)
+                    {
+                        return null;
+                    }
+
+                    if (!rst.Succeeded)
+                    {
+                        return rst.ResultObject;
+                    }
+                }
+
+                return result;
             }
 
             static ApiMethodInfo()

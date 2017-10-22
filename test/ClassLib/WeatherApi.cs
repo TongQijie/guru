@@ -27,8 +27,15 @@ namespace ClassLib
         }
 
         [DefaultHandlingBefore]
-        [ApiMethod("get")]
+        [DefaultHandlingAfter]
+        [ApiMethod("getstring")]
         public string  GetString(string a, string b)
+        {
+            return a + b;
+        }
+
+        [ApiMethod("getint")]
+        public int GetInt(int a, int b)
         {
             return a + b;
         }

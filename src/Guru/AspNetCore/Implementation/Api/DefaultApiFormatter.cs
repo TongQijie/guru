@@ -3,7 +3,7 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.Formatter.Abstractions;
 
-namespace Guru.AspNetCore.Implementations.Api
+namespace Guru.AspNetCore.Implementation.Api
 {
     [Injectable(typeof(IApiFormatter), Lifetime.Singleton)]
     public class DefaultApiFormatter : IApiFormatter

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Delegates;

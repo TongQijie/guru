@@ -13,19 +13,23 @@ using Guru.DependencyInjection.Attributes;
 namespace Guru.Logging
 {
     [Injectable(typeof(IFileLogger), Lifetime.Singleton)]
-    internal class FileLogger : IFileLogger
+    public class FileLogger : AbstractLogger, IFileLogger
     {
-        public FileLogger()
+        public FileLogger(ILoggerKeeper loggerKeeper) : base(loggerKeeper)
         {
             Folder = "./log".FullPath();
             Interval = 3000;
         }
 
+        private readonly ILoggerKeeper _LoggerKeeper;
+
         public string Folder { get; set; }
 
         public int Interval { get; set; }
 
-        public void LogEvent(string category, Severity severity, params object[] parameters)
+        private string LoggerName => $"LogThread({Folder.Name()})";
+
+        public override void LogEvent(string category, Severity severity, params object[] parameters)
         {
             _Items.Enqueue(new Item(category, severity, parameters));
 
@@ -77,7 +81,7 @@ namespace Guru.Logging
                         })
                         {
                             IsBackground = true,
-                            Name = "FileLogger",
+                            Name = LoggerName,
                         }.Start();
                     }
                 }
@@ -90,7 +94,7 @@ namespace Guru.Logging
             {
                 Folder.EnsureFolder();
 
-                var fileName = string.Format("{0}.log", DateTime.Now.ToString("yyyy-MM-dd"));
+                var fileName = string.Format("{0}.log", DateTime.Now.ToString("yyyyMMdd"));
                 using (var outputStream = new FileStream(Path.Combine(Folder, fileName), FileMode.Append, FileAccess.Write))
                 {
                     using (var sw = new StreamWriter(outputStream, Encoding.UTF8))
@@ -108,11 +112,11 @@ namespace Guru.Logging
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             _IsAlive = false;
 
-            Console.WriteLine("Logger is disposing...");
+            Console.WriteLine($"{LoggerName} is disposing...");
 
             while (_IsThreadRunning)
             {
@@ -130,7 +134,9 @@ namespace Guru.Logging
                 Flush(items);
             }
 
-            Console.WriteLine("Logger disposed.");
+            Console.WriteLine($"{LoggerName} disposed.");
+
+            base.Dispose();
         }
 
         class Item

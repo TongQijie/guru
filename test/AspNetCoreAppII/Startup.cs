@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Guru.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Guru.AspNetCore.Delegates;
 
 namespace AspNetCoreAppII
 {
@@ -15,6 +16,14 @@ namespace AspNetCoreAppII
     {
         public int Run(string[] args)
         {
+            StartupDelegate startupDelegate = delegate (AspNetCoreInstance instance)
+            {
+                if (instance.Component != null)
+                {
+                    instance.Component.NeedLog = true;
+                }
+            };
+
             new WebHostBuilder()
                 .UseKestrel()
                 .UseIISIntegration()
@@ -23,7 +32,7 @@ namespace AspNetCoreAppII
                 .Configure(x =>
                 {
                     HttpContextUtil.Configure(x.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
-                    x.UseMiddleware<AspNetCoreInstance>();
+                    x.UseMiddleware<AspNetCoreInstance>("AspNetCoreAppII", startupDelegate);
                 })
                 .Build()
                 .Run();

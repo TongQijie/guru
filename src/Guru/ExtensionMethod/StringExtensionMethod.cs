@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using Guru.Util;
+using Guru.Utils;
 
 namespace Guru.ExtensionMethod
 {
@@ -187,12 +187,12 @@ namespace Guru.ExtensionMethod
 
         public static string Md5(this string stringValue, bool lowercase = true)
         {
-            return lowercase ? CryptoUtil.Md5(stringValue) : CryptoUtil.Md5(stringValue).ToUpper();
+            return lowercase ? CryptoUtils.Md5(stringValue) : CryptoUtils.Md5(stringValue).ToUpper();
         }
 
         public static string Sha1(this string stringValue, bool lowercase = true)
         {
-            return lowercase ? CryptoUtil.Sha1(stringValue) : CryptoUtil.Sha1(stringValue).ToUpper();
+            return lowercase ? CryptoUtils.Sha1(stringValue) : CryptoUtils.Sha1(stringValue).ToUpper();
         }
     }
 }

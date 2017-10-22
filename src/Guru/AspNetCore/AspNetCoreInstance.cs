@@ -20,23 +20,25 @@ namespace Guru.AspNetCore
 
             try
             {
-                startup?.Invoke(this);
-
                 if (_Component == null)
                 {
                     _Component = ContainerManager.Default.Resolve<IAspNetCoreComponent>();
                 }
 
-                Console.WriteLine($"instance({name ?? string.Empty}) startup succeeded.");
+                startup?.Invoke(this);
+
+                Console.WriteLine($"AspNetCore Instance '{name ?? string.Empty}' startup succeeded.");
             }
             catch (Exception e)
             {
                 Console.WriteLine(new Logging.ExceptionWrapper(e).ToString());
-                Console.WriteLine($"instance({name ?? string.Empty}) startup failed.");
+                Console.WriteLine($"AspNetCore Instance '{name ?? string.Empty}' startup failed.");
             }
         }
 
         private IAspNetCoreComponent _Component = null;
+
+        public IAspNetCoreComponent Component => _Component;
 
         public void RegisterComponent(IAspNetCoreComponent component)
         {

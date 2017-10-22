@@ -11,7 +11,7 @@ using Guru.Monitor.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
-namespace Guru.DependencyInjection.Implementations
+namespace Guru.DependencyInjection.Implementation
 {
     internal class StaticFileImplementationResolver : IImplementationResolver
     {

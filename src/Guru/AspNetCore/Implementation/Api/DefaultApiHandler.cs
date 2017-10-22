@@ -6,8 +6,9 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
 using Guru.Logging.Abstractions;
+using System.Reflection;
 
-namespace Guru.AspNetCore.Implementations.Api
+namespace Guru.AspNetCore.Implementation.Api
 {
     [Injectable(typeof(IApiHandler), Lifetime.Singleton)]
     public class DefaultApiHandler : IApiHandler
@@ -72,6 +73,11 @@ namespace Guru.AspNetCore.Implementations.Api
                 {
                     contentType = "plain/text";
                 }
+            }
+            else if (executionResult.GetType() == typeof(string) || 
+                executionResult.GetType().GetTypeInfo().IsValueType)
+            {
+                contentType = "plain/text";
             }
 
             context.SetOutputParameter(new ContextParameter()

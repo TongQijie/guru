@@ -2,8 +2,9 @@ using System;
 
 namespace Guru.AspNetCore.Attributes
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public abstract class HandlingBeforeAttribute : Attribute
     {
-        public abstract HandlingBeforeResult Handle(params object[] args);
+        public abstract HandlingResult Handle(string id, params object[] args);
     }
 }

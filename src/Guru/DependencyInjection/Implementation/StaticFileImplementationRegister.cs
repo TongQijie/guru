@@ -4,7 +4,7 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection.Attributes;
 using Guru.DependencyInjection.Abstractions;
 
-namespace Guru.DependencyInjection.Implementations
+namespace Guru.DependencyInjection.Implementation
 {
     internal class StaticFileImplementationRegister : IImplementationRegister
     {

@@ -1,21 +1,19 @@
 using System;
+using System.Linq;
 using Guru.AspNetCore.Attributes;
 
 namespace ClassLib
 {
     public class DefaultHandlingBeforeAttribute : HandlingBeforeAttribute
     {
-        public override HandlingBeforeResult Handle(params object[] args)
+        public override HandlingResult Handle(string id, params object[] args)
         {
             if (args != null)
             {
-                foreach (var arg in args)
-                {
-                    Console.WriteLine(arg.ToString());
-                }
+                Console.WriteLine($"id:{id}{Environment.NewLine}{string.Join(",", args.Select(x => x.ToString()))}");
             }
             
-            return HandlingBeforeResult.Fail("error");
+            return HandlingResult.Succeed();
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Guru.Util
+namespace Guru.Utils
 {
-    internal static class CryptoUtil
+    internal static class CryptoUtils
     {
         public static string Md5(string plainText)
         {

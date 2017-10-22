@@ -1,22 +1,22 @@
 namespace Guru.AspNetCore.Attributes
 {
-    public class HandlingBeforeResult
+    public class HandlingResult
     {
         public bool Succeeded { get; private set; }
 
         public object ResultObject { get; private set; }
 
-        public static HandlingBeforeResult Succeed()
+        public static HandlingResult Succeed()
         {
-            return new HandlingBeforeResult()
+            return new HandlingResult()
             {
                 Succeeded = true,
             };
         }
 
-        public static HandlingBeforeResult Fail(object obj)
+        public static HandlingResult Fail(object obj)
         {
-            return new HandlingBeforeResult()
+            return new HandlingResult()
             {
                 Succeeded = false,
                 ResultObject = obj,

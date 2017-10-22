@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Text;
 
-namespace Guru.Util
+namespace Guru.Utils
 {
-    public static class WebUtil
+    public static class WebUtils
     {
         #region UrlEncode implementation
 

@@ -1,7 +1,7 @@
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Delegates;
 
-namespace Guru.AspNetCore.Implementations.Api
+namespace Guru.AspNetCore.Implementation.Api
 {
     public class DefaultApiContext : IApiContext
     {

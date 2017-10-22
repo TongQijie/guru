@@ -8,7 +8,6 @@ using Guru.Jobs.Abstractions;
 using Guru.Jobs.Configuration;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
-using Guru.DependencyInjection.Abstractions;
 using Guru.DependencyInjection.Attributes;
 
 namespace Guru.Jobs

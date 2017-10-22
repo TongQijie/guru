@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Guru.Logging.Abstractions
+﻿namespace Guru.Logging.Abstractions
 {
     public interface IFileLogger : ILogger
     {

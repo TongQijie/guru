@@ -4,10 +4,10 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
 
-namespace Guru.AspNetCore.Implementations
+namespace Guru.AspNetCore.Implementation
 {
     [Injectable(typeof(IAspNetCoreProcessor), Lifetime.Singleton)]
-    public class DefaultAspNetCoreProcessor : IAspNetCoreProcessor
+    internal class DefaultAspNetCoreProcessor : IAspNetCoreProcessor
     {
         private readonly IResourceHandler _ResourceHandler;
 

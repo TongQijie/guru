@@ -5,7 +5,7 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
 
-namespace Guru.AspNetCore.Implementations.Res
+namespace Guru.AspNetCore.Implementation.Resource
 {
     [Injectable(typeof(IResourceHandler), Lifetime.Singleton)]
     public class DefaultResourceHandler : IResourceHandler

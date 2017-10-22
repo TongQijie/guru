@@ -15,15 +15,18 @@ namespace Guru.Executable
         private ConsoleInstance()
         {
             _Logger = ContainerManager.Default.Resolve<IFileLogger>();
+            _LoggerKeeper = ContainerManager.Default.Resolve<ILoggerKeeper>();
         }
 
-        private readonly ILogger _Logger = null;
+        private readonly ILogger _Logger;
+
+        private readonly ILoggerKeeper _LoggerKeeper;
 
         private bool _InstanceAlive = false;
 
         public void Run(string[] args, bool loop = false)
         {
-            _Logger.LogEvent("ConsoleInstance", Severity.Information, "Application started.");
+            _Logger.LogEvent(nameof(ConsoleInstance), Severity.Information, "Application started.");
 
             try
             {
@@ -49,13 +52,13 @@ namespace Guru.Executable
             }
             catch (Exception e)
             {
-                _Logger.LogEvent("ConsoleInstance", Severity.Information, "Application occurred an unhandled exception.", e);
+                _Logger.LogEvent(nameof(ConsoleInstance), Severity.Information, "Application occurred an unhandled exception.", e);
                 Console.WriteLine($"Application aborted. {e.Message}");
             }
 
-            _Logger.LogEvent("ConsoleInstance", Severity.Information, "Application stopped.");
+            _Logger.LogEvent(nameof(ConsoleInstance), Severity.Information, "Application stopped.");
 
-            _Logger.Dispose();
+            _LoggerKeeper.DisposeAll();
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Globalization;
 using System.Security.Cryptography;
-using Guru.Util;
+using Guru.Utils;
 using System.Threading;
 using Guru.Logging.Abstractions;
 using System.Threading.Tasks;

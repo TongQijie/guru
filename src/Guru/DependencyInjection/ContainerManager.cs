@@ -1,5 +1,5 @@
 ﻿using Guru.DependencyInjection.Abstractions;
-using Guru.DependencyInjection.Implementations;
+using Guru.DependencyInjection.Implementation;
 
 namespace Guru.DependencyInjection
 {

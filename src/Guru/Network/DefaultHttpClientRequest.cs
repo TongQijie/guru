@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
  
-using Guru.Util;
+using Guru.Utils;
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
@@ -82,7 +82,7 @@ namespace Guru.Network
             var body = string.Empty;
             if (formData != null)
             {
-                 body = string.Join("&", formData.Select(x => $"{WebUtil.UrlEncode(x.Key)}={WebUtil.UrlEncode(x.Value)}"));
+                 body = string.Join("&", formData.Select(x => $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}"));
             }
 
             return await PostAsync<ITextFormatter>(uri, queryString, body, contentHeaders);
@@ -101,7 +101,7 @@ namespace Guru.Network
                 uri = uri + "?";
             }
 
-            return uri + string.Join("&", queryString.Select(x => $"{WebUtil.UrlEncode(x.Key)}={WebUtil.UrlEncode(x.Value)}"));
+            return uri + string.Join("&", queryString.Select(x => $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}"));
         }
 
         private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : IFormatter

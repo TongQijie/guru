@@ -5,10 +5,10 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
 
-namespace Guru.AspNetCore.Implementations
+namespace Guru.AspNetCore.Implementation
 {
     [Injectable(typeof(IAspNetCoreRouter), Lifetime.Singleton)]
-    public class DefaultAspNetCoreRouter : IAspNetCoreRouter
+    internal class DefaultAspNetCoreRouter : IAspNetCoreRouter
     {
         public void GetRouteData(CallingContext context)
         {
