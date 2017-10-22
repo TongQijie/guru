@@ -14,7 +14,11 @@ namespace Guru.DependencyInjection.Implementation
 
         public DynamicProxyImplementationRegister()
         {
-            _DynamicProxyGenerator = ContainerManager.Default.Resolve<IDynamicProxyGenerator>();
+            try
+            {
+                _DynamicProxyGenerator = ContainerManager.Default.Resolve<IDynamicProxyGenerator>();
+            }
+            catch (Exception) { }
         }
 
         public void Register(IContainerInstance instance)
@@ -36,7 +40,7 @@ namespace Guru.DependencyInjection.Implementation
                         Type proxyType;
                         try
                         {
-                            proxyType = _DynamicProxyGenerator.CreateProxyType(type);
+                            proxyType = _DynamicProxyGenerator?.CreateProxyType(type);
                         }
                         catch (Exception)
                         {
@@ -44,7 +48,12 @@ namespace Guru.DependencyInjection.Implementation
                             throw;
                         }
 
-                        instance.Add(attribute.Abstraction, new ImplementationResolver(new ImplementationDecorator(proxyType, attribute.Lifetime, attribute.Priority)));
+                        if (proxyType != null)
+                        {
+                            instance.Add(attribute.Abstraction, 
+                                new ImplementationResolver(
+                                    new ImplementationDecorator(proxyType, attribute.Lifetime, attribute.Priority)));
+                        }
                     }
                 }
             }
