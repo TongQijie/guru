@@ -21,8 +21,6 @@ namespace Guru.Logging
             Interval = 3000;
         }
 
-        private readonly ILoggerKeeper _LoggerKeeper;
-
         public string Folder { get; set; }
 
         public int Interval { get; set; }
