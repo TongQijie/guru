@@ -16,14 +16,6 @@ namespace AspNetCoreAppII
     {
         public int Run(string[] args)
         {
-            StartupDelegate startupDelegate = delegate (AspNetCoreInstance instance)
-            {
-                if (instance.Component != null)
-                {
-                    instance.Component.NeedLog = true;
-                }
-            };
-
             new WebHostBuilder()
                 .UseKestrel()
                 .UseIISIntegration()
@@ -32,7 +24,7 @@ namespace AspNetCoreAppII
                 .Configure(x =>
                 {
                     HttpContextUtil.Configure(x.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
-                    x.UseMiddleware<AspNetCoreInstance>("AspNetCoreAppII", startupDelegate);
+                    x.UseMiddleware<AspNetCoreInstance>("AspNetCoreAppII");
                 })
                 .Build()
                 .Run();

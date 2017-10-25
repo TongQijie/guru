@@ -11,5 +11,8 @@ namespace Guru.AspNetCore.Configuration
 
         [JsonProperty("prefix")]
         public string Prefix { get; set; }
+
+        [JsonProperty("enableLog")]
+        public bool EnableLog { get; set; }
     }
 }

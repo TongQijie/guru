@@ -17,7 +17,7 @@ namespace Guru.AspNetCore.Implementation
                 return;
             }
 
-            var router = ContainerManager.Default.Resolve<IApplicationConfiguration>().Router;
+            var router = context.ApplicationConfiguration?.Router;
 
             var requestPath = context.InputParameters.Get("RequestPath").Value.Trim('/');
             if (requestPath == null || !requestPath.HasValue())

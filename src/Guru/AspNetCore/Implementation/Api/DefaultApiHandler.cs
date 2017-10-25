@@ -1,12 +1,12 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
-using Guru.AspNetCore.Abstractions;
-using Guru.DependencyInjection;
-using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
+using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
-using System.Reflection;
+using Guru.AspNetCore.Abstractions;
+using Guru.DependencyInjection.Attributes;
 
 namespace Guru.AspNetCore.Implementation.Api
 {
@@ -17,17 +17,22 @@ namespace Guru.AspNetCore.Implementation.Api
 
         private readonly IApiFormatter _ApiFormatter;
 
-        private readonly ILogger _Logger;
+        private readonly ILogger _DefaultLogger;
 
-        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater, IFileLogger fileLogger)
+        private readonly IRequestLogger _RequestLogger;
+
+        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater, IFileLogger defaultLogger, IRequestLogger requestLogger)
         {
             _ApiProvider = apiHandler;
             _ApiFormatter = apiFormater;
-            _Logger = fileLogger;
+            _DefaultLogger = defaultLogger;
+            _RequestLogger = requestLogger;
         }
 
         public async Task ProcessRequest(CallingContext context)
         {
+            var startTime = DateTime.Now;
+
             var apiContext = await _ApiProvider.GetApi(context);
             if (apiContext == null)
             {
@@ -41,54 +46,40 @@ namespace Guru.AspNetCore.Implementation.Api
             }
 
             object executionResult = null;
+            var contentType = "application/json";
             try
             {
                 executionResult = apiContext.ApiExecute(apiContext.Parameters);
-            }
-            catch(Exception e)
-            {
-                _Logger.LogEvent(nameof(DefaultApiHandler), Severity.Error, "an error occurred when processing api request.", e);
-                context.SetOutputParameter(new ContextParameter()
-                {
-                    Name = "StatusCode",
-                    Source = ContextParameterSource.Http,
-                    Value = "500",
-                });
-                return;
-            }
 
-            var contentType = "application/json";
-            if (context.InputParameters.ContainsKey("formatter"))
-            {
-                var formatter = context.InputParameters.Get("formatter").Value;
-                if (formatter.ContainsIgnoreCase("json"))
+                if (context.InputParameters.ContainsKey("formatter"))
                 {
-                    contentType = "application/json";
+                    var formatter = context.InputParameters.Get("formatter").Value;
+                    if (formatter.ContainsIgnoreCase("json"))
+                    {
+                        contentType = "application/json";
+                    }
+                    else if (formatter.ContainsIgnoreCase("xml"))
+                    {
+                        contentType = "application/xml";
+                    }
+                    else if (formatter.ContainsIgnoreCase("text"))
+                    {
+                        contentType = "plain/text";
+                    }
                 }
-                else if (formatter.ContainsIgnoreCase("xml"))
-                {
-                    contentType = "application/xml";
-                }
-                else if (formatter.ContainsIgnoreCase("text"))
+                else if (executionResult.GetType() == typeof(string) || 
+                    executionResult.GetType().GetTypeInfo().IsValueType)
                 {
                     contentType = "plain/text";
                 }
-            }
-            else if (executionResult.GetType() == typeof(string) || 
-                executionResult.GetType().GetTypeInfo().IsValueType)
-            {
-                contentType = "plain/text";
-            }
 
-            context.SetOutputParameter(new ContextParameter()
-            {
-                Name = "Content-Type",
-                Source = ContextParameterSource.Header,
-                Value = contentType,
-            });
-            
-            try
-            {
+                context.SetOutputParameter(new ContextParameter()
+                {
+                    Name = "Content-Type",
+                    Source = ContextParameterSource.Header,
+                    Value = contentType,
+                });
+
                 if (contentType == "application/json")
                 {
                     await _ApiFormatter.GetFormatter("json").WriteObjectAsync(executionResult, context.OutputStream);
@@ -102,9 +93,9 @@ namespace Guru.AspNetCore.Implementation.Api
                     await _ApiFormatter.GetFormatter("text").WriteObjectAsync(executionResult, context.OutputStream);
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                _Logger.LogEvent(nameof(DefaultApiHandler), Severity.Error, "an error occurred when processing api request.", e);
+                _DefaultLogger.LogEvent(nameof(DefaultApiHandler), Severity.Error, "an error occurred when processing api request.", e);
                 context.SetOutputParameter(new ContextParameter()
                 {
                     Name = "StatusCode",
@@ -112,6 +103,13 @@ namespace Guru.AspNetCore.Implementation.Api
                     Value = "500",
                 });
                 return;
+            }
+            finally
+            {
+                if (context.ApplicationConfiguration?.Api?.EnableLog == true)
+                {
+                    _RequestLogger.LogEvent(nameof(DefaultApiHandler), context, startTime, DateTime.Now, apiContext.Parameters, executionResult);
+                }
             }
         }
     }

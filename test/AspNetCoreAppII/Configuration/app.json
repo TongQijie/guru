@@ -6,5 +6,8 @@
     "mineTypes": {
       "html": "text/html"
     }
+  },
+  "api": {
+    "enableLog": true
   }
 }
