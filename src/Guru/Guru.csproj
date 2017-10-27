@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.0.33</Version>
+    <Version>1.0.34</Version>
     <TargetFramework>netstandard1.6</TargetFramework>
     <PackageId>Guru</PackageId>
     <Authors>tongqijie</Authors>
