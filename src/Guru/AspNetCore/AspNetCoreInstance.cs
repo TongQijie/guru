@@ -58,7 +58,7 @@ namespace Guru.AspNetCore
             }
             catch (Exception e)
             {
-                Console.WriteLine($"fatal error: {e.Message}");
+                Console.WriteLine($"fatal error: {e.Message}{Environment.NewLine}{e.StackTrace}");
             }
         }
     }
