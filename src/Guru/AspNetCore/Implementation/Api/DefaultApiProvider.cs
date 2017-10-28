@@ -63,7 +63,12 @@ namespace Guru.AspNetCore.Implementation.Api
             ApiContextCache cache = null;
             _ApiContextCaches.TryGetValue(key, out cache);
 
-            var parameterValues = new object[cache.MethodInfo.Parameters.Length];
+            if (cache == null || cache.MethodInfo == null)
+            {
+                return null;
+            }
+            
+            var parameterValues = new object[cache.MethodInfo.Parameters?.Length ?? 0];
             for (int i = 0; i < parameterValues.Length; i++)
             {
                 var apiParameterInfo = cache.MethodInfo.Parameters[i];
