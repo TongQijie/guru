@@ -27,12 +27,6 @@ namespace ConsoleApp
 
         public int Run(string[] args)
         {
-            _Logger.LogEvent("test", Severity.Information, "first line");
-
-            RunAsync().GetAwaiter().GetResult();
-
-            _Logger.LogEvent("test", Severity.Information, "third line");
-
             //new DependencyInjection.TestRunner().Run();
 
             //new Formatter.TestRunner().Run();
@@ -43,7 +37,7 @@ namespace ConsoleApp
 
             // new EntityFramework.TestRunner().Run();
 
-            // new Cache.TestRunner().Run();
+            new Cache.TestRunner().Run();
 
             // new Mq.TestRunner().Run();
 
@@ -52,13 +46,6 @@ namespace ConsoleApp
             //new Markdown.TestRunner().Run();
             
             return 0;
-        }
-
-        private async Task RunAsync()
-        {
-            await Task.Delay(200);
-
-            _Logger.LogEvent("test", Severity.Information, "second line");
         }
     }
 }
