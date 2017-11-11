@@ -1,4 +1,5 @@
 ﻿{
+  "appId": "AspNetCoreAppII",
   "router": {
     "default": "res/index.html"
   },

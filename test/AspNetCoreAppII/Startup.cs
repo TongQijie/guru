@@ -23,8 +23,8 @@ namespace AspNetCoreAppII
                 .ConfigureServices(x => x.AddSingleton<IHttpContextAccessor, HttpContextAccessor>())
                 .Configure(x =>
                 {
-                    HttpContextUtil.Configure(x.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
-                    x.UseMiddleware<AspNetCoreInstance>("AspNetCoreAppII");
+                    HttpContextUtils.Configure(x.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
+                    x.UseMiddleware<AspNetCoreAppInstance>();
                 })
                 .Build()
                 .Run();

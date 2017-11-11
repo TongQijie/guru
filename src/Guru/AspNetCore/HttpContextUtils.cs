@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Guru.AspNetCore
 {
-    public static class HttpContextUtil
+    public static class HttpContextUtils
     {
         private static IHttpContextAccessor _HttpContextAccessor;
 

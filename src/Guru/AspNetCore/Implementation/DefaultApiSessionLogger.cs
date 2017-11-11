@@ -11,15 +11,15 @@ using System;
 
 namespace Guru.AspNetCore.Implementation
 {
-    [Injectable(typeof(IRequestLogger), Lifetime.Singleton)]
-    internal class DefaultRequestLogger : FileLogger, IRequestLogger
+    [Injectable(typeof(IApiSessionLogger), Lifetime.Singleton)]
+    internal class DefaultApiSessionLogger : FileLogger, IApiSessionLogger
     {
         private readonly IFormatter _Formatter;
 
-        public DefaultRequestLogger(ILoggerKeeper loggerKeeper, IJsonFormatter formatter)
+        public DefaultApiSessionLogger(ILoggerKeeper loggerKeeper, IJsonFormatter formatter)
             : base(loggerKeeper)
         {
-            Folder = "./requests".FullPath();
+            Folder = "./ApiSessionLog".FullPath();
             Interval = 5000;
             _Formatter = formatter;
         }

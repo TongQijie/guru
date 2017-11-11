@@ -6,13 +6,13 @@ using System.Threading;
 
 namespace Guru.Executable
 {
-    public class ConsoleInstance
+    public class ConsoleAppInstance
     {
-        private static ConsoleInstance _Default = null;
+        private static ConsoleAppInstance _Default = null;
 
-        public static ConsoleInstance Default { get { return _Default ?? (_Default = new ConsoleInstance()); } }
+        public static ConsoleAppInstance Default { get { return _Default ?? (_Default = new ConsoleAppInstance()); } }
 
-        private ConsoleInstance()
+        private ConsoleAppInstance()
         {
             _Logger = ContainerManager.Default.Resolve<IFileLogger>();
             _LoggerKeeper = ContainerManager.Default.Resolve<ILoggerKeeper>();
@@ -26,7 +26,7 @@ namespace Guru.Executable
 
         public void Run(string[] args, bool loop = false)
         {
-            _Logger.LogEvent(nameof(ConsoleInstance), Severity.Information, "Application started.");
+            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application started.");
 
             try
             {
@@ -52,11 +52,11 @@ namespace Guru.Executable
             }
             catch (Exception e)
             {
-                _Logger.LogEvent(nameof(ConsoleInstance), Severity.Information, "Application occurred an unhandled exception.", e);
+                _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application occurred an unhandled exception.", e);
                 Console.WriteLine($"Application aborted. {e.Message}");
             }
 
-            _Logger.LogEvent(nameof(ConsoleInstance), Severity.Information, "Application stopped.");
+            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application stopped.");
 
             _LoggerKeeper.DisposeAll();
         }

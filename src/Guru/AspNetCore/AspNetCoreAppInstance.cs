@@ -4,22 +4,28 @@ using Microsoft.AspNetCore.Http;
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Delegates;
 using Guru.DependencyInjection;
+using Guru.ExtensionMethod;
 
 namespace Guru.AspNetCore
 {
-    public class AspNetCoreInstance
+    public class AspNetCoreAppInstance
     {
         private readonly RequestDelegate _Next;
 
         private readonly string _Name;
 
-        public AspNetCoreInstance(RequestDelegate next, string name = null, StartupDelegate startup = null)
+        public AspNetCoreAppInstance(RequestDelegate next, StartupDelegate startup = null)
         {
             _Next = next;
-            _Name = name;
 
             try
             {
+                var config = ContainerManager.Default.Resolve<IApplicationConfiguration>();
+                if (config.AppId.HasValue())
+                {
+                    _Name = config.AppId;
+                }
+
                 if (_Component == null)
                 {
                     _Component = ContainerManager.Default.Resolve<IAspNetCoreComponent>();
@@ -27,12 +33,12 @@ namespace Guru.AspNetCore
 
                 startup?.Invoke(this);
 
-                Console.WriteLine($"AspNetCore Instance '{name ?? string.Empty}' startup succeeded.");
+                Console.WriteLine($"AspNetCore App Instance '{_Name ?? string.Empty}' startup succeeded.");
             }
             catch (Exception e)
             {
                 Console.WriteLine(new Logging.ExceptionWrapper(e).ToString());
-                Console.WriteLine($"AspNetCore Instance '{name ?? string.Empty}' startup failed.");
+                Console.WriteLine($"AspNetCore App Instance '{_Name ?? string.Empty}' startup failed.");
             }
         }
 

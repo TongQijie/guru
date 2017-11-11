@@ -19,9 +19,9 @@ namespace Guru.AspNetCore.Implementation.Api
 
         private readonly ILogger _DefaultLogger;
 
-        private readonly IRequestLogger _RequestLogger;
+        private readonly IApiSessionLogger _RequestLogger;
 
-        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater, IFileLogger defaultLogger, IRequestLogger requestLogger)
+        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater, IFileLogger defaultLogger, IApiSessionLogger requestLogger)
         {
             _ApiProvider = apiHandler;
             _ApiFormatter = apiFormater;

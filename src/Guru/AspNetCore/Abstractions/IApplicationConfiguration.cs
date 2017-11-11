@@ -4,6 +4,8 @@ namespace Guru.AspNetCore.Abstractions
 {
     public interface IApplicationConfiguration
     {
+        string AppId { get; set; }
+
         RouterConfiguration Router { get; set; }
 
         ResourceConfiguration Resource { get; set; }
