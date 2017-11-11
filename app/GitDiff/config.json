@@ -1,9 +1,0 @@
-{
-  "GitPath": "REQUIRED: this is git command path",
-  "LocalGitDirectory": "REQUIRED: this is your local git directory",
-  "BranchName": "REQUIRED: this is your branch name",
-  "StartTime": "REQUIRED: this is start time when searching commits from.",
-  "EndTime": "OPTIONAL: this is end time when searching commits to.",
-  "CompareTool": "REQUIRED: this MUST be your compare tool's absolute path.",
-  "CompareToolParams": "OPTIONAL: this content will be added as command parameters with CompareTool."
-}
