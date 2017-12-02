@@ -11,21 +11,26 @@ namespace Guru.Formatter.Json
 
         private readonly bool _OmitDefaultValue;
 
+        private readonly string _DateTimeFormat;
+
         public JsonSettings()
         {
             _CurrentEncoding = Encoding.UTF8;
             _OmitDefaultValue = true;
         }
 
-        public JsonSettings(Encoding encoding, bool omitDefaultValue)
+        public JsonSettings(Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
         {
             _CurrentEncoding = encoding;
             _OmitDefaultValue = omitDefaultValue;
+            _DateTimeFormat = dateTimeFormat;
         }
 
         public Encoding CurrentEncoding => _CurrentEncoding;
 
         public bool OmitDefaultValue => _OmitDefaultValue;
+
+        public string DateTimeFormat => _DateTimeFormat;
 
         public object DeserializeValue(JValue value, Type targetType)
         {
@@ -81,7 +86,14 @@ namespace Guru.Formatter.Json
             if (valueType == typeof(DateTime))
             {
                 // convert to datetime format
-                return CurrentEncoding.GetBytes($"\"{((DateTime)value).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}\"");
+                if (!string.IsNullOrEmpty(_DateTimeFormat))
+                {
+                    return CurrentEncoding.GetBytes($"\"{((DateTime)value).ToString(_DateTimeFormat)}\"");
+                }
+                else
+                {
+                    return CurrentEncoding.GetBytes($"\"{((DateTime)value).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}\"");
+                }
             }
             else if (valueType == typeof(string))
             {

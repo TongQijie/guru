@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Guru.ExtensionMethod
 {
@@ -68,6 +69,17 @@ namespace Guru.ExtensionMethod
                 {
                     throw;
                 }
+            }
+            else if (targetType == typeof(DateTime) && Regex.IsMatch(obj.ToString(), @"/Date\(\d+-?\d*\)/"))
+            {
+                var dateString = obj.ToString().Substring(6, obj.ToString().Length - 8);
+                var idx = dateString.IndexOf('-');
+                var timestamp = dateString;
+                if (idx >= 0)
+                {
+                    timestamp = dateString.Substring(0, idx);
+                }
+                return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(long.Parse(timestamp)).ToLocalTime();
             }
             else if (typeof(IConvertible).GetTypeInfo().IsAssignableFrom(obj.GetType()))
             {

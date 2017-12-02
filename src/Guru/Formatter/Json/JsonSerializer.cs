@@ -15,10 +15,10 @@ namespace Guru.Formatter.Json
 {
     internal class JsonSerializer
     {
-        public JsonSerializer(Type type, Encoding encoding, bool omitDefaultValue)
+        public JsonSerializer(Type type, Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
         {
             Type = type;
-            JsonSettings = new JsonSettings(encoding, omitDefaultValue);
+            JsonSettings = new JsonSettings(encoding, omitDefaultValue, dateTimeFormat);
 
             JsonType = JsonUtility.GetJsonType(Type);
             Initialize();
@@ -95,12 +95,12 @@ namespace Guru.Formatter.Json
             get { return _Caches ?? (_Caches = new ConcurrentDictionary<string, JsonSerializer>()); }
         }
 
-        private static string GetSerializerKey(Type type, Encoding encoding, bool omitDefaultValue)
+        private static string GetSerializerKey(Type type, Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
         {
-            return $"{type.FullName};{encoding.EncodingName};{omitDefaultValue.ToString()}";
+            return $"{type.FullName};{encoding.EncodingName};{omitDefaultValue.ToString()};{dateTimeFormat}";
         }
 
-        public static JsonSerializer GetSerializer(Type targetType, Encoding encoding, bool omitDefaultValue)
+        public static JsonSerializer GetSerializer(Type targetType, Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
         {
             var jsonType = JsonUtility.GetJsonType(targetType);
             if (jsonType == JType.Dynamic || jsonType == JType.Value)
@@ -108,12 +108,12 @@ namespace Guru.Formatter.Json
                 return null;
             }
 
-            var serializerKey = GetSerializerKey(targetType, encoding, omitDefaultValue);
+            var serializerKey = GetSerializerKey(targetType, encoding, omitDefaultValue, dateTimeFormat);
 
             JsonSerializer serializer;
             if (!Caches.ContainsKey(serializerKey))
             {
-                return Caches.GetOrAdd(serializerKey, new JsonSerializer(targetType, encoding, omitDefaultValue));
+                return Caches.GetOrAdd(serializerKey, new JsonSerializer(targetType, encoding, omitDefaultValue, dateTimeFormat));
             }
             else if (Caches.TryGetValue(serializerKey, out serializer))
             {
@@ -393,7 +393,7 @@ namespace Guru.Formatter.Json
             }
             else
             {
-                GetSerializer(value.GetType(), JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).Serialize(value, stream);
+                GetSerializer(value.GetType(), JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).Serialize(value, stream);
             }
         }
 
@@ -414,7 +414,7 @@ namespace Guru.Formatter.Json
             }
             else
             {
-                await GetSerializer(value.GetType(), JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalSerializeAsync(value, stream);
+                await GetSerializer(value.GetType(), JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalSerializeAsync(value, stream);
             }
         }
 
@@ -501,7 +501,7 @@ namespace Guru.Formatter.Json
                     {
                         if (element is JObject)
                         {
-                            var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element);
+                            var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(element);
                             jsonProperty.PropertyInfo.SetValue(instance, value, null);
                         }
                         else if (element is JValue)
@@ -574,7 +574,7 @@ namespace Guru.Formatter.Json
                     {
                         if (element is JObject)
                         {
-                            dictValue = GetSerializer(args[1], JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(element);
+                            dictValue = GetSerializer(args[1], JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(element);
                         }
                         else if (element is JValue)
                         {
@@ -629,7 +629,7 @@ namespace Guru.Formatter.Json
                     var jsonObject = collectionObject.Elements[i];
                     if (jsonObject is JObject)
                     {
-                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
                         array.SetValue(value, i);
                     }
                     else if (jsonObject is JArray)
@@ -654,7 +654,7 @@ namespace Guru.Formatter.Json
                     var jsonObject = collectionObject.Elements[i];
                     if (jsonObject is JObject)
                     {
-                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
                         collection.Add(value);
                     }
                     else if (jsonObject is JArray)

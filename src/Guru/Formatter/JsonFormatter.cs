@@ -24,17 +24,17 @@ namespace Guru.Formatter
 
         public override object ReadObject(Type targetType, Stream stream)
         {
-            return JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue).Deserialize(stream);
+            return JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue, "").Deserialize(stream);
         }
 
         public override async Task<object> ReadObjectAsync(Type targetType, Stream stream)
         {
-            return await JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue).DeserializeAsync(stream);
+            return await JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue, "").DeserializeAsync(stream);
         }
 
         public object ReadObject(Type targetType, JBase jsonObject)
         {
-            return JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue).Deserialize(jsonObject);
+            return JsonSerializer.GetSerializer(targetType, DefaultEncoding, OmitDefaultValue, "").Deserialize(jsonObject);
         }
 
         public T ReadObject<T>(JBase jsonObject)
@@ -44,12 +44,12 @@ namespace Guru.Formatter
 
         public override void WriteObject(object instance, Stream stream)
         {
-            JsonSerializer.GetSerializer(instance.GetType(), DefaultEncoding, OmitDefaultValue).Serialize(instance, stream);
+            JsonSerializer.GetSerializer(instance.GetType(), DefaultEncoding, OmitDefaultValue, "").Serialize(instance, stream);
         }
 
         public override async Task WriteObjectAsync(object instance, Stream stream)
         {
-            await JsonSerializer.GetSerializer(instance.GetType(), DefaultEncoding, OmitDefaultValue).SerializeAsync(instance, stream);
+            await JsonSerializer.GetSerializer(instance.GetType(), DefaultEncoding, OmitDefaultValue, "").SerializeAsync(instance, stream);
         }
     }
 }

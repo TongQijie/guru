@@ -29,7 +29,7 @@ namespace ConsoleApp
         {
             //new DependencyInjection.TestRunner().Run();
 
-            //new Formatter.TestRunner().Run();
+            new Formatter.TestRunner().Run();
 
             //new Network.TestRunner().Run();
 
@@ -37,7 +37,7 @@ namespace ConsoleApp
 
             // new EntityFramework.TestRunner().Run();
 
-            new Cache.TestRunner().Run();
+            //new Cache.TestRunner().Run();
 
             // new Mq.TestRunner().Run();
 
