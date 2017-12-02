@@ -19,14 +19,14 @@ namespace Guru.AspNetCore.Implementation.Api
 
         private readonly ILogger _DefaultLogger;
 
-        private readonly IApiSessionLogger _RequestLogger;
+        private readonly IApiLogger _ApiLogger;
 
-        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater, IFileLogger defaultLogger, IApiSessionLogger requestLogger)
+        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatter apiFormater, IFileLogger defaultLogger, IApiLogger apiLogger)
         {
             _ApiProvider = apiHandler;
             _ApiFormatter = apiFormater;
             _DefaultLogger = defaultLogger;
-            _RequestLogger = requestLogger;
+            _ApiLogger = apiLogger;
         }
 
         public async Task ProcessRequest(CallingContext context)
@@ -108,7 +108,7 @@ namespace Guru.AspNetCore.Implementation.Api
             {
                 if (context.ApplicationConfiguration?.Api?.EnableLog == true)
                 {
-                    _RequestLogger.LogEvent(nameof(DefaultApiHandler), context, startTime, DateTime.Now, apiContext.Parameters, executionResult);
+                    _ApiLogger.LogEvent(context, startTime, DateTime.Now, apiContext.Parameters, executionResult);
                 }
             }
         }

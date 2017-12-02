@@ -1,31 +1,32 @@
-﻿using Guru.AspNetCore.Abstractions;
+using System;
+using System.Reflection;
+using System.Text;
+using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
+using Guru.Formatter.Abstractions;
 using Guru.Logging;
 using Guru.Logging.Abstractions;
-using System.Text;
-using System.Reflection;
-using Guru.Formatter.Abstractions;
-using System;
 
-namespace Guru.AspNetCore.Implementation
+namespace Guru.AspNetCore.Implementation.Api
 {
-    [Injectable(typeof(IApiSessionLogger), Lifetime.Singleton)]
-    internal class DefaultApiSessionLogger : FileLogger, IApiSessionLogger
+    [Injectable(typeof(IApiLogger), Lifetime.Singleton)]
+    internal class DefaultApiLogger : FileLogger, IApiLogger
     {
         private readonly IFormatter _Formatter;
 
-        public DefaultApiSessionLogger(ILoggerKeeper loggerKeeper, IJsonFormatter formatter)
+        public DefaultApiLogger(ILoggerKeeper loggerKeeper, IJsonFormatter formatter)
             : base(loggerKeeper)
         {
-            Folder = "./ApiSessionLog".FullPath();
+            Folder = "./ApiLog".FullPath();
             Interval = 5000;
             _Formatter = formatter;
         }
 
-        public void LogEvent(string category, CallingContext context,
-            DateTime requestTime, DateTime responseTime, object[] requestBodys, object responseBody)
+        public void LogEvent(CallingContext context,
+            DateTime requestTime, DateTime responseTime, 
+            object[] requestBodys, object responseBody)
         {
             var stringBuilder = new StringBuilder();
             foreach (var parameter in context.InputParameters.GetDictionary())
@@ -71,7 +72,7 @@ namespace Guru.AspNetCore.Implementation
                 stringBuilder.AppendLine($"[Response] {_Formatter.WriteString(responseBody, Encoding.UTF8)}");
             }
 
-            LogEvent(category, Severity.Information, stringBuilder.ToString());
+            LogEvent(nameof(DefaultApiLogger), Severity.Information, stringBuilder.ToString());
         }
     }
 }
