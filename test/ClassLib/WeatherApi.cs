@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ClassLib
 {
-    [ApiService("weather")]
+    [Api("weather")]
     public class WeatherApi
     {
         [ApiMethod("moment", DefaultMethod = true)]

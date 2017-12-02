@@ -10,18 +10,21 @@ using Guru.AspNetCore.Delegates;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
-using Guru.Formatter.Abstractions;
+using Guru.Logging.Abstractions;
 
 namespace Guru.AspNetCore.Implementation.Api
 {
     [Injectable(typeof(IApiProvider), Lifetime.Singleton)]
     public class DefaultApiProvider : IApiProvider
     {
-        private readonly IApiFormatter _ApiFormatter;
+        private readonly IApiFormatters _ApiFormatters;
 
-        public DefaultApiProvider(IApiFormatter apiFormatter)
+        private readonly IFileLogger _Logger;
+
+        public DefaultApiProvider(IApiFormatters apiFormatters, IFileLogger logger)
         {
-            _ApiFormatter = apiFormatter;
+            _ApiFormatters = apiFormatters;
+            _Logger = logger;
             Init();
         }
 
@@ -69,35 +72,40 @@ namespace Guru.AspNetCore.Implementation.Api
             }
             
             var parameterValues = new object[cache.MethodInfo.Parameters?.Length ?? 0];
-            for (int i = 0; i < parameterValues.Length; i++)
+            try
             {
-                var apiParameterInfo = cache.MethodInfo.Parameters[i];
+                for (int i = 0; i < parameterValues.Length; i++)
+                {
+                    var apiParameterInfo = cache.MethodInfo.Parameters[i];
 
-                if (context.RouteData.Length > 2 && i < (context.RouteData.Length - 2))
-                {
-                    parameterValues[i] = context.RouteData[2 + i].ConvertTo(apiParameterInfo.Prototype.ParameterType);
-                }
-                else if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName))
-                {
-                    parameterValues[i] = context.InputParameters.Get(apiParameterInfo.ParameterName).Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
-                }
-                else
-                {
-                    if (typeof(string) != apiParameterInfo.Prototype.ParameterType && apiParameterInfo.Prototype.ParameterType.GetTypeInfo().IsClass)
+                    if (context.RouteData.Length > 2 && i < (context.RouteData.Length - 2))
                     {
-                        IFormatter formatter = _ApiFormatter.GetFormatter("json");
-                        if (context.InputParameters.ContainsKey("formatter"))
-                        {
-                            formatter = _ApiFormatter.GetFormatter(context.InputParameters.Get("formatter").Value.ToLower());
-                        }
-
-                        parameterValues[i] = await formatter.ReadObjectAsync(apiParameterInfo.Prototype.ParameterType, context.InputStream);
+                        parameterValues[i] = context.RouteData[2 + i].ConvertTo(apiParameterInfo.Prototype.ParameterType);
+                    }
+                    else if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName))
+                    {
+                        parameterValues[i] = context.InputParameters.Get(apiParameterInfo.ParameterName).Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
                     }
                     else
                     {
-                        parameterValues[i] = cache.MethodInfo.Parameters[i].Prototype.ParameterType.GetDefaultValue();
+                        if (context.InputStream.CanRead &&
+                            apiParameterInfo.Prototype.ParameterType != typeof(string) &&
+                            apiParameterInfo.Prototype.ParameterType.GetTypeInfo().IsClass)
+                        {
+                            var apiFormatter = _ApiFormatters.Get(context);
+                            parameterValues[i] = await apiFormatter.Read(apiParameterInfo.Prototype.ParameterType, context.InputStream);
+                        }
+                        else
+                        {
+                            parameterValues[i] = cache.MethodInfo.Parameters[i].Prototype.ParameterType.GetDefaultValue();
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                _Logger.LogEvent(nameof(DefaultApiProvider), Severity.Error, "error occurs when setting parameter values.", e);
+                return null;
             }
 
             return new DefaultApiContext()
@@ -121,7 +129,7 @@ namespace Guru.AspNetCore.Implementation.Api
             foreach (var assembly in assemblies)
             {
                 foreach (var type in assembly.GetTypes().Subset(x => x.GetTypeInfo().IsClass &&
-                    x.GetTypeInfo().IsDefined(typeof(ApiServiceAttribute), false)))
+                    x.GetTypeInfo().IsDefined(typeof(ApiAttribute), false)))
                 {
                     RegisterService(type);
                 }
@@ -130,7 +138,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
         private void RegisterService(Type serviceType)
         {
-            var serviceAttribute = serviceType.GetTypeInfo().GetCustomAttribute<ApiServiceAttribute>();
+            var serviceAttribute = serviceType.GetTypeInfo().GetCustomAttribute<ApiAttribute>();
             if (serviceAttribute == null)
             {
                 throw new Exception($"service type '{serviceType.FullName}' does not mark attribute 'ApiServiceAttribute'.");

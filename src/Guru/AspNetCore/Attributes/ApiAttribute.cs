@@ -3,9 +3,9 @@ using System;
 namespace Guru.AspNetCore.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class ApiServiceAttribute : Attribute
+    public class ApiAttribute : Attribute
     {
-        public ApiServiceAttribute(string serviceName)
+        public ApiAttribute(string serviceName)
         {
             ServiceName = serviceName;
         }
