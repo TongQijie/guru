@@ -105,6 +105,10 @@ namespace Guru.DependencyInjection.Implementation
                                         if (Regex.IsMatch(fileInfo.Name, _PathExpression))
                                         {
                                             var elements = _Formatter.ReadObject(collectionType, fileInfo.FullName) as IList;
+                                            if (elements == null || elements.Count == 0)
+                                            {
+                                                continue;
+                                            }
                                             foreach (var element in elements)
                                             {
                                                 collection.Add(element);
@@ -119,7 +123,7 @@ namespace Guru.DependencyInjection.Implementation
                             }
                             catch (Exception e)
                             {
-                                _Logger.LogEvent("error", Severity.Error, e);
+                                _Logger.LogEvent(nameof(StaticFileImplementationResolver), Severity.Error, $"failed to resolve static file. {decorator.Path}", e);
 
                                 if (retries > 1)
                                 {
