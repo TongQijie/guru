@@ -2,7 +2,7 @@
 
 namespace Guru.DependencyInjection.Abstractions
 {
-    public interface IImplementationDecorator
+    internal interface IDependencyDescriptor
     {
         Type ImplementationType { get; }
 

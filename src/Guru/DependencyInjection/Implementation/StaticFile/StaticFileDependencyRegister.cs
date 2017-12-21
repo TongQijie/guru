@@ -4,17 +4,17 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection.Attributes;
 using Guru.DependencyInjection.Abstractions;
 
-namespace Guru.DependencyInjection.Implementation
+namespace Guru.DependencyInjection.Implementation.StaticFile
 {
-    internal class StaticFileImplementationRegister : IImplementationRegister
+    internal class StaticFileDependencyRegister : IDependencyRegister
     {
-        public void Register(IContainerInstance instance)
+        public IContainerInstance Register(IContainerInstance instance)
         {
             var assemblies = AssemblyLoader.Instance.GetAssemblies();
 
             if (!assemblies.HasLength())
             {
-                return;
+                return instance;
             }
 
             foreach (var assembly in assemblies)
@@ -24,10 +24,12 @@ namespace Guru.DependencyInjection.Implementation
                     var attribute = type.GetTypeInfo().GetCustomAttribute<StaticFileAttribute>();
                     if (attribute != null)
                     {
-                        instance.Add(attribute.Abstraction, new StaticFileImplementationResolver(new StaticFileImplementationDecorator(type, attribute.Path, attribute.Format, attribute.MultiFiles)));
+                        instance.Add(attribute.Abstraction, new StaticFileDependencyResolver(new StaticFileDependencyDescriptor(type, attribute.Path, attribute.Format, attribute.MultiFiles)));
                     }
                 }
             }
+
+            return instance;
         }
     }
 }

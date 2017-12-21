@@ -52,7 +52,7 @@ namespace Guru.EntityFramework
 
         private DatabaseItemConfiguration GetDatabaseItem(string name)
         {
-            var configuration = ContainerManager.Default.Resolve<IDatabaseConfiguration>();
+            var configuration = DependencyContainer.Resolve<IDatabaseConfiguration>();
             if (!configuration.Items.HasLength())
             {
                 return null;

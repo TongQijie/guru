@@ -15,9 +15,9 @@ namespace ConsoleApp.Formatter
 
         public TestRunner()
         {
-            _JsonFormatter = ContainerManager.Default.Resolve<IJsonFormatter>();
-            _XmlFormatter = ContainerManager.Default.Resolve<IXmlFormatter>();
-            _JsonLightningFormatter = ContainerManager.Default.Resolve<IJsonLightningFormatter>();
+            _JsonFormatter = DependencyContainer.Resolve<IJsonFormatter>();
+            _XmlFormatter = DependencyContainer.Resolve<IXmlFormatter>();
+            _JsonLightningFormatter = DependencyContainer.Resolve<IJsonLightningFormatter>();
             _JsonLightningFormatter.DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
             _JsonLightningFormatter.OmitDefaultValue = true;
 

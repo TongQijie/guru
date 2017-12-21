@@ -13,7 +13,7 @@ namespace Guru.AspNetCore
             var context = new CallingContext()
             {
                 InputParameters = new DictionaryIgnoreCase<ContextParameter>(),
-                ApplicationConfiguration = ContainerManager.Default.Resolve<IApplicationConfiguration>(),
+                ApplicationConfiguration = DependencyContainer.Resolve<IApplicationConfiguration>(),
             };
 
             if (httpContext.Request.Host != null)

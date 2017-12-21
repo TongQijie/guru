@@ -6,28 +6,28 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection.Attributes;
 using Guru.DependencyInjection.Abstractions;
 
-namespace Guru.DependencyInjection.Implementation
+namespace Guru.DependencyInjection.Implementation.DynamicProxy
 {
-    internal class DynamicProxyImplementationRegister : IImplementationRegister
+    internal class DynamicProxyDependencyRegister : IDependencyRegister
     {
         private readonly IDynamicProxyGenerator _DynamicProxyGenerator;
 
-        public DynamicProxyImplementationRegister()
+        public DynamicProxyDependencyRegister()
         {
             try
             {
-                _DynamicProxyGenerator = ContainerManager.Default.Resolve<IDynamicProxyGenerator>();
+                _DynamicProxyGenerator = DependencyContainer.Resolve<IDynamicProxyGenerator>();
             }
             catch (Exception) { }
         }
 
-        public void Register(IContainerInstance instance)
+        public IContainerInstance Register(IContainerInstance instance)
         {
             var assemblies = AssemblyLoader.Instance.GetAssemblies();
 
             if (!assemblies.HasLength())
             {
-                return;
+                return instance;
             }
 
             foreach (var assembly in assemblies)
@@ -50,13 +50,13 @@ namespace Guru.DependencyInjection.Implementation
 
                         if (proxyType != null)
                         {
-                            instance.Add(attribute.Abstraction, 
-                                new ImplementationResolver(
-                                    new ImplementationDecorator(proxyType, attribute.Lifetime, attribute.Priority)));
+                            instance.Add(attribute.Abstraction, new DefaultDependencyResolver(new DefaultDependencyDescriptor(proxyType, attribute.Lifetime, attribute.Priority)));
                         }
                     }
                 }
             }
+
+            return instance;
         }
     }
 }

@@ -20,7 +20,7 @@ namespace ConsoleApp.Network
 
         public UnsplashCrawler()
         {
-            _Broker = ContainerManager.Default.Resolve<IHttpClientBroker>();
+            _Broker = DependencyContainer.Resolve<IHttpClientBroker>();
 
             _Request = _Broker.Get(new DefaultHttpClientSettings(
                 "unsplash",

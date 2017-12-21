@@ -20,7 +20,7 @@ namespace Guru.AspNetCore
 
             try
             {
-                var config = ContainerManager.Default.Resolve<IApplicationConfiguration>();
+                var config = DependencyContainer.Resolve<IApplicationConfiguration>();
                 if (config.AppId.HasValue())
                 {
                     _Name = config.AppId;
@@ -28,7 +28,7 @@ namespace Guru.AspNetCore
 
                 if (_Component == null)
                 {
-                    _Component = ContainerManager.Default.Resolve<IAspNetCoreComponent>();
+                    _Component = DependencyContainer.Resolve<IAspNetCoreComponent>();
                 }
 
                 startup?.Invoke(this);

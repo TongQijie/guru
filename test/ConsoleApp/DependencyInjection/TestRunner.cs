@@ -12,7 +12,7 @@ namespace ConsoleApp.DependencyInjection
 
         public TestRunner()
         {
-            _JsonFormatter = ContainerManager.Default.Resolve<IJsonFormatter>();
+            _JsonFormatter = DependencyContainer.Resolve<IJsonFormatter>();
         }
 
         public void Run()
@@ -53,7 +53,7 @@ namespace ConsoleApp.DependencyInjection
             //        .Each(x => Console.WriteLine($"B: {x.B}"));
             //}
 
-            var apple = ContainerManager.Default.Resolve<IAppleInterface>();
+            var apple = DependencyContainer.Resolve<IAppleInterface>();
             Assert.IsTrue(apple.Banana != null);
 
             "./dependencyinjection".EnsureFolder();
@@ -73,19 +73,19 @@ namespace ConsoleApp.DependencyInjection
                 _JsonFormatter.WriteObject(new DurianClass() { "hello, 2!" }, outputStream);
             }
 
-            var cherry = ContainerManager.Default.Resolve<ICherryInterface>();
+            var cherry = DependencyContainer.Resolve<ICherryInterface>();
             Assert.IsTrue(cherry.A == 100);
 
-            var durian = ContainerManager.Default.Resolve<IDurianInterface>();
+            var durian = DependencyContainer.Resolve<IDurianInterface>();
             Assert.IsTrue(durian.B.Length == 2 && durian.B[0] == "hello, 1!" && durian.B[1] == "hello, 2!");
 
             Console.WriteLine("hit 'esc' to stop loop...");
             while (Console.ReadKey().Key != ConsoleKey.Escape)
             {
-                cherry = ContainerManager.Default.Resolve<ICherryInterface>();
+                cherry = DependencyContainer.Resolve<ICherryInterface>();
                 Console.WriteLine($"A: {cherry.A}");
 
-                ContainerManager.Default.Resolve<IDurianInterface>().B.Each(x => Console.WriteLine($"B: {x}"));
+                DependencyContainer.Resolve<IDurianInterface>().B.Each(x => Console.WriteLine($"B: {x}"));
             }
         }
     }

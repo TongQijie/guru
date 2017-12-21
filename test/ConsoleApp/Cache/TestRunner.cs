@@ -13,7 +13,7 @@ namespace ConsoleApp.Cache
 
         public TestRunner()
         {
-            _MemoryCacheProvider = ContainerManager.Default.Resolve<IMemoryCacheProvider>();
+            _MemoryCacheProvider = DependencyContainer.Resolve<IMemoryCacheProvider>();
         }
 
         public void Run()

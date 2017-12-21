@@ -131,7 +131,7 @@ namespace Guru.Jobs
 
         public void ReadConfig()
         {
-            var config = ContainerManager.Default.Resolve<IApplicationConfiguration>();
+            var config = DependencyContainer.Resolve<IApplicationConfiguration>();
             if (!config.Enabled)
             {
                 _IsAlive = false;

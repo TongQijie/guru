@@ -2,14 +2,14 @@
 
 namespace Guru.DependencyInjection.Implementation
 {
-    internal class ImplementationResolver : IImplementationResolver
+    internal class DefaultDependencyResolver : IDependencyResolver
     {
-        public ImplementationResolver(IImplementationDecorator decorator)
+        public DefaultDependencyResolver(IDependencyDescriptor descriptor)
         {
-            Decorator = decorator;
+            Descriptor = descriptor;
         }
 
-        public IImplementationDecorator Decorator { get; private set; }
+        public IDependencyDescriptor Descriptor { get; private set; }
 
         private object _SingletonObject = null;
 
@@ -17,7 +17,7 @@ namespace Guru.DependencyInjection.Implementation
 
         public object Resolve()
         {
-            if (Decorator.Lifetime == Lifetime.Singleton)
+            if (Descriptor.Lifetime == Lifetime.Singleton)
             {
                 if (_SingletonObject == null)
                 {
@@ -25,7 +25,7 @@ namespace Guru.DependencyInjection.Implementation
                     {
                         if (_SingletonObject == null)
                         {
-                            _SingletonObject = CreateInstanceFactory.Instance.GetInstance(Decorator.ImplementationType);
+                            _SingletonObject = CreateInstanceFactory.Instance.GetInstance(Descriptor.ImplementationType);
                         }
                     }
                 }
@@ -34,7 +34,7 @@ namespace Guru.DependencyInjection.Implementation
             }
             else
             {
-                return CreateInstanceFactory.Instance.GetInstance(Decorator.ImplementationType);
+                return CreateInstanceFactory.Instance.GetInstance(Descriptor.ImplementationType);
             }
         }
     }

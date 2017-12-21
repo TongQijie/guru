@@ -16,7 +16,7 @@ namespace Guru.Jobs
         {
             Name = name;
 
-            _Logger = ContainerManager.Default.Resolve<IFileLogger>();
+            _Logger = DependencyContainer.Resolve<IFileLogger>();
         }
 
         public AbstractJob(string name, Schedule schedule) : this(name)

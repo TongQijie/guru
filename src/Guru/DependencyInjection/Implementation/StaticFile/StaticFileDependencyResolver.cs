@@ -11,9 +11,9 @@ using Guru.Monitor.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 
-namespace Guru.DependencyInjection.Implementation
+namespace Guru.DependencyInjection.Implementation.StaticFile
 {
-    internal class StaticFileImplementationResolver : IImplementationResolver
+    internal class StaticFileDependencyResolver : IDependencyResolver
     {
         private readonly IFileSystemMonitor _FileSystemMonitor;
 
@@ -21,23 +21,23 @@ namespace Guru.DependencyInjection.Implementation
 
         private readonly ILogger _Logger;
 
-        public StaticFileImplementationResolver(IImplementationDecorator decorator)
+        public StaticFileDependencyResolver(IDependencyDescriptor descriptor)
         {
-            Decorator = decorator;
+            Descriptor = descriptor;
 
-            _FileSystemMonitor = ContainerManager.Default.GetImplementation(typeof(IFileSystemMonitor)) as IFileSystemMonitor;
+            _FileSystemMonitor = DependencyContainer.Resolve<IFileSystemMonitor>();
 
-            _Logger = ContainerManager.Default.GetImplementation(typeof(IFileLogger)) as IFileLogger;
+            _Logger = DependencyContainer.Resolve<IFileLogger>();
 
-            var dec = decorator as StaticFileImplementationDecorator;
+            var dec = descriptor as StaticFileDependencyDescriptor;
 
-            if (dec.Format == StaticFileImplementationDecorator.StaticFileFormat.Json)
+            if (dec.Format == StaticFileDependencyDescriptor.StaticFileFormat.Json)
             {
-                _Formatter = ContainerManager.Default.GetImplementation(typeof(IJsonFormatter)) as IJsonFormatter;
+                _Formatter = DependencyContainer.Resolve<IJsonFormatter>();
             }
-            else if (dec.Format == StaticFileImplementationDecorator.StaticFileFormat.Xml)
+            else if (dec.Format == StaticFileDependencyDescriptor.StaticFileFormat.Xml)
             {
-                _Formatter = ContainerManager.Default.GetImplementation(typeof(IXmlFormatter)) as IXmlFormatter;
+                _Formatter = DependencyContainer.Resolve<IXmlFormatter>();
             }
 
             if (dec.MultiFiles)
@@ -46,7 +46,7 @@ namespace Guru.DependencyInjection.Implementation
             }
         }
 
-        public IImplementationDecorator Decorator { get; private set; }
+        public IDependencyDescriptor Descriptor { get; private set; }
 
         private object _SingletonObject = null;
 
@@ -60,7 +60,7 @@ namespace Guru.DependencyInjection.Implementation
 
         public object Resolve()
         {
-            var decorator = Decorator as StaticFileImplementationDecorator;
+            var decorator = Descriptor as StaticFileDependencyDescriptor;
 
             if (!_IsInitialized)
             {
@@ -123,7 +123,7 @@ namespace Guru.DependencyInjection.Implementation
                             }
                             catch (Exception e)
                             {
-                                _Logger.LogEvent(nameof(StaticFileImplementationResolver), Severity.Error, $"failed to resolve static file. {decorator.Path}", e);
+                                _Logger.LogEvent(nameof(StaticFileDependencyResolver), Severity.Error, $"failed to resolve static file. {decorator.Path}", e);
 
                                 if (retries > 1)
                                 {

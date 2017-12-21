@@ -53,7 +53,7 @@ namespace Guru.AspNetCore.Implementation.Api
                     return null;
                 }
 
-                var instance = ContainerManager.Default.Resolve(apiServiceInfo.Prototype);
+                var instance = DependencyContainer.Resolve(apiServiceInfo.Prototype);
 
                 _ApiContextCaches.TryAdd(key, new ApiContextCache()
                 {
@@ -168,7 +168,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 apiServiceInfo.MethodInfos = apiServiceInfo.MethodInfos.Append(apiMethodInfo);
             }
 
-            ContainerManager.Default.RegisterSingleton(serviceType, serviceType);
+            DependencyContainer.RegisterSingleton(serviceType, serviceType);
 
             if (!_ApiServiceInfos.ContainsKey(apiServiceInfo.ServiceName.ToLower()))
             {

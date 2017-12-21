@@ -6,15 +6,15 @@ using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.DependencyInjection.Implementation
 {
-    internal class ImplementationRegister : IImplementationRegister
+    internal class DefaultDependencyRegister : IDependencyRegister
     {
-        public void Register(IContainerInstance instance)
+        public IContainerInstance Register(IContainerInstance instance)
         {
             var assemblies = AssemblyLoader.Instance.GetAssemblies();
 
             if (!assemblies.HasLength())
             {
-                return;
+                return instance;
             }
 
             foreach (var assembly in assemblies)
@@ -24,10 +24,12 @@ namespace Guru.DependencyInjection.Implementation
                     var attribute = type.GetTypeInfo().GetCustomAttribute<InjectableAttribute>();
                     if (attribute != null)
                     {
-                        instance.Add(attribute.Abstraction, new ImplementationResolver(new ImplementationDecorator(type, attribute.Lifetime, attribute.Priority)));
+                        instance.Add(attribute.Abstraction, new DefaultDependencyResolver(new DefaultDependencyDescriptor(type, attribute.Lifetime, attribute.Priority)));
                     }
                 }
             }
+
+            return instance;
         }
     }
 }

@@ -14,8 +14,8 @@ namespace Guru.Executable
 
         private ConsoleAppInstance()
         {
-            _Logger = ContainerManager.Default.Resolve<IFileLogger>();
-            _LoggerKeeper = ContainerManager.Default.Resolve<ILoggerKeeper>();
+            _Logger = DependencyContainer.Resolve<IFileLogger>();
+            _LoggerKeeper = DependencyContainer.Resolve<ILoggerKeeper>();
         }
 
         private readonly ILogger _Logger;
@@ -30,7 +30,7 @@ namespace Guru.Executable
 
             try
             {
-                if (ContainerManager.Default.Resolve<IConsoleExecutable>().Run(args) == 0)
+                if (DependencyContainer.Resolve<IConsoleExecutable>().Run(args) == 0)
                 {
                     if (loop)
                     {

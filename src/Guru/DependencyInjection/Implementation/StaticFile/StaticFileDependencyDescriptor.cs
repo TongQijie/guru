@@ -3,11 +3,11 @@
 using Guru.ExtensionMethod;
 using Guru.DependencyInjection.Abstractions;
 
-namespace Guru.DependencyInjection.Implementation
+namespace Guru.DependencyInjection.Implementation.StaticFile
 {
-    internal class StaticFileImplementationDecorator : IImplementationDecorator
+    internal class StaticFileDependencyDescriptor : IDependencyDescriptor
     {
-        public StaticFileImplementationDecorator(Type implementationType, string path, string format, bool multifiles)
+        public StaticFileDependencyDescriptor(Type implementationType, string path, string format, bool multifiles)
         {
             ImplementationType = implementationType;
             Path = path;

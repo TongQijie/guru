@@ -49,7 +49,7 @@ namespace Guru.EntityFramework
 
         private CommandItemConfiguration GetCommandItem(string name)
         {
-            var configuration = ContainerManager.Default.Resolve<ICommandConfiguration>();
+            var configuration = DependencyContainer.Resolve<ICommandConfiguration>();
             if (!configuration.Items.HasLength())
             {
                 return null;

@@ -106,7 +106,7 @@ namespace Guru.Network
 
         private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : IFormatter
         {
-            var bytes = ContainerManager.Default.Resolve<TFormatter>().WriteBytes(body);
+            var bytes = DependencyContainer.Resolve<TFormatter>().WriteBytes(body);
 
             using (var content = new ByteArrayContent(bytes))
             {

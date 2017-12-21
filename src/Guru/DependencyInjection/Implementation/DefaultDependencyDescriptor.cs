@@ -4,9 +4,9 @@ using Guru.DependencyInjection.Abstractions;
 
 namespace Guru.DependencyInjection.Implementation
 {
-    internal class ImplementationDecorator : IImplementationDecorator
+    internal class DefaultDependencyDescriptor : IDependencyDescriptor
     {
-        public ImplementationDecorator(Type implementationType, Lifetime lifetime, int priority)
+        public DefaultDependencyDescriptor(Type implementationType, Lifetime lifetime, int priority)
         {
             ImplementationType = implementationType;
             Lifetime = lifetime;

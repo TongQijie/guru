@@ -25,7 +25,7 @@ namespace Guru.DependencyInjection
         {
             var parameterTypes = GetConstructorParameterTypes(type);
 
-            object[] paramaters = parameterTypes.Select(t => ContainerManager.Default.GetImplementation(t));
+            object[] paramaters = parameterTypes.Select(t => DependencyContainer.Resolve(t));
             Func<object[], object> constructorDelegate;
             _ConstructorDelegates.TryGetValue(type, out constructorDelegate);
             if (constructorDelegate == null)
@@ -49,7 +49,7 @@ namespace Guru.DependencyInjection
             {
                 Type[] ctorParamsTypes = ctor.GetParameters().Select(param => param.ParameterType);
 
-                if (ctorParamsTypes.Exists(x => !ContainerManager.Default.Exists(x)))
+                if (ctorParamsTypes.Exists(x => !DependencyContainer.Has(x)))
                 {
                     continue;
                 }
