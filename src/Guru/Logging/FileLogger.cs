@@ -17,7 +17,7 @@ namespace Guru.Logging
     {
         public FileLogger(ILoggerKeeper loggerKeeper) : base(loggerKeeper)
         {
-            Folder = "./log".FullPath();
+            Folder = "./DefaultLog".FullPath();
             Interval = 3000;
         }
 

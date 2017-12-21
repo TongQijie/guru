@@ -1,5 +1,7 @@
 ﻿using Guru.DependencyInjection.Abstractions;
 using Guru.DependencyInjection.Implementation;
+using Guru.DependencyInjection.Implementation.DynamicProxy;
+using Guru.DependencyInjection.Implementation.StaticFile;
 using System;
 
 namespace Guru.DependencyInjection
@@ -33,7 +35,9 @@ namespace Guru.DependencyInjection
                     {
                         _ContainerInstance = new DefaultContainerInstance();
 
-                        _ContainerInstance.Register(new DefaultDependencyRegister());
+                        _ContainerInstance.Register(new DefaultDependencyRegister())
+                            .Register(new DynamicProxyDependencyRegister())
+                            .Register(new StaticFileDependencyRegister());
                     }
                 }
             }
