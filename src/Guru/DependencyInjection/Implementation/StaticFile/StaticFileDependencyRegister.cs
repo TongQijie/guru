@@ -19,17 +19,34 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
 
             foreach (var assembly in assemblies)
             {
-                foreach (var type in assembly.GetTypes().Subset(x => x.GetTypeInfo().IsClass))
-                {
-                    var attribute = type.GetTypeInfo().GetCustomAttribute<StaticFileAttribute>();
-                    if (attribute != null)
-                    {
-                        instance.Add(attribute.Abstraction, new StaticFileDependencyResolver(new StaticFileDependencyDescriptor(type, attribute.Path, attribute.Format, attribute.MultiFiles)));
-                    }
-                }
+                InternalRegister(instance, assembly);
             }
 
             return instance;
+        }
+
+        public IContainerInstance Register(IContainerInstance instance, Assembly assembly)
+        {
+            if (assembly == null)
+            {
+                return instance;
+            }
+
+            InternalRegister(instance, assembly);
+
+            return instance;
+        }
+
+        private void InternalRegister(IContainerInstance instance, Assembly assembly)
+        {
+            foreach (var type in assembly.GetTypes().Subset(x => x.GetTypeInfo().IsClass))
+            {
+                var attribute = type.GetTypeInfo().GetCustomAttribute<StaticFileAttribute>();
+                if (attribute != null)
+                {
+                    instance.Add(attribute.Abstraction, new StaticFileDependencyResolver(new StaticFileDependencyDescriptor(type, attribute.Path, attribute.Format, attribute.MultiFiles)));
+                }
+            }
         }
     }
 }

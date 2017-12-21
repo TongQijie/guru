@@ -1,6 +1,9 @@
 ﻿using Guru.DependencyInjection.Abstractions;
+using Guru.DependencyInjection.Implementation.DynamicProxy;
+using Guru.DependencyInjection.Implementation.StaticFile;
 using System;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Guru.DependencyInjection.Implementation
 {
@@ -22,8 +25,19 @@ namespace Guru.DependencyInjection.Implementation
         {
             if (!_DependencyResolvers.TryGetValue(key, out var resolver))
             {
-                Console.WriteLine($"Implementation '{key}' cannot be found.");
-                return null;
+                if (key is Type)
+                {
+                    var assembly = Assembly.GetAssembly(key as Type);
+                    new DefaultDependencyRegister().Register(this, assembly);
+                    new DynamicProxyDependencyRegister().Register(this, assembly);
+                    new StaticFileDependencyRegister().Register(this, assembly);
+                }
+
+                if (!_DependencyResolvers.TryGetValue(key, out resolver))
+                {
+                    Console.WriteLine($"Implementation '{key}' cannot be found.");
+                    return null;
+                }
             }
 
             return resolver.Resolve();
@@ -32,6 +46,11 @@ namespace Guru.DependencyInjection.Implementation
         public IContainerInstance Register(IDependencyRegister register)
         {
             return register.Register(this);
+        }
+
+        private IContainerInstance Register(IDependencyRegister register, Assembly assembly)
+        {
+            return register.Register(this, assembly);
         }
     }
 }
