@@ -6,6 +6,7 @@ using Guru.Logging.Abstractions;
 using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection.Attributes;
 using Guru.AspNetCore.Implementation.Api.Formatter;
+using Guru.Logging;
 
 namespace Guru.AspNetCore.Implementation.Api
 {

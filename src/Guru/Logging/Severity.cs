@@ -1,4 +1,4 @@
-﻿namespace Guru.Logging.Abstractions
+﻿namespace Guru.Logging
 {
     public enum Severity
     {

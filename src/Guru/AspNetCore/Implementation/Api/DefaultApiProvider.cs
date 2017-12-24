@@ -10,6 +10,7 @@ using Guru.AspNetCore.Delegates;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
+using Guru.Logging;
 using Guru.Logging.Abstractions;
 
 namespace Guru.AspNetCore.Implementation.Api

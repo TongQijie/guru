@@ -8,11 +8,12 @@ using Guru.ExtensionMethod;
 using Guru.Formatter.Abstractions;
 using Guru.Logging;
 using Guru.Logging.Abstractions;
+using Guru.Logging.Implementation;
 
 namespace Guru.AspNetCore.Implementation.Api
 {
     [Injectable(typeof(IApiLogger), Lifetime.Singleton)]
-    internal class DefaultApiLogger : FileLogger, IApiLogger
+    internal class DefaultApiLogger : DefaultFileLogger, IApiLogger
     {
         private readonly IFormatter _Formatter;
 

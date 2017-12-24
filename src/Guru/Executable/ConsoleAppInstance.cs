@@ -3,6 +3,7 @@ using Guru.DependencyInjection;
 using Guru.Executable.Abstractions;
 using Guru.Logging.Abstractions;
 using System.Threading;
+using Guru.Logging;
 
 namespace Guru.Executable
 {

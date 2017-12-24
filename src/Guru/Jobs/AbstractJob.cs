@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Guru.Jobs.Configuration;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
+using Guru.Logging;
 
 namespace Guru.Jobs
 {

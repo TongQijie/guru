@@ -10,6 +10,7 @@ using Guru.Logging.Abstractions;
 using Guru.Monitor.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection.Abstractions;
+using Guru.Logging;
 
 namespace Guru.DependencyInjection.Implementation.StaticFile
 {
