@@ -13,12 +13,14 @@ namespace Guru.Network.Abstractions
 
         IReadOnlyDictionary<string, string[]> Headers { get; }
 
-        Task<TBody> GetBodyAsync<TBody, TFormatter>() where TFormatter : IFormatter;
+        Task<TBody> GetBodyAsync<TBody, TFormatter>() where TFormatter : ILightningFormatter;
 
-        Task<TBody> GetBodyAsync<TBody>(IFormatter formatter);
+        Task<TBody> GetBodyAsync<TBody>(ILightningFormatter formatter);
 
         Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4 * 1024);
 
         Task<Stream> GetStreamAsync();
+
+        Task<string> GetStringAsync();
     }
 }

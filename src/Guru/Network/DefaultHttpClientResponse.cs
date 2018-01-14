@@ -53,7 +53,7 @@ namespace Guru.Network
             }
         }
         
-        public async Task<TBody> GetBodyAsync<TBody, TFormatter>() where TFormatter : IFormatter
+        public async Task<TBody> GetBodyAsync<TBody, TFormatter>() where TFormatter : ILightningFormatter
         {
             using (var stream = await _Response.Content.ReadAsStreamAsync())
             {
@@ -61,7 +61,7 @@ namespace Guru.Network
             }
         }
 
-        public async Task<TBody> GetBodyAsync<TBody>(IFormatter formatter)
+        public async Task<TBody> GetBodyAsync<TBody>(ILightningFormatter formatter)
         {
             using (var stream = await _Response.Content.ReadAsStreamAsync())
             {
@@ -86,6 +86,11 @@ namespace Guru.Network
         public async Task<Stream> GetStreamAsync()
         {
             return await _Response.Content.ReadAsStreamAsync();
+        }
+
+        public async Task<string> GetStringAsync()
+        {
+            return await _Response.Content.ReadAsStringAsync();
         }
 
         public void Dispose()
