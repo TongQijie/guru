@@ -88,7 +88,7 @@ namespace ConsoleApp.Network
                 {
                     Console.WriteLine("succeeded");
 
-                    return await response.GetBodyAsync<Photo[], IJsonFormatter>();
+                    return await response.GetBodyAsync<Photo[], IJsonLightningFormatter>();
                 }
                 else
                 {
