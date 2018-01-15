@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>2.1.1</Version>
+    <Version>2.1.2</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Guru</PackageId>
     <Authors>tongqijie</Authors>
