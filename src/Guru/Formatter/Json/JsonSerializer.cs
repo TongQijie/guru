@@ -634,7 +634,8 @@ namespace Guru.Formatter.Json
                     }
                     else if (jsonObject is JArray)
                     {
-                        // TODO: multi-dimension array
+                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
+                        array.SetValue(value, i);
                     }
                     else if (jsonObject is JValue)
                     {
@@ -659,7 +660,8 @@ namespace Guru.Formatter.Json
                     }
                     else if (jsonObject is JArray)
                     {
-                        // TODO: multi-dimension array
+                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
+                        collection.Add(value);
                     }
                     else if (jsonObject is JValue)
                     {

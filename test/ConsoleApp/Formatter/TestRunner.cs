@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 
 using Guru.DependencyInjection;
 using Guru.Formatter.Abstractions;
@@ -27,7 +28,15 @@ namespace ConsoleApp.Formatter
 
         public void Run()
         {
-            
+            var json = "{\"Body\":[[\"abc\",\"def\"],[\"ghi\"]]}";
+            var testA = _JsonLightningFormatter.ReadObject<TestA>(json);
+
+            var json1 = _JsonLightningFormatter.WriteObject(testA);
+        }
+
+        public class TestA
+        {
+            public string[][] Body { get; set; }
         }
     }
 }
