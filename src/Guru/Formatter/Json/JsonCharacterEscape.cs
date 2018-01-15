@@ -54,8 +54,8 @@ namespace Guru.Formatter.Json
                 return new byte[0];
             }
 
-            var firstByte = ConvertHexByte(source[0]) * 0x0F + ConvertHexByte(source[1]);
-            var secondByte = ConvertHexByte(source[2]) * 0x0F + ConvertHexByte(source[3]);
+            var firstByte = (ConvertHexByte(source[0]) << 4) + ConvertHexByte(source[1]);
+            var secondByte = (ConvertHexByte(source[2]) << 4) + ConvertHexByte(source[3]);
 
             if (firstByte == 0)
             {

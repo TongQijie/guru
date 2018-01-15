@@ -28,7 +28,7 @@ namespace ConsoleApp.Formatter
 
         public void Run()
         {
-            var json = "{\"Body\":[[\"abc\",\"def\"],[\"ghi\"]]}";
+            var json = "{\"Body\":[[\"abc\",\"def\"],[\"ghi\",\"\\u003cem class=\\u0027datanull\\u0027\\u003eNULL\\u003c/em\\u003e\"]]}";
             var testA = _JsonLightningFormatter.ReadObject<TestA>(json);
 
             var json1 = _JsonLightningFormatter.WriteObject(testA);
