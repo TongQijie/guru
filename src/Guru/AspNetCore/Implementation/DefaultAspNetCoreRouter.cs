@@ -31,7 +31,7 @@ namespace Guru.AspNetCore.Implementation
                 return;
             }
 
-            if (router.RewriteRules.HasLength())
+            if (router != null && router.RewriteRules.HasLength())
             {
                 foreach (var rule in router.RewriteRules)
                 {
