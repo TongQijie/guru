@@ -2,13 +2,19 @@
 
 namespace ClassLib
 {
-    [Api("test")]
+    [Api("testApi")]
     public class TestApi
     {
-        [ApiMethod("hi")]
-        public string Hi(string hi)
+        [ApiMethod("sayHi")]
+        public string SayHi(string word)
         {
-            return hi;
+            return word;
+        }
+
+        [ApiMethod("toDo")]
+        public void ToDo(string something)
+        {
+
         }
     }
 }

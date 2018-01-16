@@ -40,7 +40,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 {
                     Name = "StatusCode",
                     Source = ContextParameterSource.Http,
-                    Value = "404",
+                    Value = "400",
                 });
                 return;
             }
@@ -49,35 +49,35 @@ namespace Guru.AspNetCore.Implementation.Api
             try
             {
                 executionResult = apiContext.ApiExecute(apiContext.Parameters);
-                if (executionResult == null)
-                {
-                    context.SetOutputParameter(new ContextParameter()
-                    {
-                        Name = "StatusCode",
-                        Source = ContextParameterSource.Http,
-                        Value = "500",
-                    });
-                    return;
-                }
-
-                AbstractApiFormatter apiFormatter = null;
-                if (executionResult.GetType() == typeof(string) || executionResult.GetType().GetTypeInfo().IsValueType)
-                {
-                    apiFormatter = _ApiFormatters.Text;
-                }
-                else
-                {
-                    apiFormatter = _ApiFormatters.Get(context);
-                }
 
                 context.SetOutputParameter(new ContextParameter()
                 {
-                    Name = "Content-Type",
-                    Source = ContextParameterSource.Header,
-                    Value = apiFormatter?.ContentType,
+                    Name = "StatusCode",
+                    Source = ContextParameterSource.Http,
+                    Value = "200",
                 });
 
-                await apiFormatter.Write(executionResult, context.OutputStream);
+                if (executionResult != null)
+                {
+                    AbstractApiFormatter apiFormatter = null;
+                    if (executionResult.GetType() == typeof(string) || executionResult.GetType().GetTypeInfo().IsValueType)
+                    {
+                        apiFormatter = _ApiFormatters.Text;
+                    }
+                    else
+                    {
+                        apiFormatter = _ApiFormatters.Get(context);
+                    }
+
+                    context.SetOutputParameter(new ContextParameter()
+                    {
+                        Name = "Content-Type",
+                        Source = ContextParameterSource.Header,
+                        Value = apiFormatter?.ContentType,
+                    });
+
+                    await apiFormatter.Write(executionResult, context.OutputStream);
+                }
             }
             catch(Exception e)
             {
