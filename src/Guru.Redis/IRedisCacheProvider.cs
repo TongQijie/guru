@@ -1,4 +1,4 @@
-﻿using Guru.Cache;
+﻿using Guru.Cache.Abstractions;
 
 namespace Guru.Redis
 {
