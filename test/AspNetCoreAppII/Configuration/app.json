@@ -1,8 +1,18 @@
 ﻿{
   "appId": "AspNetCoreAppII",
+  "router": {
+    "default": "index.html"
+  },
   "res": {
     "mineTypes": {
-      "html": "text/html"
+      "html": "text/html",
+      "js": "application/x-javascript",
+      "css": "text/css",
+      "woff": "application/font-woff",
+      "jpg": "image/jpeg",
+      "ico": "image/x-icon",
+      "gif": "image/gif",
+      "md": "text/plain"
     }
   },
   "api": {

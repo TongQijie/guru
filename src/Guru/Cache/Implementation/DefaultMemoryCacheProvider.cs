@@ -23,9 +23,16 @@ namespace Guru.Cache.Implementation
         public DefaultMemoryCacheProvider(IFileLogger fileLogger)
         {
             _Logger = fileLogger;
+            SecondsToClean = 60;
         }
 
         private bool _Alive = false;
+
+        private object _Locker = new object();
+
+        public bool Persistent { get; set; }
+
+        public int SecondsToClean { get; set; }
 
         private void Startup()
         {
@@ -34,43 +41,63 @@ namespace Guru.Cache.Implementation
                 return;
             }
 
-            _Alive = true;
-
-            new Thread(() =>
+            lock (_Locker)
             {
-                _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Information, "Default Memory Cache Provider started.");
-                
-                try
+                if (!_Alive)
                 {
-                    while (_Alive)
+                    if (Persistent)
                     {
-                        Thread.Sleep(1000 * 60);
-
-                        var items = _Memory.ToArray();
-                        foreach (var item in items)
+                        try
                         {
-                            if (DateTime.Now > item.Value.ExpiryTime)
+                            var items = new DefaultMemoryCachePersistence().RestoreFromFile();
+                            foreach (var item in items)
                             {
-                                _Memory.TryRemove(item.Key, out var i);
+                                _Memory.TryAdd(item.Key, item);
                             }
                         }
+                        catch (Exception e)
+                        {
+                            _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Error, "Default Memory Cache Provider persistence failed.", e);
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Error, e);
-                }
-                finally
-                {
-                    _Alive = false;
-                }
 
-                _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Information, "Default Memory Cache Provider stopped.");
-            })
-            {
-                IsBackground = true,
-                Name = "MemoryCacheProvider",
-            }.Start();
+                    _Alive = true;
+
+                    new Thread(() =>
+                    {
+                        _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Information, "Default Memory Cache Provider started.");
+                        
+                        try
+                        {
+                            while (_Alive)
+                            {
+                                Thread.Sleep(1000 * SecondsToClean);
+
+                                var items = _Memory.ToArray();
+                                foreach (var item in items)
+                                {
+                                    if (DateTime.Now > item.Value.ExpiryTime)
+                                    {
+                                        _Memory.TryRemove(item.Key, out var i);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Error, e);
+                        }
+                        finally
+                        {
+                            _Alive = false;
+                        }
+                    })
+                    {
+                        IsBackground = true,
+                        Name = "MemoryCacheProvider",
+                    }.Start();
+                }
+            }
         }
 
         public T Get<T>(string key)
@@ -80,14 +107,19 @@ namespace Guru.Cache.Implementation
                 Startup();
             }
 
-            if (_Memory.TryGetValue(key.Md5(), out var item) && DateTime.Now < item.ExpiryTime)
+            if (_Memory.TryGetValue(key.Md5(), out var item))
             {
-                return (T)item.Value;
+                if (DateTime.Now < item.ExpiryTime)
+                {
+                    return (T)item.Value;
+                }
+                else
+                {
+                    Remove(key.Md5());
+                }
             }
-            else
-            {
-                return default(T);
-            }
+
+            return default(T);
         }
 
         public Task<T> GetAsync<T>(string key)
@@ -112,6 +144,7 @@ namespace Guru.Cache.Implementation
                 {
                     var addItem = new DefaultMemoryCacheItem()
                     {
+                        Key = key.Md5(),
                         Value = setDelegate(this),
                         ExpiryTime = DateTime.Now.Add(expiry),
                     };
@@ -131,6 +164,7 @@ namespace Guru.Cache.Implementation
             {
                 return (T)_Memory.GetOrAdd(key.Md5(), new DefaultMemoryCacheItem()
                 {
+                    Key = key.Md5(),
                     Value = setDelegate(this),
                     ExpiryTime = DateTime.Now.Add(expiry),
                 }).Value;
@@ -166,6 +200,7 @@ namespace Guru.Cache.Implementation
 
             var addItem = new DefaultMemoryCacheItem()
             {
+                Key = key.Md5(),
                 Value = value,
                 ExpiryTime = DateTime.Now.Add(expiry),
             };
@@ -186,6 +221,29 @@ namespace Guru.Cache.Implementation
         public Task<bool> SetAsync<T>(string key, T value, TimeSpan expiry)
         {
             throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            _Alive = false;
+
+            _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Information, "Default Memory Cache Provider is disposing.");
+            Console.WriteLine("Default Memory Cache Provider is disposing.");
+
+            if (Persistent)
+            {
+                try
+                {
+                    new DefaultMemoryCachePersistence().StoreToFile(_Memory.Values);
+                }
+                catch (Exception e)
+                {
+                    _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Error, "Default Memory Cache Provider persistence failed.", e);
+                }
+            }
+
+            _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Information, "Default Memory Cache Provider is disposed.");
+            Console.WriteLine("Default Memory Cache Provider is disposed.");
         }
     }
 }
