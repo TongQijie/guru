@@ -11,6 +11,8 @@ using Guru.ExtensionMethod;
 using Guru.Formatter.Abstractions;
 
 using StackExchange.Redis;
+using Guru.Logging;
+using Guru.Cache.Delegates;
 
 namespace Guru.Redis
 {
@@ -81,7 +83,7 @@ namespace Guru.Redis
             return _Formatter.ReadObject<T>(db.StringGet(key), Encoding.UTF8);
         }
 
-        public T GetOrSet<T>(string key, SetDelegate setDelegate)
+        public T GetOrSet<T>(string key, SetDelegate<T> setDelegate)
         {
             var db = GetDatabase();
             if (db == null)
@@ -100,17 +102,6 @@ namespace Guru.Redis
             }
 
             return _Formatter.ReadObject<T>(db.StringGet(key), Encoding.UTF8);
-        }
-
-        public bool Set<T>(string key, T value)
-        {
-            var db = GetDatabase();
-            if (db == null)
-            {
-                return false;
-            }
-
-            return db.StringSet(key, _Formatter.WriteString(value, Encoding.UTF8));
         }
 
         public bool Set<T>(string key, T value, TimeSpan expiry)
@@ -140,7 +131,7 @@ namespace Guru.Redis
             return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key), Encoding.UTF8);
         }
 
-        public async Task<T> GetOrSetAsync<T>(string key, SetAsyncDelegate setAsyncDelegate)
+        public async Task<T> GetOrSetAsync<T>(string key, SetAsyncDelegate<T> setAsyncDelegate)
         {
             var db = GetDatabase();
             if (db == null)
@@ -161,17 +152,6 @@ namespace Guru.Redis
             return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key), Encoding.UTF8);
         }
 
-        public async Task<bool> SetAsync<T>(string key, T value)
-        {
-            var db = GetDatabase();
-            if (db == null)
-            {
-                return false;
-            }
-
-            return await db.StringSetAsync(key, await _Formatter.WriteStringAsync(value, Encoding.UTF8));
-        }
-
         public async Task<bool> SetAsync<T>(string key, T value, TimeSpan expiry)
         {
             var db = GetDatabase();
@@ -181,6 +161,90 @@ namespace Guru.Redis
             }
 
             return await db.StringSetAsync(key, await _Formatter.WriteStringAsync(value, Encoding.UTF8), expiry);
+        }
+
+        public T GetOrSet<T>(string key, SetDelegate<T> setDelegate, TimeSpan expiry)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return default(T);
+            }
+
+            if (db.KeyExists(key))
+            {
+                return Get<T>(key);
+            }
+            else
+            {
+                var value = setDelegate(this);
+                if (value == null)
+                {
+                    return default(T);
+                }
+
+                if (Set(key, value, expiry))
+                {
+                    return value;
+                }
+                else
+                {
+                    return default(T);
+                }
+            }
+        }
+
+        public bool Remove(string key)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return false;
+            }
+
+            return db.KeyDelete(key);
+        }
+
+        public async Task<T> GetOrSetAsync<T>(string key, SetAsyncDelegate<T> setDelegate, TimeSpan expiry)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return default(T);
+            }
+
+            if (await db.KeyExistsAsync(key))
+            {
+                return await GetAsync<T>(key);
+            }
+            else
+            {
+                var value = setDelegate(this).GetAwaiter().GetResult();
+                if (value == null)
+                {
+                    return default(T);
+                }
+
+                if (await SetAsync(key, value, expiry))
+                {
+                    return value;
+                }
+                else
+                {
+                    return default(T);
+                }
+            }
+        }
+
+        public async Task<bool> RemoveAsync(string key)
+        {
+            var db = GetDatabase();
+            if (db == null)
+            {
+                return false;
+            }
+
+            return await db.KeyDeleteAsync(key);
         }
     }
 }
