@@ -5,7 +5,7 @@ namespace ClassLib
 {
     public class DefaultHandlingAfterAttribute : HandlingAfterAttribute
     {
-        public override HandlingResult Handle(string id, object args)
+        public override HandlingResult Handle(string id, Type returnType, object args)
         {
             if (args != null)
             {

@@ -6,7 +6,7 @@ namespace ClassLib
 {
     public class DefaultHandlingBeforeAttribute : HandlingBeforeAttribute
     {
-        public override HandlingResult Handle(string id, params object[] args)
+        public override HandlingResult Handle(string id, Type returnType, params object[] args)
         {
             if (args != null)
             {

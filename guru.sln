@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guru", "src\Guru\Guru.csproj", "{328705FC-CA04-4D3E-BB4C-ED612BDBBC85}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLib", "test\ClassLib\ClassLib.csproj", "{99A31781-B4BB-42A4-8887-1A8F15C85FB6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guru.Redis", "src\Guru.Redis\Guru.Redis.csproj", "{C1BD2D12-BAC3-4451-84EC-82CF5B7C3735}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guru.Auth", "src\Guru.Auth\Guru.Auth.csproj", "{BF157B01-1098-4C4C-8511-FF119F5438FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +45,10 @@ Global
 		{C1BD2D12-BAC3-4451-84EC-82CF5B7C3735}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1BD2D12-BAC3-4451-84EC-82CF5B7C3735}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1BD2D12-BAC3-4451-84EC-82CF5B7C3735}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF157B01-1098-4C4C-8511-FF119F5438FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF157B01-1098-4C4C-8511-FF119F5438FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF157B01-1098-4C4C-8511-FF119F5438FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF157B01-1098-4C4C-8511-FF119F5438FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{82F84DBE-844D-4244-868B-87CD58EBFD02} = {E5879043-41AC-4FF0-8AFF-96FE0234FFCB}
 		{99A31781-B4BB-42A4-8887-1A8F15C85FB6} = {E5879043-41AC-4FF0-8AFF-96FE0234FFCB}
 		{C1BD2D12-BAC3-4451-84EC-82CF5B7C3735} = {3815D5C3-FE3A-46E9-AC58-44E46CB2860D}
+		{BF157B01-1098-4C4C-8511-FF119F5438FB} = {3815D5C3-FE3A-46E9-AC58-44E46CB2860D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {057B1451-F259-485F-9E88-990F86DD191A}

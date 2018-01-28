@@ -221,7 +221,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 {
                     if (!prototype.ReturnType.GetTypeInfo().IsGenericType)
                     {
-                        _ReturnTypeGenericParameters = new Type[0];
+                        _ReturnTypeGenericParameters = new Type[1] { typeof(void) };
                     }
                     else
                     {
@@ -236,7 +236,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                 if (_HandlingBefore != null)
                 {
-                    var rst = _HandlingBefore.Handle(id, parameters);
+                    var rst = _HandlingBefore.Handle(id, ReturnType, parameters);
                     if (rst == null)
                     {
                         return null;
@@ -260,7 +260,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                 if (_HandlingAfter != null)
                 {
-                    var rst = _HandlingAfter.Handle(id, result);
+                    var rst = _HandlingAfter.Handle(id, ReturnType, result);
                     if (rst == null)
                     {
                         return null;
@@ -294,6 +294,28 @@ namespace Guru.AspNetCore.Implementation.Api
             public ApiParameterInfo[] Parameters { get; set; }
 
             public MethodInfo Prototype { get; set; }
+
+            public Type ReturnType
+            {
+                get
+                {
+                    if (_IsAsyncMethod)
+                    {
+                        if (_ReturnTypeGenericParameters.HasLength())
+                        {
+                            return _ReturnTypeGenericParameters[0];
+                        }
+                        else
+                        {
+                            return typeof(void);
+                        }
+                    }
+                    else
+                    {
+                        return Prototype.ReturnType;
+                    }
+                }
+            }
         }
 
         class ApiParameterInfo

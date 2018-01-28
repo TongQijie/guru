@@ -80,7 +80,7 @@ namespace Guru.Cache.Implementation
 
                 if (type.IsValueType || type == typeof(string))
                 {
-                    item.Value = item.Value.ConvertTo(type);
+                    item.Value = entity.Value.ConvertTo(type);
                 }
                 else
                 {

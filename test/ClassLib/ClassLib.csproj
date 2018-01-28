@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Guru.Auth\Guru.Auth.csproj" />
     <ProjectReference Include="..\..\src\Guru\Guru.csproj" />
   </ItemGroup>
 
