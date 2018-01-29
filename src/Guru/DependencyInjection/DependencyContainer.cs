@@ -1,5 +1,6 @@
 ﻿using Guru.DependencyInjection.Abstractions;
 using Guru.DependencyInjection.Implementation;
+using Guru.DependencyInjection.Implementation.Configurable;
 using Guru.DependencyInjection.Implementation.DynamicProxy;
 using Guru.DependencyInjection.Implementation.StaticFile;
 using System;
@@ -37,7 +38,8 @@ namespace Guru.DependencyInjection
 
                         _ContainerInstance.Register(new DefaultDependencyRegister())
                             .Register(new DynamicProxyDependencyRegister())
-                            .Register(new StaticFileDependencyRegister());
+                            .Register(new StaticFileDependencyRegister())
+                            .Register(new ConfigurableDependencyRegister());
                     }
                 }
             }
@@ -51,6 +53,11 @@ namespace Guru.DependencyInjection
         public static T Resolve<T>()
         {
             return (T)ContainerInstance.GetImplementation(typeof(T));
+        }
+
+        public static T Resolve<T>(string dependencyName)
+        {
+            return (T)ContainerInstance.GetImplementation(dependencyName);
         }
 
         public static void RegisterSingleton(Type abstraction, Type implementationType)

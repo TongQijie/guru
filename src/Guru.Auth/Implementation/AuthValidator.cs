@@ -9,16 +9,16 @@ namespace Guru.Auth.Implementation
     [Injectable(typeof(IAuthValidator), Lifetime.Singleton)]
     public class AuthValidator : IAuthValidator
     {
-        private readonly IMemoryCacheProvider _MemoryCacheProvider;
+        private readonly ICacheProvider _CacheProvider;
 
-        public AuthValidator(IMemoryCacheProvider memoryCacheProvider)
+        public AuthValidator()
         {
-            _MemoryCacheProvider = memoryCacheProvider;
+            _CacheProvider = DependencyContainer.Resolve<ICacheProvider>("DefaultCache");
         }
 
         public void AddUid(string auth, string uid)
         {
-            _MemoryCacheProvider.Set(auth, uid, TimeSpan.FromDays(3));
+            _CacheProvider.Set(auth, uid, TimeSpan.FromDays(3));
         }
 
         public void Validate(IAuthRequest authRequest)
@@ -28,7 +28,7 @@ namespace Guru.Auth.Implementation
                 return;
             }
 
-            authRequest.Head.Uid = _MemoryCacheProvider.Get<string>(authRequest.Head.Auth);
+            authRequest.Head.Uid = _CacheProvider.Get<string>(authRequest.Head.Auth);
         }
     }
 }

@@ -23,17 +23,17 @@ namespace Guru.Redis
 
         private readonly ILogger _Logger;
 
-        private readonly IFormatter _Formatter;
+        private readonly ILightningFormatter _Formatter;
 
         private ConnectionMultiplexer _ConnectionMultiplexer;
 
         private IDatabase _Databse;
 
-        public RedisCacheProvider(IRedisConfiguration redisConfiguration, IFileLogger fileLogger, IJsonFormatter jsonFormatter)
+        public RedisCacheProvider(IRedisConfiguration redisConfiguration, IFileLogger fileLogger, IJsonLightningFormatter formatter)
         {
             _RedisConfiguration = redisConfiguration;
             _Logger = fileLogger;
-            _Formatter = jsonFormatter;
+            _Formatter = formatter;
         }
 
         private IDatabase GetDatabase()
@@ -80,7 +80,14 @@ namespace Guru.Redis
                 return default(T);
             }
 
-            return _Formatter.ReadObject<T>(db.StringGet(key), Encoding.UTF8);
+            if (typeof(T).IsValueType || typeof(T) == typeof(string))
+            {
+                return db.StringGet(key).ConvertTo<T>();
+            }
+            else
+            {
+                return _Formatter.ReadObject<T>(db.StringGet(key));
+            }
         }
 
         public T GetOrSet<T>(string key, SetDelegate<T> setDelegate)
@@ -101,7 +108,14 @@ namespace Guru.Redis
                 return default(T);
             }
 
-            return _Formatter.ReadObject<T>(db.StringGet(key), Encoding.UTF8);
+            if (typeof(T).IsValueType || typeof(T) == typeof(string))
+            {
+                return db.StringGet(key).ConvertTo<T>();
+            }
+            else
+            {
+                return _Formatter.ReadObject<T>(db.StringGet(key));
+            }
         }
 
         public bool Set<T>(string key, T value, TimeSpan expiry)
@@ -112,7 +126,14 @@ namespace Guru.Redis
                 return false;
             }
 
-            return db.StringSet(key, _Formatter.WriteString(value, Encoding.UTF8), expiry);
+            if (typeof(T).IsValueType || typeof(T) == typeof(string))
+            {
+                return db.StringSet(key, value.ToString(), expiry);
+            }
+            else
+            {
+                return db.StringSet(key, _Formatter.WriteObject(value), expiry);
+            }
         }
 
         public async Task<T> GetAsync<T>(string key)
@@ -128,7 +149,14 @@ namespace Guru.Redis
                 return default(T);
             }
 
-            return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key), Encoding.UTF8);
+            if (typeof(T).IsValueType || typeof(T) == typeof(string))
+            {
+                return (await db.StringGetAsync(key)).ConvertTo<T>();
+            }
+            else
+            {
+                return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key));
+            }
         }
 
         public async Task<T> GetOrSetAsync<T>(string key, SetAsyncDelegate<T> setAsyncDelegate)
@@ -149,7 +177,14 @@ namespace Guru.Redis
                 return default(T);
             }
 
-            return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key), Encoding.UTF8);
+            if (typeof(T).IsValueType || typeof(T) == typeof(string))
+            {
+                return (await db.StringGetAsync(key)).ConvertTo<T>();
+            }
+            else
+            {
+                return await _Formatter.ReadObjectAsync<T>(await db.StringGetAsync(key));
+            }
         }
 
         public async Task<bool> SetAsync<T>(string key, T value, TimeSpan expiry)
@@ -160,7 +195,14 @@ namespace Guru.Redis
                 return false;
             }
 
-            return await db.StringSetAsync(key, await _Formatter.WriteStringAsync(value, Encoding.UTF8), expiry);
+            if (typeof(T).IsValueType || typeof(T) == typeof(string))
+            {
+                return await db.StringSetAsync(key, value.ToString(), expiry);
+            }
+            else
+            {
+                return await db.StringSetAsync(key, await _Formatter.WriteObjectAsync(value), expiry);
+            }
         }
 
         public T GetOrSet<T>(string key, SetDelegate<T> setDelegate, TimeSpan expiry)

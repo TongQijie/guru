@@ -1,0 +1,7 @@
+﻿[
+  {
+    "Name": "DefaultCache",
+    "Type": "Guru.Cache.Implementation.DefaultMemoryCacheProvider,Guru",
+    "Lifetime": "Singleton"
+  }
+]
