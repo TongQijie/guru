@@ -18,11 +18,15 @@ namespace Guru.AspNetCore.Implementation.Api
 
         public DefaultApiFormatters(IXmlLightningFormatter xml, IJsonLightningFormatter json)
         {
-            // default json settings
-            json.OmitDefaultValue = true;
-            json.DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+            if (DependencyContainer.Contains("JsonApiFormatter"))
+            {
+                _Json = new JsonApiFormatter(DependencyContainer.Resolve<ILightningFormatter>("JsonApiFormatter"));
+            }
+            else
+            {
+                _Json = new JsonApiFormatter(json);
+            }
 
-            _Json = new JsonApiFormatter(json);
             _Xml = new XmlApiFormatter(xml);
             _Text = new TextApiFormatter();
         }

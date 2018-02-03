@@ -3,5 +3,20 @@
     "Name": "DefaultCache",
     "Type": "Guru.Cache.Implementation.DefaultMemoryCacheProvider,Guru",
     "Lifetime": "Singleton"
+  },
+  {
+    "Name": "JsonApiFormatter",
+    "Type": "Guru.Formatter.Implementation.DefaultJsonLightningFormatter,Guru",
+    "Lifetime": "Transient",
+    "Properties": [
+      {
+        "Name": "OmitDefaultValue",
+        "Value": "true"
+      },
+      {
+        "Name": "DateTimeFormat",
+        "Value": "yyyy-MM-dd HH:mm:ss"
+      }
+    ]
   }
 ]

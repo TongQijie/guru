@@ -9,5 +9,7 @@
         public Lifetime Lifetime { get; set; }
 
         public int Priority { get; set; }
+
+        public DependencyPropertyConfiguration[] Properties { get; set; }
     }
 }

@@ -69,5 +69,10 @@ namespace Guru.DependencyInjection
         {
             return ContainerInstance.Exists(abstraction);
         }
+
+        public static bool Contains(object key)
+        {
+            return ContainerInstance.Exists(key);
+        }
     }
 }

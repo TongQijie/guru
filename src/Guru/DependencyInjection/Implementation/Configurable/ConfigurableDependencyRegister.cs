@@ -80,7 +80,16 @@ namespace Guru.DependencyInjection.Implementation.Configurable
                 return;
             }
 
-            instance.Add(dependency.Name, new DefaultDependencyResolver(new DefaultDependencyDescriptor(targetType, dependency.Lifetime, dependency.Priority)));
+            var descriptor = new ConfigurableDependencyDescriptor(targetType, dependency.Lifetime, dependency.Priority);
+            if (dependency.Properties != null && dependency.Properties.Length > 0)
+            {
+                foreach (var property in dependency.Properties)
+                {
+                    descriptor.SetProperty(property.Name, property.Value);
+                }
+            }
+
+            instance.Add(dependency.Name, new ConfigurableDependencyResolver(descriptor));
         }
     }
 }
