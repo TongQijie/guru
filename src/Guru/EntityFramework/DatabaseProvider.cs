@@ -27,8 +27,7 @@ namespace Guru.EntityFramework
             DbProviderFactory factory;
             if (!_Caches.ContainsKey(database.Provider))
             {
-                //var factoryType = database.Provider.GetTypeByName();
-                var factoryType = GetFactoryType(database.Provider);
+                var factoryType = Type.GetType(database.Provider, false, true);
                 if (factoryType == null)
                 {
                     throw new Exception($"databse factory type cannot be reached by '{database.Provider}'");
@@ -59,20 +58,6 @@ namespace Guru.EntityFramework
             }
 
             return configuration.Items.FirstOrDefault(x => x.Name.EqualsWith(name));
-        }
-
-        private Type GetFactoryType(string stringValue)
-        {
-            foreach (var a in AssemblyLoader.Instance.GetAssemblies())
-            {
-                var type = a.GetType(stringValue, false, true);
-                if (type != null)
-                {
-                    return type;
-                }
-            }
-
-            return null;
         }
     }
 }

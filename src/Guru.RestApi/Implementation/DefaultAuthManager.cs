@@ -13,9 +13,16 @@ namespace Guru.RestApi.Implementation
     {
         private readonly ICacheProvider _CacheProvider;
 
-        public DefaultAuthManager()
+        public DefaultAuthManager(IMemoryCacheProvider memoryCacheProvider)
         {
-            _CacheProvider = DependencyContainer.Resolve<ICacheProvider>("DefaultCache");
+            if (DependencyContainer.Contains("DefaultCache"))
+            {
+                _CacheProvider = DependencyContainer.Resolve<ICacheProvider>("DefaultCache");
+            }
+            else
+            {
+                _CacheProvider = memoryCacheProvider;
+            }
         }
 
         public void Create(string auth, string uid)

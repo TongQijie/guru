@@ -27,9 +27,9 @@ namespace ConsoleApp
 
         public int Run(string[] args)
         {
-            //new DependencyInjection.TestRunner().Run();
+            new DependencyInjection.TestRunner().Run();
 
-            new Formatter.TestRunner().Run();
+            //new Formatter.TestRunner().Run();
 
             //new Network.TestRunner().Run();
 

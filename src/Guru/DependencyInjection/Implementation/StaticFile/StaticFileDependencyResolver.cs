@@ -93,19 +93,12 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
                                 {
                                     var collection = Activator.CreateInstance(decorator.ImplementationType) as IList;
 
-                                    var collectionType = decorator.ImplementationType;
-                                    Type elementType = null;
-                                    while ((elementType = collectionType.GetTypeInfo().GetGenericArguments().FirstOrDefault()) == null)
-                                    {
-                                        collectionType = collectionType.GetTypeInfo().BaseType;
-                                    }
-
                                     var folder = decorator.Path.Folder();
                                     foreach (var fileInfo in new DirectoryInfo(folder).GetFiles())
                                     {
                                         if (Regex.IsMatch(fileInfo.Name, _PathExpression))
                                         {
-                                            var elements = _Formatter.ReadObject(collectionType, fileInfo.FullName) as IList;
+                                            var elements = _Formatter.ReadObject(decorator.ImplementationType, fileInfo.FullName) as IList;
                                             if (elements == null || elements.Count == 0)
                                             {
                                                 continue;
