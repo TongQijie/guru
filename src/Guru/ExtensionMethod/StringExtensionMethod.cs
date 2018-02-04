@@ -194,5 +194,18 @@ namespace Guru.ExtensionMethod
         {
             return lowercase ? CryptoUtils.Sha1(stringValue) : CryptoUtils.Sha1(stringValue).ToUpper();
         }
+
+        public static bool Exists(this string stringValue, Predicate<char> predicate)
+        {
+            foreach (var c in stringValue)
+            {
+                if (predicate(c))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

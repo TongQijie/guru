@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,6 +10,7 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
+using System.IO;
 
 namespace Guru.Network
 {
@@ -62,12 +63,12 @@ namespace Guru.Network
             return new DefaultHttpClientResponse(await _Client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead));
         }
 
-        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : IFormatter
+        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : ILightningFormatter
         {
             return await InternalPostAsync<TFormatter>(uri, body, contentHeaders); 
         }
 
-        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : IFormatter
+        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : ILightningFormatter
         {
             if (queryString != null)
             {
@@ -85,7 +86,7 @@ namespace Guru.Network
                  body = string.Join("&", formData.Select(x => $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}"));
             }
 
-            return await PostAsync<ITextFormatter>(uri, queryString, body, contentHeaders);
+            return await PostAsync<ILightningFormatter>(uri, queryString, body, contentHeaders);
         }
 
         private string AddQueryString(string uri, IDictionary<string, string> queryString)
@@ -104,9 +105,14 @@ namespace Guru.Network
             return uri + string.Join("&", queryString.Select(x => $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}"));
         }
 
-        private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : IFormatter
+        private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : ILightningFormatter
         {
-            var bytes = DependencyContainer.Resolve<TFormatter>().WriteBytes(body);
+            byte[] bytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                await DependencyContainer.Resolve<TFormatter>().WriteObjectAsync(body, memoryStream);
+                bytes = memoryStream.ToArray();
+            }
 
             using (var content = new ByteArrayContent(bytes))
             {

@@ -8,6 +8,8 @@ using Guru.DependencyInjection;
 using Guru.EntityFramework.Abstractions;
 using Guru.EntityFramework.Configuration;
 using Guru.DependencyInjection.Attributes;
+using Guru.Logging.Abstractions;
+using Guru.Logging;
 
 namespace Guru.EntityFramework
 {
@@ -16,12 +18,20 @@ namespace Guru.EntityFramework
     {
         private ConcurrentDictionary<string, DbProviderFactory> _Caches = new ConcurrentDictionary<string, DbProviderFactory>();
 
+        private readonly ILogger _Logger;
+
+        public DatabaseProvider(IFileLogger fileLogger)
+        {
+            _Logger = fileLogger;
+        }
+
         public IDatabase GetDatabase(string name)
         {
             var database = GetDatabaseItem(name);
             if (database == null)
             {
-                throw new Exception($"database '{name}' does not exist in databases.xml.");
+                _Logger.LogEvent(nameof(DatabaseProvider), Severity.Error, $"database '{name}' does not exist in databases.xml.");
+                return null;
             }
 
             DbProviderFactory factory;
@@ -30,13 +40,15 @@ namespace Guru.EntityFramework
                 var factoryType = Type.GetType(database.Provider, false, true);
                 if (factoryType == null)
                 {
-                    throw new Exception($"databse factory type cannot be reached by '{database.Provider}'");
+                    _Logger.LogEvent(nameof(DatabaseProvider), Severity.Error, $"databse factory type cannot be reached by '{database.Provider}'");
+                    return null;
                 }
 
                 var instance = factoryType.GetField("Instance", BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
                 if (instance == null)
                 {
-                    throw new Exception($"database factory instance cannot be found from type '{factoryType.FullName}'.");
+                    _Logger.LogEvent(nameof(DatabaseProvider), Severity.Error, $"database factory instance cannot be found from type '{factoryType.FullName}'.");
+                    return null;
                 }
 
                 factory = _Caches.GetOrAdd(database.Provider, instance.GetValue(null) as DbProviderFactory);

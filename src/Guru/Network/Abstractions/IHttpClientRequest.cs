@@ -11,9 +11,9 @@ namespace Guru.Network.Abstractions
 
          Task<IHttpClientResponse> GetAsync(string uri, IDictionary<string, string> queryString);
 
-         Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : IFormatter;
+         Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : ILightningFormatter;
 
-         Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : IFormatter;
+         Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : ILightningFormatter;
 
          Task<IHttpClientResponse> PostAsync(string uri, IDictionary<string, string> queryString, Dictionary<string, string> formData, Dictionary<string, string> contentHeaders = null);
     }

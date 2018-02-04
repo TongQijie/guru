@@ -5,6 +5,8 @@ using Guru.DependencyInjection;
 using Guru.EntityFramework.Abstractions;
 using Guru.EntityFramework.Configuration;
 using Guru.DependencyInjection.Attributes;
+using Guru.Logging.Abstractions;
+using Guru.Logging;
 
 namespace Guru.EntityFramework
 {
@@ -13,9 +15,12 @@ namespace Guru.EntityFramework
     {
         private readonly IDatabaseProvider _DatabaseProvider;
 
-        public CommandProvider(IDatabaseProvider databaseProvider)
+        private readonly ILogger _Logger;
+
+        public CommandProvider(IDatabaseProvider databaseProvider, IFileLogger fileLogger)
         {
             _DatabaseProvider = databaseProvider;
+            _Logger = fileLogger;
         }
 
         public ICommand GetCommand(string name)
@@ -23,13 +28,18 @@ namespace Guru.EntityFramework
             var item = GetCommandItem(name);
             if (item == null)
             {
-                throw new Exception($"command '{name}' doest not exist in commands_*.xml.");
+                _Logger.LogEvent(nameof(CommandProvider), Severity.Error, $"command '{name}' doest not exist in commands_*.xml.");
+                return null;
+            }
+
+            var database = _DatabaseProvider.GetDatabase(item.Database);
+            if (database == null)
+            {
+                return null;
             }
 
             try
             {
-                var database = _DatabaseProvider.GetDatabase(item.Database);
-
                 var command = new Command(database, item.CommandType, item.CommandText);
                 if (item.Parameters.HasLength())
                 {
@@ -43,8 +53,10 @@ namespace Guru.EntityFramework
             }
             catch (Exception e)
             {
-                throw new Exception($"some error has occur when getting command '{name}'.", e);
+                _Logger.LogEvent(nameof(CommandProvider), Severity.Error, $"some error has occur when getting command '{name}'.", e);
             }
+
+            return null;
         }
 
         private CommandItemConfiguration GetCommandItem(string name)
