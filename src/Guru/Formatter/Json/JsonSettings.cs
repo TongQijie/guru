@@ -13,17 +13,22 @@ namespace Guru.Formatter.Json
 
         private readonly string _DateTimeFormat;
 
+        private readonly bool _ElementKeyIgnoreCase;
+
+        private readonly bool _OmitNullValue;
+
         public JsonSettings()
         {
             _CurrentEncoding = Encoding.UTF8;
-            _OmitDefaultValue = true;
         }
 
-        public JsonSettings(Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
+        public JsonSettings(Encoding encoding, bool omitDefaultValue, string dateTimeFormat, bool elementKeyIgnoreCase, bool omitNullValue)
         {
             _CurrentEncoding = encoding;
             _OmitDefaultValue = omitDefaultValue;
             _DateTimeFormat = dateTimeFormat;
+            _ElementKeyIgnoreCase = elementKeyIgnoreCase;
+            _OmitNullValue = omitNullValue;
         }
 
         public Encoding CurrentEncoding => _CurrentEncoding;
@@ -31,6 +36,10 @@ namespace Guru.Formatter.Json
         public bool OmitDefaultValue => _OmitDefaultValue;
 
         public string DateTimeFormat => _DateTimeFormat;
+
+        public bool ElementKeyIgnoreCase => _ElementKeyIgnoreCase;
+
+        public bool OmitNullValue => _OmitNullValue;
 
         public object DeserializeValue(JValue value, Type targetType)
         {

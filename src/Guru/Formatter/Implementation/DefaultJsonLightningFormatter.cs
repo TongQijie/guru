@@ -16,14 +16,18 @@ namespace Guru.Formatter.Implementation
 
         public string DateTimeFormat { get; set; }
 
+        public bool ElementKeyIgnoreCase { get; set; }
+
+        public bool OmitNullValue { get; set; }
+
         public override async Task<object> ReadObjectAsync(Type targetType, Stream stream)
         {
-            return await JsonSerializer.GetSerializer(targetType, Encoding.UTF8, OmitDefaultValue, DateTimeFormat ?? "").DeserializeAsync(stream);
+            return await JsonSerializer.GetSerializer(targetType, new JsonSettings(Encoding.UTF8, OmitDefaultValue, DateTimeFormat ?? "", ElementKeyIgnoreCase, OmitNullValue)).DeserializeAsync(stream);
         }
 
         public override async Task WriteObjectAsync(object instance, Stream stream)
         {
-            await JsonSerializer.GetSerializer(instance.GetType(), Encoding.UTF8, OmitDefaultValue, DateTimeFormat ?? "").SerializeAsync(instance, stream);
+            await JsonSerializer.GetSerializer(instance.GetType(), new JsonSettings(Encoding.UTF8, OmitDefaultValue, DateTimeFormat ?? "", ElementKeyIgnoreCase, OmitNullValue)).SerializeAsync(instance, stream);
         }
     }
 }

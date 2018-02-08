@@ -15,10 +15,10 @@ namespace Guru.Formatter.Json
 {
     internal class JsonSerializer
     {
-        public JsonSerializer(Type type, Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
+        public JsonSerializer(Type type, JsonSettings jsonSettings)
         {
             Type = type;
-            JsonSettings = new JsonSettings(encoding, omitDefaultValue, dateTimeFormat);
+            JsonSettings = jsonSettings;
 
             JsonType = JsonUtility.GetJsonType(Type);
             Initialize();
@@ -74,7 +74,14 @@ namespace Guru.Formatter.Json
                                     jsonProperty = new JsonProperty(propertyInfo, attribute.Alias, false);
                                 }
 
-                                JsonProperties.TryAdd(jsonProperty.Key, jsonProperty);
+                                if (JsonSettings.ElementKeyIgnoreCase)
+                                {
+                                    JsonProperties.TryAdd(jsonProperty.Key.ToLower(), jsonProperty);
+                                }
+                                else
+                                {
+                                    JsonProperties.TryAdd(jsonProperty.Key, jsonProperty);
+                                }
                             }
                         }
 
@@ -95,12 +102,12 @@ namespace Guru.Formatter.Json
             get { return _Caches ?? (_Caches = new ConcurrentDictionary<string, JsonSerializer>()); }
         }
 
-        private static string GetSerializerKey(Type type, Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
+        private static string GetSerializerKey(Type type, JsonSettings jsonSettings)
         {
-            return $"{type.FullName};{encoding.EncodingName};{omitDefaultValue.ToString()};{dateTimeFormat}";
+            return $"{type.FullName};{jsonSettings.CurrentEncoding.EncodingName};{jsonSettings.OmitDefaultValue.ToString()};{jsonSettings.DateTimeFormat};{jsonSettings.ElementKeyIgnoreCase};{jsonSettings.OmitNullValue}".Md5();
         }
 
-        public static JsonSerializer GetSerializer(Type targetType, Encoding encoding, bool omitDefaultValue, string dateTimeFormat)
+        public static JsonSerializer GetSerializer(Type targetType, JsonSettings jsonSettings)
         {
             var jsonType = JsonUtility.GetJsonType(targetType);
             if (jsonType == JType.Dynamic || jsonType == JType.Value)
@@ -108,12 +115,12 @@ namespace Guru.Formatter.Json
                 return null;
             }
 
-            var serializerKey = GetSerializerKey(targetType, encoding, omitDefaultValue, dateTimeFormat);
+            var serializerKey = GetSerializerKey(targetType, jsonSettings);
 
             JsonSerializer serializer;
             if (!Caches.ContainsKey(serializerKey))
             {
-                return Caches.GetOrAdd(serializerKey, new JsonSerializer(targetType, encoding, omitDefaultValue, dateTimeFormat));
+                return Caches.GetOrAdd(serializerKey, new JsonSerializer(targetType, jsonSettings));
             }
             else if (Caches.TryGetValue(serializerKey, out serializer))
             {
@@ -201,6 +208,11 @@ namespace Guru.Formatter.Json
                     continue;
                 }
 
+                if (JsonSettings.OmitNullValue && propertyValue == null)
+                {
+                    continue;
+                }
+
                 if (firstElement)
                 {
                     firstElement = false;
@@ -228,6 +240,11 @@ namespace Guru.Formatter.Json
             {
                 var propertyValue = jsonProperty.PropertyInfo.GetValue(value, null);
                 if (JsonSettings.OmitDefaultValue && jsonProperty.DefaultValue.EqualsWith(propertyValue))
+                {
+                    continue;
+                }
+
+                if (JsonSettings.OmitNullValue && propertyValue == null)
                 {
                     continue;
                 }
@@ -266,6 +283,11 @@ namespace Guru.Formatter.Json
             var firstElement = true;
             foreach (var key in dictionary.Keys)
             {
+                if (JsonSettings.OmitNullValue && dictionary[key] == null)
+                {
+                    continue;
+                }
+
                 if (firstElement)
                 {
                     firstElement = false;
@@ -300,6 +322,11 @@ namespace Guru.Formatter.Json
             var firstElement = true;
             foreach (var key in dictionary.Keys)
             {
+                if (JsonSettings.OmitNullValue && dictionary[key] == null)
+                {
+                    continue;
+                }
+
                 if (firstElement)
                 {
                     firstElement = false;
@@ -393,7 +420,7 @@ namespace Guru.Formatter.Json
             }
             else
             {
-                GetSerializer(value.GetType(), JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).Serialize(value, stream);
+                GetSerializer(value.GetType(), JsonSettings).Serialize(value, stream);
             }
         }
 
@@ -414,7 +441,7 @@ namespace Guru.Formatter.Json
             }
             else
             {
-                await GetSerializer(value.GetType(), JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalSerializeAsync(value, stream);
+                await GetSerializer(value.GetType(), JsonSettings).InternalSerializeAsync(value, stream);
             }
         }
 
@@ -479,6 +506,11 @@ namespace Guru.Formatter.Json
                 {
                     var key = JsonSettings.CurrentEncoding.GetString(element.Key);
 
+                    if (JsonSettings.ElementKeyIgnoreCase)
+                    {
+                        key = key.ToLower();
+                    }
+
                     JsonProperty jsonProperty;
                     JsonProperties.TryGetValue(key, out jsonProperty);
                     if (jsonProperty == null)
@@ -501,7 +533,7 @@ namespace Guru.Formatter.Json
                     {
                         if (element is JObject)
                         {
-                            var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(element);
+                            var value = GetSerializer(jsonProperty.PropertyInfo.PropertyType, JsonSettings).InternalDeserialize(element);
                             jsonProperty.PropertyInfo.SetValue(instance, value, null);
                         }
                         else if (element is JValue)
@@ -574,7 +606,7 @@ namespace Guru.Formatter.Json
                     {
                         if (element is JObject)
                         {
-                            dictValue = GetSerializer(args[1], JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(element);
+                            dictValue = GetSerializer(args[1], JsonSettings).InternalDeserialize(element);
                         }
                         else if (element is JValue)
                         {
@@ -629,12 +661,12 @@ namespace Guru.Formatter.Json
                     var jsonObject = collectionObject.Elements[i];
                     if (jsonObject is JObject)
                     {
-                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings).InternalDeserialize(jsonObject);
                         array.SetValue(value, i);
                     }
                     else if (jsonObject is JArray)
                     {
-                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings).InternalDeserialize(jsonObject);
                         array.SetValue(value, i);
                     }
                     else if (jsonObject is JValue)
@@ -655,12 +687,12 @@ namespace Guru.Formatter.Json
                     var jsonObject = collectionObject.Elements[i];
                     if (jsonObject is JObject)
                     {
-                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings).InternalDeserialize(jsonObject);
                         collection.Add(value);
                     }
                     else if (jsonObject is JArray)
                     {
-                        var value = GetSerializer(elementType, JsonSettings.CurrentEncoding, JsonSettings.OmitDefaultValue, JsonSettings.DateTimeFormat).InternalDeserialize(jsonObject);
+                        var value = GetSerializer(elementType, JsonSettings).InternalDeserialize(jsonObject);
                         collection.Add(value);
                     }
                     else if (jsonObject is JValue)
