@@ -89,7 +89,8 @@ namespace Guru.AspNetCore.Implementation.Api
                     }
                     else
                     {
-                        if (context.InputStream.CanRead &&
+                        if (context.InputStream != null &&
+                            context.InputStream.CanRead &&
                             apiParameterInfo.Prototype.ParameterType != typeof(string) &&
                             apiParameterInfo.Prototype.ParameterType.GetTypeInfo().IsClass)
                         {

@@ -61,5 +61,42 @@ namespace Guru.Executable
 
             _LoggerKeeper.DisposeAll();
         }
+
+        public void RunAsync(string[] args, bool loop = false)
+        {
+            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application started.");
+
+            try
+            {
+                if (DependencyContainer.Resolve<IConsoleExecutable>().RunAsync(args).GetAwaiter().GetResult() == 0)
+                {
+                    if (loop)
+                    {
+                        _InstanceAlive = true;
+
+                        Console.CancelKeyPress += (sender, eventArgs) =>
+                        {
+                            _InstanceAlive = false;
+                            eventArgs.Cancel = true;
+                        };
+
+                        Console.WriteLine("Application started. Press Ctrl+C to shut down.");
+                        while (_InstanceAlive)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application occurred an unhandled exception.", e);
+                Console.WriteLine($"Application aborted. {e.Message}");
+            }
+
+            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application stopped.");
+
+            _LoggerKeeper.DisposeAll();
+        }
     }
 }
