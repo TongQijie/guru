@@ -47,5 +47,10 @@ namespace ConsoleApp
             
             return 0;
         }
+
+        public Task<int> RunAsync(string[] args)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

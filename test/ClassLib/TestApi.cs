@@ -1,7 +1,7 @@
 ﻿using Guru.AspNetCore.Attributes;
-using Guru.Auth;
-using Guru.Auth.Abstractions;
 using Guru.Cache.Abstractions;
+using Guru.RestApi;
+using Guru.RestApi.Abstractions;
 using System;
 
 namespace ClassLib
@@ -11,12 +11,12 @@ namespace ClassLib
     {
         private readonly IMemoryCacheProvider _MemoryCacheProvider;
 
-        private static IAuthValidator _AuthValidator;
+        private static IAuthManager _AuthManager;
 
-        public TestApi(IMemoryCacheProvider memoryCacheProvider, IAuthValidator authValidator)
+        public TestApi(IMemoryCacheProvider memoryCacheProvider, IAuthManager authManager)
         {
             _MemoryCacheProvider = memoryCacheProvider;
-            _AuthValidator = authValidator;
+            _AuthManager = authManager;
         }
 
         [ApiMethod("sayHi")]
@@ -35,17 +35,17 @@ namespace ClassLib
         public string Login(string uid)
         {
             var auth = Guid.NewGuid().ToString().Replace("-", "");
-            _AuthValidator.AddUid(auth, uid);
+            _AuthManager.Create(auth, uid);
             return auth;
         }
 
         [ApiMethod("query")]
-        [AuthValidate]
+        [RestApiPrefix(AuthValidatingEnum.Required)]
         public QueryResponse Query(QueryRequest request)
         {
             return new QueryResponse()
             {
-                Uid = request.Head.Uid,
+                Uid = request.Head.Extensions["uid"],
             };
         }
 
@@ -60,14 +60,14 @@ namespace ClassLib
             public string Value { get; set; }
         }
 
-        public class QueryRequest : IAuthRequest
+        public class QueryRequest : IAuthRestApiRequest
         {
-            public AuthRequestHeader Head { get; set; }
+            public AuthRestApiRequestHead Head { get; set; }
         }
 
-        public class QueryResponse : IAuthResponse
+        public class QueryResponse : IRestApiResponse
         {
-            public AuthResponseHeader Head { get; set; }
+            public RestApiResponseHead Head { get; set; }
 
             public string Uid { get; set; }
         }

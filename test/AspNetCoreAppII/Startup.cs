@@ -9,6 +9,7 @@ using Guru.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Guru.AspNetCore.Delegates;
 using Guru.Cache.Abstractions;
+using System.Threading.Tasks;
 
 namespace AspNetCoreAppII
 {
@@ -41,6 +42,11 @@ namespace AspNetCoreAppII
             _MemoryCacheProvider.Dispose();
 
             return 0;
+        }
+
+        public Task<int> RunAsync(string[] args)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
