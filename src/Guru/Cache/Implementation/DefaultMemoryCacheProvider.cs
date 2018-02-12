@@ -23,6 +23,7 @@ namespace Guru.Cache.Implementation
         public DefaultMemoryCacheProvider(IFileLogger fileLogger)
         {
             _Logger = fileLogger;
+            Persistent = true;
             SecondsToClean = 60;
         }
 

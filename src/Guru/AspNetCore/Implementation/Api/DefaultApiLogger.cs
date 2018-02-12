@@ -1,13 +1,14 @@
 using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
+using Guru.Executable.Abstractions;
 using Guru.ExtensionMethod;
 using Guru.Formatter.Abstractions;
 using Guru.Logging;
-using Guru.Logging.Abstractions;
 using Guru.Logging.Implementation;
 
 namespace Guru.AspNetCore.Implementation.Api
@@ -15,10 +16,10 @@ namespace Guru.AspNetCore.Implementation.Api
     [Injectable(typeof(IApiLogger), Lifetime.Singleton)]
     internal class DefaultApiLogger : DefaultFileLogger, IApiLogger
     {
-        private readonly IFormatter _Formatter;
+        private readonly ILightningFormatter _Formatter;
 
-        public DefaultApiLogger(ILoggerKeeper loggerKeeper, IJsonFormatter formatter)
-            : base(loggerKeeper)
+        public DefaultApiLogger(IZooKeeper zooKeeper, IJsonLightningFormatter formatter)
+            : base(zooKeeper)
         {
             Folder = "./ApiLog".FullPath();
             Interval = 5000;
@@ -54,7 +55,7 @@ namespace Guru.AspNetCore.Implementation.Api
                     }
                     else
                     {
-                        stringBuilder.AppendLine($"[Request] {_Formatter.WriteString(requestBody, Encoding.UTF8)}");
+                        stringBuilder.AppendLine($"[Request] {_Formatter.WriteObject(requestBody)}");
                     }
                 }
             }
@@ -70,7 +71,7 @@ namespace Guru.AspNetCore.Implementation.Api
             }
             else
             {
-                stringBuilder.AppendLine($"[Response] {_Formatter.WriteString(responseBody, Encoding.UTF8)}");
+                stringBuilder.AppendLine($"[Response] {_Formatter.WriteObject(responseBody)}");
             }
 
             LogEvent(nameof(DefaultApiLogger), Severity.Information, stringBuilder.ToString());

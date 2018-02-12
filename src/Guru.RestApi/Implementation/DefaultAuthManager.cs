@@ -3,7 +3,6 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.RestApi.Abstractions;
 using Guru.ExtensionMethod;
-using System.Collections.Generic;
 using System;
 
 namespace Guru.RestApi.Implementation
@@ -30,25 +29,21 @@ namespace Guru.RestApi.Implementation
             _CacheProvider.Set(auth, uid, TimeSpan.FromDays(3));
         }
 
-        public bool Validate(AuthRestApiRequestHead head)
+        public bool Validate(IAuthRestApiRequest request)
         {
-            if (head == null || !head.Auth.HasValue())
+            var auth = request.GetAuth();
+            if (!auth.HasValue())
             {
                 return false;
             }
 
-            var uid = _CacheProvider.Get<string>(head.Auth);
+            var uid = _CacheProvider.Get<string>(auth);
             if (!uid.HasValue())
             {
                 return false;
             }
 
-            if (head.Extensions == null)
-            {
-                head.Extensions = new Dictionary<string, string>();
-            }
-
-            head.Extensions["uid"] = uid;
+            request.SetUid(uid);
             return true;
         }
     }

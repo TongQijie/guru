@@ -55,13 +55,7 @@ namespace Guru.RestApi
                     return CreateAuthFailureResult(returnType);
                 }
 
-                var head = (request as IAuthRestApiRequest).Head;
-                if (head == null || !head.Auth.HasValue())
-                {
-                    return CreateAuthFailureResult(returnType);
-                }
-
-                var result = _AuthManager.Validate(head);
+                var result = _AuthManager.Validate(request as IAuthRestApiRequest);
 
                 if (!result)
                 {
@@ -81,13 +75,7 @@ namespace Guru.RestApi
                     return null;
                 }
 
-                var head = (request as IAuthRestApiRequest).Head;
-                if (head == null || !head.Auth.HasValue())
-                {
-                    return CreateAuthFailureResult(returnType);
-                }
-
-                var result = _AuthManager.Validate(head);
+                var result = _AuthManager.Validate(request as IAuthRestApiRequest);
 
                 if (!result)
                 {

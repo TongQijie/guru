@@ -9,13 +9,14 @@ using Guru.ExtensionMethod;
 using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Attributes;
+using Guru.Executable.Abstractions;
 
 namespace Guru.Logging.Implementation
 {
     [Injectable(typeof(IFileLogger), Lifetime.Singleton)]
     internal class DefaultFileLogger : AbstractLogger, IFileLogger
     {
-        public DefaultFileLogger(ILoggerKeeper loggerKeeper) : base(loggerKeeper)
+        public DefaultFileLogger(IZooKeeper loggerKeeper) : base(loggerKeeper)
         {
             Folder = "./DefaultLog".FullPath();
             Interval = 3000;
@@ -133,8 +134,6 @@ namespace Guru.Logging.Implementation
             }
 
             Console.WriteLine($"{LoggerName} disposed.");
-
-            base.Dispose();
         }
 
         class Item

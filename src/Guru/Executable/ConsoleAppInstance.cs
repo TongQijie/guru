@@ -13,15 +13,15 @@ namespace Guru.Executable
 
         public static ConsoleAppInstance Default { get { return _Default ?? (_Default = new ConsoleAppInstance()); } }
 
+        private readonly ILogger _Logger;
+
+        private readonly IZooKeeper _ZooKeeper;
+
         private ConsoleAppInstance()
         {
             _Logger = DependencyContainer.Resolve<IFileLogger>();
-            _LoggerKeeper = DependencyContainer.Resolve<ILoggerKeeper>();
+            _ZooKeeper = DependencyContainer.Resolve<IZooKeeper>();
         }
-
-        private readonly ILogger _Logger;
-
-        private readonly ILoggerKeeper _LoggerKeeper;
 
         private bool _InstanceAlive = false;
 
@@ -59,7 +59,7 @@ namespace Guru.Executable
 
             _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application stopped.");
 
-            _LoggerKeeper.DisposeAll();
+            _ZooKeeper.RemoveAll();
         }
 
         public void RunAsync(string[] args, bool loop = false)
@@ -96,7 +96,7 @@ namespace Guru.Executable
 
             _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application stopped.");
 
-            _LoggerKeeper.DisposeAll();
+            _ZooKeeper.RemoveAll();
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     public interface IAuthManager
     {
-        bool Validate(AuthRestApiRequestHead head);
+        bool Validate(IAuthRestApiRequest request);
 
         void Create(string auth, string uid);
     }

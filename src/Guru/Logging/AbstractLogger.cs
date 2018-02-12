@@ -1,22 +1,17 @@
-﻿using Guru.Logging.Abstractions;
+﻿using Guru.Executable.Abstractions;
+using Guru.Logging.Abstractions;
 
 namespace Guru.Logging
 {
     public abstract class AbstractLogger : ILogger
     {
-        public AbstractLogger(ILoggerKeeper loggerKeeper)
+        public AbstractLogger(IZooKeeper zooKeeper)
         {
-            _LoggerKeeper = loggerKeeper;
-            _LoggerKeeper.Connect(this);
+            zooKeeper.Add(this);
         }
-
-        private readonly ILoggerKeeper _LoggerKeeper;
 
         public abstract void LogEvent(string category, Severity severity, params object[] parameters);
 
-        public virtual void Dispose()
-        {
-            _LoggerKeeper.Disconnect(this);
-        }
+        public virtual void Dispose() { }
     }
 }

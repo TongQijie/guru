@@ -57,7 +57,14 @@ namespace Guru.DependencyInjection
 
         public static T Resolve<T>(string dependencyName)
         {
-            return (T)ContainerInstance.GetImplementation(dependencyName);
+            if (ContainerInstance.Exists(dependencyName))
+            {
+                return (T)ContainerInstance.GetImplementation(dependencyName);
+            }
+            else
+            {
+                return (T)ContainerInstance.GetImplementation(typeof(T));
+            }
         }
 
         public static void RegisterSingleton(Type abstraction, Type implementationType)
