@@ -49,5 +49,18 @@ namespace Guru.RestApi
 
             return authRestApiRequest.Head.Extensions["uid"];
         }
+
+        public static string GetExtensionValue(this IAuthRestApiRequest authRestApiRequest, string key)
+        {
+            if (authRestApiRequest == null ||
+                authRestApiRequest.Head == null ||
+                authRestApiRequest.Head.Extensions == null ||
+                !authRestApiRequest.Head.Extensions.ContainsKey(key))
+            {
+                return null;
+            }
+
+            return authRestApiRequest.Head.Extensions[key];
+        }
     }
 }
