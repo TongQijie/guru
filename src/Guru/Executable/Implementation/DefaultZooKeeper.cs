@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using Guru.DependencyInjection;
+using Guru.DependencyInjection.Attributes;
 using Guru.Executable.Abstractions;
 
 namespace Guru.Executable.Implementation
 {
+    [Injectable(typeof(IZooKeeper), Lifetime.Singleton)]
     public class DefaultZooKeeper : IZooKeeper
     {
         private ConcurrentBag<IDisposable> _Animals = new ConcurrentBag<IDisposable>();
