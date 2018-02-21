@@ -1,6 +1,8 @@
-﻿namespace Guru.Logging.Abstractions
+﻿using System;
+
+namespace Guru.Logging.Abstractions
 {
-    public interface IFileLogger : ILogger
+    public interface IFileLogger : ILogger, IDisposable
     {
         string Folder { get; set; }
 

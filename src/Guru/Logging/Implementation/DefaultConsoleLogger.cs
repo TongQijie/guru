@@ -38,7 +38,5 @@ namespace Guru.Logging.Implementation
         {
             LogEvent(string.Empty, severity, parameters);
         }
-
-        public void Dispose() { }
     }
 }

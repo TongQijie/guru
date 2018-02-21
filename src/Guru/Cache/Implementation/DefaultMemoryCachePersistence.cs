@@ -43,7 +43,9 @@ namespace Guru.Cache.Implementation
                 entities.Add(entity);
             }
 
-            using (var outputStream = new FileStream("./MemoryCache.dat".FullPath(), FileMode.Create, FileAccess.Write))
+            "./Cache".EnsureFolder();
+
+            using (var outputStream = new FileStream("./Cache/MemoryCache.dat".FullPath(), FileMode.Create, FileAccess.Write))
             {
                 _Formatter.WriteObject(entities, outputStream);
             }
@@ -51,13 +53,13 @@ namespace Guru.Cache.Implementation
 
         public IEnumerable<DefaultMemoryCacheItem> RestoreFromFile()
         {
-            if (!"./MemoryCache.dat".IsFile())
+            if (!"./Cache/MemoryCache.dat".IsFile())
             {
                 return null;
             }
 
             List<Entity> entities = null;
-            using (var inputStream = new FileStream("./MemoryCache.dat".FullPath(), FileMode.Open, FileAccess.Read))
+            using (var inputStream = new FileStream("./Cache/MemoryCache.dat".FullPath(), FileMode.Open, FileAccess.Read))
             {
                 entities = _Formatter.ReadObject<List<Entity>>(inputStream);
             }

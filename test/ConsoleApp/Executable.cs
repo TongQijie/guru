@@ -27,7 +27,7 @@ namespace ConsoleApp
 
         public int Run(string[] args)
         {
-            new DependencyInjection.TestRunner().Run();
+            //new DependencyInjection.TestRunner().Run();
 
             //new Formatter.TestRunner().Run();
 
@@ -37,7 +37,7 @@ namespace ConsoleApp
 
             // new EntityFramework.TestRunner().Run();
 
-            //new Cache.TestRunner().Run();
+            new Cache.TestRunner().Run();
 
             // new Mq.TestRunner().Run();
 

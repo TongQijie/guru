@@ -10,6 +10,7 @@ using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Attributes;
 using Guru.Logging;
+using Guru.Executable.Abstractions;
 
 namespace Guru.Cache.Implementation
 {
@@ -20,11 +21,12 @@ namespace Guru.Cache.Implementation
 
         private readonly ILogger _Logger;
 
-        public DefaultMemoryCacheProvider(IFileLogger fileLogger)
+        public DefaultMemoryCacheProvider(IFileLogger fileLogger, IZooKeeper zooKeeper)
         {
             _Logger = fileLogger;
             Persistent = true;
             SecondsToClean = 60;
+            zooKeeper.Add(this);
         }
 
         private bool _Alive = false;
@@ -51,9 +53,12 @@ namespace Guru.Cache.Implementation
                         try
                         {
                             var items = new DefaultMemoryCachePersistence().RestoreFromFile();
-                            foreach (var item in items)
+                            if (items != null)
                             {
-                                _Memory.TryAdd(item.Key, item);
+                                foreach (var item in items)
+                                {
+                                    _Memory.TryAdd(item.Key, item);
+                                }
                             }
                         }
                         catch (Exception e)

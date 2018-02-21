@@ -14,12 +14,13 @@ using Guru.Executable.Abstractions;
 namespace Guru.Logging.Implementation
 {
     [Injectable(typeof(IFileLogger), Lifetime.Singleton)]
-    internal class DefaultFileLogger : AbstractLogger, IFileLogger
+    internal class DefaultFileLogger : IFileLogger
     {
-        public DefaultFileLogger(IZooKeeper loggerKeeper) : base(loggerKeeper)
+        public DefaultFileLogger(IZooKeeper zooKeeper)
         {
             Folder = "./DefaultLog".FullPath();
             Interval = 3000;
+            zooKeeper.Add(this);
         }
 
         public string Folder { get; set; }
@@ -28,7 +29,7 @@ namespace Guru.Logging.Implementation
 
         private string LoggerName => $"LogThread({Folder.Name()})";
 
-        public override void LogEvent(string category, Severity severity, params object[] parameters)
+        public void LogEvent(string category, Severity severity, params object[] parameters)
         {
             _Items.Enqueue(new Item(category, severity, parameters));
 
@@ -111,7 +112,7 @@ namespace Guru.Logging.Implementation
             }
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             _IsAlive = false;
 

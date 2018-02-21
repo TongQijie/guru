@@ -13,10 +13,7 @@ namespace Guru.Executable.Implementation
 
         public void Add(IDisposable disposable)
         {
-            if (!_Animals.TryPeek(out var d))
-            {
-                _Animals.Add(disposable);
-            }
+            _Animals.Add(disposable);
         }
 
         public void RemoveAll()
