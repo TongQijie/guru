@@ -6,6 +6,8 @@ namespace Guru.AspNetCore.Abstractions
     {
         string AppId { get; set; }
 
+        string[] Urls { get; set; }
+
         RouterConfiguration Router { get; set; }
 
         ResourceConfiguration Resource { get; set; }

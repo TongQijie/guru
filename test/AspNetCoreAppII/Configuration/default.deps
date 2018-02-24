@@ -1,10 +1,5 @@
 ﻿[
   {
-    "Name": "DefaultCache",
-    "Type": "Guru.Cache.Implementation.DefaultMemoryCacheProvider,Guru",
-    "Lifetime": "Singleton"
-  },
-  {
     "Name": "JsonApiFormatter",
     "Type": "Guru.Formatter.Implementation.DefaultJsonLightningFormatter,Guru",
     "Lifetime": "Transient",

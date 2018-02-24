@@ -7,28 +7,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Guru.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Guru.AspNetCore.Delegates;
-using Guru.Cache.Abstractions;
 using System.Threading.Tasks;
+using Guru.AspNetCore.Abstractions;
 
 namespace AspNetCoreAppII
 {
     [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
     public class Startup : IConsoleExecutable
     {
-        private readonly IMemoryCacheProvider _MemoryCacheProvider;
-
-        public Startup(IMemoryCacheProvider memoryCacheProvider)
-        {
-            _MemoryCacheProvider = memoryCacheProvider;
-            _MemoryCacheProvider.Persistent = true;
-        }
-
         public int Run(string[] args)
         {
             new WebHostBuilder()
                 .UseKestrel()
-                .UseIISIntegration()
+                .UseUrls(DependencyContainer.Resolve<IApplicationConfiguration>()?.Urls ?? new string[] { "http://localhost:5000" })
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureServices(x => x.AddSingleton<IHttpContextAccessor, HttpContextAccessor>())
                 .Configure(x =>
@@ -38,8 +29,6 @@ namespace AspNetCoreAppII
                 })
                 .Build()
                 .Run();
-
-            _MemoryCacheProvider.Dispose();
 
             return 0;
         }

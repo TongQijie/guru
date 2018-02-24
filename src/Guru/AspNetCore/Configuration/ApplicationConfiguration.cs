@@ -16,6 +16,9 @@ namespace Guru.AspNetCore.Configuration
         [JsonProperty(Alias = "appId")]
         public string AppId { get; set; }
 
+        [JsonProperty(Alias = "urls")]
+        public string[] Urls { get; set; }
+
         [JsonProperty(Alias = "router")]
         public RouterConfiguration Router { get; set; }
 
