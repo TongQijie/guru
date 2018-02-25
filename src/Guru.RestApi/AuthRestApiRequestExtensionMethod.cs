@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Guru.ExtensionMethod;
 
 namespace Guru.RestApi
 {
     public static class AuthRestApiRequestExtensionMethod
     {
+        public const string UserIdExtensionKey = "uid";
+
         public static string GetAuth(this IAuthRestApiRequest authRestApiRequest)
         {
             if (authRestApiRequest == null ||
@@ -34,7 +37,7 @@ namespace Guru.RestApi
                 authRestApiRequest.Head.Extensions = new Dictionary<string, string>();
             }
 
-            authRestApiRequest.Head.Extensions["uid"] = uid;
+            authRestApiRequest.Head.Extensions[UserIdExtensionKey] = uid;
         }
 
         public static string GetUid(this IAuthRestApiRequest authRestApiRequest)
@@ -42,25 +45,30 @@ namespace Guru.RestApi
             if (authRestApiRequest == null || 
                 authRestApiRequest.Head == null || 
                 authRestApiRequest.Head.Extensions == null || 
-                !authRestApiRequest.Head.Extensions.ContainsKey("uid"))
+                !authRestApiRequest.Head.Extensions.ContainsKey(UserIdExtensionKey))
             {
                 return null;
             }
 
-            return authRestApiRequest.Head.Extensions["uid"];
+            return authRestApiRequest.Head.Extensions[UserIdExtensionKey];
         }
 
         public static string GetExtensionValue(this IAuthRestApiRequest authRestApiRequest, string key)
         {
             if (authRestApiRequest == null ||
                 authRestApiRequest.Head == null ||
-                authRestApiRequest.Head.Extensions == null ||
-                !authRestApiRequest.Head.Extensions.ContainsKey(key))
+                authRestApiRequest.Head.Extensions == null)
             {
                 return null;
             }
 
-            return authRestApiRequest.Head.Extensions[key];
+            var extensionKey = authRestApiRequest.Head.Extensions.Keys.ToArray().FirstOrDefault(x => x.EqualsIgnoreCase(key));
+            if (extensionKey == null)
+            {
+                return null;
+            }
+
+            return authRestApiRequest.Head.Extensions[extensionKey];
         }
     }
 }

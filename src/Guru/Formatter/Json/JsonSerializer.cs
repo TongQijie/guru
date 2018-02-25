@@ -641,7 +641,7 @@ namespace Guru.Formatter.Json
                         throw new Errors.JsonSerializeFailedException(dictKey, ".net runtime type does not match json type.");
                     }
 
-                    instance.Add(dictKey, dictValue);
+                    instance.Add(dictKey.ConvertTo(args[0]), dictValue);
                 }
 
                 return instance;
