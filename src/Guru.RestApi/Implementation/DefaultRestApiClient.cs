@@ -20,22 +20,25 @@ namespace Guru.RestApi.Implementation
 
         private readonly ILogger _Logger;
 
-        public DefaultRestApiClient(IHttpClientBroker httpClientBroker, IFileLogger fileLogger)
+        private readonly ILightningFormatter _Formatter;
+
+        public DefaultRestApiClient(IHttpClientBroker httpClientBroker, IFileLogger fileLogger, IJsonLightningFormatter formatter)
         {
             _HttpClientRequest = httpClientBroker.Get(new DefaultHttpClientSettings("DefaultRestApiClient"));
             _Logger = fileLogger;
+            _Formatter = formatter;
         }
 
         public async Task<TResponse> Request<TRequest, TResponse>(TRequest request, string serviceName, string methodName)
         {
             try
             {
-                using (var response = await _HttpClientRequest.PostAsync<IJsonLightningFormatter>($"{BaseUrl}/{serviceName}/{methodName}", request, new Dictionary<string, string>()
+                using (var response = await _HttpClientRequest.PostAsync($"{BaseUrl}/{serviceName}/{methodName}", null, request, _Formatter, new Dictionary<string, string>()
                 {
                     { "Content-Type", "application/json" }
                 }))
                 {
-                    return await response.GetBodyAsync<TResponse, IJsonLightningFormatter>();
+                    return await response.GetBodyAsync<TResponse>(_Formatter);
                 }
             }
             catch (Exception e)

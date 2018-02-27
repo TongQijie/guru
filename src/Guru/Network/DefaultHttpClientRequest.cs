@@ -7,10 +7,10 @@ using System.Collections.Generic;
  
 using Guru.Utils;
 using Guru.ExtensionMethod;
-using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
 using System.IO;
+using System.Text;
 
 namespace Guru.Network
 {
@@ -63,19 +63,14 @@ namespace Guru.Network
             return new DefaultHttpClientResponse(await _Client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead));
         }
 
-        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : ILightningFormatter
-        {
-            return await InternalPostAsync<TFormatter>(uri, body, contentHeaders); 
-        }
-
-        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body, Dictionary<string, string> contentHeaders = null) where TFormatter : ILightningFormatter
+        public async Task<IHttpClientResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString, object body, TFormatter formatter, Dictionary<string, string> contentHeaders = null) where TFormatter : ILightningFormatter
         {
             if (queryString != null)
             {
                 uri = AddQueryString(uri, queryString);
             }
 
-            return await InternalPostAsync<TFormatter>(uri, body, contentHeaders);
+            return await InternalPostAsync(uri, body, formatter, contentHeaders);
         }
 
         public async Task<IHttpClientResponse> PostAsync(string uri, IDictionary<string, string> queryString, Dictionary<string, string> formData, Dictionary<string, string> contentHeaders = null)
@@ -86,7 +81,22 @@ namespace Guru.Network
                  body = string.Join("&", formData.Select(x => $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}"));
             }
 
-            return await PostAsync<ILightningFormatter>(uri, queryString, body, contentHeaders);
+            if (queryString != null)
+            {
+                uri = AddQueryString(uri, queryString);
+            }
+
+            return await InternalPostAsync(uri, Encoding.UTF8.GetBytes(body), contentHeaders);
+        }
+
+        public async Task<IHttpClientResponse> PostAsync(string uri, IDictionary<string, string> queryString, byte[] byteArrayContent, Dictionary<string, string> contentHeaders = null)
+        {
+            if (queryString != null)
+            {
+                uri = AddQueryString(uri, queryString);
+            }
+
+            return await InternalPostAsync(uri, byteArrayContent, contentHeaders);
         }
 
         private string AddQueryString(string uri, IDictionary<string, string> queryString)
@@ -105,18 +115,23 @@ namespace Guru.Network
             return uri + string.Join("&", queryString.Select(x => $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}"));
         }
 
-        private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, Dictionary<string, string> contentHeaders) where TFormatter : ILightningFormatter
+        private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, TFormatter formatter, Dictionary<string, string> contentHeaders) where TFormatter : ILightningFormatter
         {
-            byte[] bytes;
+            byte[] byteArrayContent;
             using (var memoryStream = new MemoryStream())
             {
-                await DependencyContainer.Resolve<TFormatter>().WriteObjectAsync(body, memoryStream);
-                bytes = memoryStream.ToArray();
+                await formatter.WriteObjectAsync(body, memoryStream);
+                byteArrayContent = memoryStream.ToArray();
             }
 
-            using (var content = new ByteArrayContent(bytes))
+            return await InternalPostAsync(uri, byteArrayContent, contentHeaders);
+        }
+
+        private async Task<IHttpClientResponse> InternalPostAsync(string uri, byte[] byteArrayContent, Dictionary<string, string> contentHeaders)
+        {
+            using (var content = new ByteArrayContent(byteArrayContent))
             {
-                content.Headers.ContentLength = bytes.Length;
+                content.Headers.ContentLength = byteArrayContent.Length;
 
                 if (contentHeaders != null)
                 {

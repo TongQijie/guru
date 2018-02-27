@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-using Guru.DependencyInjection;
 using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
 
@@ -50,14 +49,6 @@ namespace Guru.Network
                 }
 
                 return _Headers;
-            }
-        }
-        
-        public async Task<TBody> GetBodyAsync<TBody, TFormatter>() where TFormatter : ILightningFormatter
-        {
-            using (var stream = await _Response.Content.ReadAsStreamAsync())
-            {
-                return await DependencyContainer.Resolve<TFormatter>().ReadObjectAsync<TBody>(stream);
             }
         }
 

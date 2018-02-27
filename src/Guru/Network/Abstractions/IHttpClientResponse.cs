@@ -12,9 +12,7 @@ namespace Guru.Network.Abstractions
         int StatusCode { get; }
 
         IReadOnlyDictionary<string, string[]> Headers { get; }
-
-        Task<TBody> GetBodyAsync<TBody, TFormatter>() where TFormatter : ILightningFormatter;
-
+        
         Task<TBody> GetBodyAsync<TBody>(ILightningFormatter formatter);
 
         Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4 * 1024);
