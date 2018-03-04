@@ -10,6 +10,7 @@ using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Attributes;
 using Guru.Executable.Abstractions;
+using Guru.Formatter.Abstractions;
 
 namespace Guru.Logging.Implementation
 {
@@ -32,6 +33,16 @@ namespace Guru.Logging.Implementation
         public void LogEvent(string category, Severity severity, params object[] parameters)
         {
             _Items.Enqueue(new Item(category, severity, parameters));
+
+            if (!_IsAlive)
+            {
+                StartThread();
+            }
+        }
+
+        public void LogEvent(string category, Severity severity, List<KeyValuePair<string, object>> namedParameters)
+        {
+            _Items.Enqueue(new Item(category, severity, namedParameters));
 
             if (!_IsAlive)
             {
@@ -139,6 +150,13 @@ namespace Guru.Logging.Implementation
 
         class Item
         {
+            static ILightningFormatter _Formatter;
+
+            static Item()
+            {
+                _Formatter = DependencyContainer.Resolve<IJsonLightningFormatter>();
+            }
+
             public Item(string category, Severity severity, object[] parameters)
             {
                 Category = category;
@@ -147,11 +165,21 @@ namespace Guru.Logging.Implementation
                 Timestamp = DateTime.Now;
             }
 
+            public Item(string category, Severity severity, List<KeyValuePair<string, object>> namedParameters)
+            {
+                Category = category;
+                Severity = severity;
+                Timestamp = DateTime.Now;
+                NamedParameters = namedParameters;
+            }
+
             public string Category { get; set; }
 
             public Severity Severity { get; set; }
 
             public object[] Parameters { get; set; }
+
+            public List<KeyValuePair<string, object>> NamedParameters { get; set; }
 
             public DateTime Timestamp { get; private set; }
 
@@ -171,6 +199,27 @@ namespace Guru.Logging.Implementation
                         else
                         {
                             stringBuilder.Append(parameter.ToString());
+                        }
+                        stringBuilder.AppendLine();
+                    }
+                }
+                if (NamedParameters != null)
+                {
+                    foreach (var kv in NamedParameters)
+                    {
+                        stringBuilder.Append($"[{kv.Key}] ");
+                        var valueType = kv.Value.GetType();
+                        if (valueType.IsValueType || valueType == typeof(string))
+                        {
+                            stringBuilder.Append(kv.Value.ToString());
+                        }
+                        else if (kv.Value is Exception)
+                        {
+                            stringBuilder.Append(new ExceptionWrapper(kv.Value as Exception).ToString());
+                        }
+                        else
+                        {
+                            stringBuilder.Append(Item._Formatter.WriteObject(kv.Value));
                         }
                         stringBuilder.AppendLine();
                     }

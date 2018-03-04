@@ -1,7 +1,6 @@
 using System;
-using System.IO;
-using System.Reflection;
-using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
@@ -30,51 +29,30 @@ namespace Guru.AspNetCore.Implementation.Api
             DateTime requestTime, DateTime responseTime, 
             object[] requestBodys, object responseBody)
         {
-            var stringBuilder = new StringBuilder();
-            foreach (var parameter in context.InputParameters.GetDictionary())
+            var kvs = new List<KeyValuePair<string, object>>()
             {
-                stringBuilder.AppendLine($"[{parameter.Value.Source.ToString()}] {parameter.Key}={parameter.Value.Value}");
-            }
+                new KeyValuePair<string, object>("RequestTime", requestTime.ToString("yyyy-MM-dd HH:mm:ss.fff")),
+                new KeyValuePair<string, object>("ResponseTime", responseTime.ToString("yyyy-MM-dd HH:mm:ss.fff")),
+                new KeyValuePair<string, object>("CostTime", $"{(responseTime - requestTime).TotalMilliseconds}ms"),
+            };
 
-            stringBuilder.AppendLine($"[RequestTime] {requestTime.ToString("yyyy-MM-dd HH:mm:ss.fff")}");
-            stringBuilder.AppendLine($"[ResponseTime] {responseTime.ToString("yyyy-MM-dd HH:mm:ss.fff")}");
-            stringBuilder.AppendLine($"[CostTime] {(responseTime - requestTime).TotalMilliseconds}ms");
+            if (context != null && context.InputParameters != null)
+            {
+                kvs.AddRange(context.InputParameters.GetDictionary().Select(x =>
+                    new KeyValuePair<string, object>(x.Value.Source.ToString(), $"{x.Key}={x.Value.Value}")));
+            }
 
             if (requestBodys != null && requestBodys.Length > 0)
             {
-                foreach (var requestBody in requestBodys)
-                {
-                    if (requestBody == null)
-                    {
-                        stringBuilder.AppendLine($"[Request] null");
-                    }
-                    else if (requestBody.GetType() == typeof(string) ||
-                        requestBody.GetType().GetTypeInfo().IsValueType)
-                    {
-                        stringBuilder.AppendLine($"[Request] {requestBody.ToString()}");
-                    }
-                    else
-                    {
-                        stringBuilder.AppendLine($"[Request] {_Formatter.WriteObject(requestBody)}");
-                    }
-                }
+                kvs.AddRange(requestBodys.Select(x => new KeyValuePair<string, object>("Request", x)));
             }
 
-            if (responseBody == null)
+            if (responseBody != null)
             {
-                stringBuilder.AppendLine($"[Response] null");
-            }
-            else if (responseBody.GetType() == typeof(string) ||
-                responseBody.GetType().GetTypeInfo().IsValueType)
-            {
-                stringBuilder.AppendLine($"[Response] {responseBody.ToString()}");
-            }
-            else
-            {
-                stringBuilder.AppendLine($"[Response] {_Formatter.WriteObject(responseBody)}");
+                kvs.Add(new KeyValuePair<string, object>("Response", responseBody));
             }
 
-            LogEvent(nameof(DefaultApiLogger), Severity.Information, stringBuilder.ToString());
+            LogEvent(nameof(DefaultApiLogger), Severity.Information, kvs);
         }
     }
 }
