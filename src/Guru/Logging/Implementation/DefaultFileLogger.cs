@@ -208,19 +208,27 @@ namespace Guru.Logging.Implementation
                     foreach (var kv in NamedParameters)
                     {
                         stringBuilder.Append($"[{kv.Key}] ");
-                        var valueType = kv.Value.GetType();
-                        if (valueType.IsValueType || valueType == typeof(string))
+                        if (kv.Value == null)
                         {
-                            stringBuilder.Append(kv.Value.ToString());
-                        }
-                        else if (kv.Value is Exception)
-                        {
-                            stringBuilder.Append(new ExceptionWrapper(kv.Value as Exception).ToString());
+                            stringBuilder.Append("null");
                         }
                         else
                         {
-                            stringBuilder.Append(Item._Formatter.WriteObject(kv.Value));
+                            var valueType = kv.Value.GetType();
+                            if (valueType.IsValueType || valueType == typeof(string))
+                            {
+                                stringBuilder.Append(kv.Value.ToString());
+                            }
+                            else if (kv.Value is Exception)
+                            {
+                                stringBuilder.Append(new ExceptionWrapper(kv.Value as Exception).ToString());
+                            }
+                            else
+                            {
+                                stringBuilder.Append(Item._Formatter.WriteObject(kv.Value));
+                            }
                         }
+                        
                         stringBuilder.AppendLine();
                     }
                 }
