@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
@@ -37,6 +38,11 @@ namespace Guru.Logging.Implementation
         public void LogEvent(Severity severity, params object[] parameters)
         {
             LogEvent(string.Empty, severity, parameters);
+        }
+
+        public void LogEvent(string category, Severity severity, List<KeyValuePair<string, object>> namedParameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }
