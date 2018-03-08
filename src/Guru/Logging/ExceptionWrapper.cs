@@ -19,13 +19,9 @@ namespace Guru.Logging
             var e = _Exception;
             while (e != null)
             {
-                stringBuilder.AppendLine(string.Format("{0}: {1}", e.GetType().Name, e.Message));
+                stringBuilder.AppendLine($"{e.GetType().Name}: {e.Message}");
+                stringBuilder.AppendLine($"{e.StackTrace}");
                 e = e.InnerException;
-            }
-
-            if (_Exception != null)
-            {
-                stringBuilder.AppendLine(_Exception.StackTrace);
             }
 
             return stringBuilder.ToString().TrimEnd(Environment.NewLine.ToCharArray());
