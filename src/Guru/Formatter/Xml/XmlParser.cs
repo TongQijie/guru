@@ -10,27 +10,39 @@ namespace Guru.Formatter.Xml
     {
         public static async Task<XObject> ParseAsync(IReaderStream stream)
         {
-            var b = await stream.SeekBytesUntilVisiableCharAsync();
-            if (b == -1 || b != XmlConstants.Lt)
-            {
-                throw new Exception();
-            }
-
+            byte[] tagName = null;
             var hasAttributes = false;
-            var tagName = await stream.ReadBytesUntilMeetingAsync(x =>
+
+            var tuple = await ParseAsyncWithHeader(stream);
+            if (tuple != null)
             {
-                if (x == XmlConstants.Gt)
+                tagName = tuple.Item1;
+                hasAttributes = tuple.Item2;
+            }
+            else
+            {
+                var b = await stream.SeekBytesUntilVisiableCharAsync();
+                if (b == -1 || b != XmlConstants.Lt)
                 {
-                    return true;
-                }
-                else if (!XmlConstants.IsPrintableChar(x))
-                {
-                    hasAttributes = true;
-                    return true;
+                    throw new Exception();
                 }
 
-                return false;
-            });
+                hasAttributes = false;
+                tagName = await stream.ReadBytesUntilMeetingAsync(x =>
+                {
+                    if (x == XmlConstants.Gt)
+                    {
+                        return true;
+                    }
+                    else if (!XmlConstants.IsPrintableChar(x))
+                    {
+                        hasAttributes = true;
+                        return true;
+                    }
+
+                    return false;
+                });
+            }
 
             if (tagName == null)
             {
@@ -86,6 +98,47 @@ namespace Guru.Formatter.Xml
             }
 
             return xObject;
+        }
+
+        private static async Task<Tuple<byte[], bool>> ParseAsyncWithHeader(IReaderStream stream)
+        {
+            var b = await stream.SeekBytesUntilVisiableCharAsync();
+            if (b == -1 || b != XmlConstants.Lt)
+            {
+                throw new Exception();
+            }
+
+            var hasAttributes = false;
+            var tagName = await stream.ReadBytesUntilMeetingAsync(x =>
+            {
+                if (x == XmlConstants.Gt)
+                {
+                    return true;
+                }
+                else if (!XmlConstants.IsPrintableChar(x))
+                {
+                    hasAttributes = true;
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (tagName == null)
+            {
+                throw new Exception("");
+            }
+
+            if (tagName.EqualsWith(new byte[] { 0x3F, 0x78, 0x6D, 0x6C }))
+            {
+                // remove xml header
+                await stream.ReadBytesUntilAsync(XmlConstants.Gt);
+                return null;
+            }
+            else
+            {
+                return new Tuple<byte[], bool>(tagName, hasAttributes);
+            }
         }
     }
 }
