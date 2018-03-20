@@ -45,7 +45,7 @@ namespace Guru.DependencyInjection
             }
         }
 
-        public static object Resolve(Type abstraction)
+        public static object Resolve(object abstraction)
         {
             return ContainerInstance.GetImplementation(abstraction);
         }
@@ -55,7 +55,7 @@ namespace Guru.DependencyInjection
             return (T)ContainerInstance.GetImplementation(typeof(T));
         }
 
-        public static T Resolve<T>(string dependencyName)
+        public static T ResolveOrDefault<T>(object dependencyName)
         {
             if (ContainerInstance.Exists(dependencyName))
             {
