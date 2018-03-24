@@ -18,8 +18,8 @@ namespace Guru.AspNetCore.Implementation.Api
 
         public DefaultApiFormatters()
         {
-            _Json = new JsonApiFormatter(DependencyContainer.ResolveOrDefault<IJsonLightningFormatter>("JsonApiFormatter"));
-            _Xml = new XmlApiFormatter(DependencyContainer.ResolveOrDefault<IXmlLightningFormatter>("XmlApiFormatter"));
+            _Json = new JsonApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IJsonLightningFormatter>("JsonApiFormatter"));
+            _Xml = new XmlApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IXmlLightningFormatter>("XmlApiFormatter"));
             _Text = new TextApiFormatter();
         }
 

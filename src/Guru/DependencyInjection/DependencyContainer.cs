@@ -55,15 +55,15 @@ namespace Guru.DependencyInjection
             return (T)ContainerInstance.GetImplementation(typeof(T));
         }
 
-        public static T ResolveOrDefault<T>(object dependencyName)
+        public static TAbstraction ResolveOrDefault<TAbstraction, TDefaultAbstraction>(object dependencyName)
         {
             if (ContainerInstance.Exists(dependencyName))
             {
-                return (T)ContainerInstance.GetImplementation(dependencyName);
+                return (TAbstraction)ContainerInstance.GetImplementation(dependencyName);
             }
             else
             {
-                return (T)ContainerInstance.GetImplementation(typeof(T));
+                return (TAbstraction)ContainerInstance.GetImplementation(typeof(TDefaultAbstraction));
             }
         }
 

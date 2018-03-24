@@ -33,9 +33,22 @@ namespace AspNetCoreAppII
             return 0;
         }
 
-        public Task<int> RunAsync(string[] args)
+        public async Task<int> RunAsync(string[] args)
         {
-            throw new System.NotImplementedException();
+            await new WebHostBuilder()
+                .UseKestrel()
+                .UseUrls(DependencyContainer.Resolve<IApplicationConfiguration>()?.Urls ?? new string[] { "http://localhost:5000" })
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .ConfigureServices(x => x.AddSingleton<IHttpContextAccessor, HttpContextAccessor>())
+                .Configure(x =>
+                {
+                    HttpContextUtils.Configure(x.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
+                    x.UseMiddleware<AspNetCoreAppInstance>();
+                })
+                .Build()
+                .RunAsync();
+
+            return 0;
         }
     }
 }

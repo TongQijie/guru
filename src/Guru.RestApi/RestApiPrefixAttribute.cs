@@ -12,7 +12,7 @@ namespace Guru.RestApi
 
         static RestApiPrefixAttribute()
         {
-            _AuthManager = DependencyContainer.ResolveOrDefault<IAuthManager>("AuthManager");
+            _AuthManager = DependencyContainer.Resolve<IAuthManager>();
         }
 
         private AuthValidatingEnum _AuthValidatingEnum = AuthValidatingEnum.Ignore;

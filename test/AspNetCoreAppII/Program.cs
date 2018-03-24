@@ -4,7 +4,7 @@
     {
         public static void Main(string[] args)
         {
-            Guru.Executable.ConsoleAppInstance.Default.Run(args);
+            Guru.Executable.ConsoleAppInstance.Default.RunAsync(args);
         }
     }
 }
