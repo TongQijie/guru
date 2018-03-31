@@ -5,5 +5,9 @@ namespace Guru.Formatter.Abstractions
         bool OmitDefaultValue { get; set; }
 
         string DateTimeFormat { get; set; }
+
+        bool ElementKeyIgnoreCase { get; set; }
+
+        bool OmitNullValue { get; set; }
     }
 }
