@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
+using Guru.ExtensionMethod;
 
 namespace Guru.Network
 {
@@ -49,6 +50,21 @@ namespace Guru.Network
                 }
 
                 return _Headers;
+            }
+        }
+
+        public long ContentLength
+        {
+            get
+            {
+                if (Headers != null && Headers.ContainsKey("Content-Length") && Headers["Content-Length"].HasLength())
+                {
+                    return Headers["Content-Length"][0].ConvertTo<long>(0);
+                }
+                else
+                {
+                    return 0;
+                }
             }
         }
 
