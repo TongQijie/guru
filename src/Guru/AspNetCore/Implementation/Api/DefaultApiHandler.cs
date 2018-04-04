@@ -7,6 +7,7 @@ using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection.Attributes;
 using Guru.AspNetCore.Implementation.Api.Formatter;
 using Guru.Logging;
+using Guru.ExtensionMethod;
 
 namespace Guru.AspNetCore.Implementation.Api
 {
@@ -92,6 +93,25 @@ namespace Guru.AspNetCore.Implementation.Api
             }
             finally
             {
+                if (context.ApplicationConfiguration?.Api?.ResponseHeaders.HasLength() == true)
+                {
+                    foreach (var header in context.ApplicationConfiguration.Api.ResponseHeaders)
+                    {
+                        if (header.Name.HasValue() && header.Values.HasLength())
+                        {
+                            foreach (var value in header.Values)
+                            {
+                                context.SetOutputParameter(new ContextParameter()
+                                {
+                                    Name = header.Name,
+                                    Source = ContextParameterSource.Header,
+                                    Value = value,
+                                });
+                            }
+                        }
+                    }
+                }
+
                 if (context.ApplicationConfiguration?.Api?.EnableLog == true)
                 {
                     _ApiLogger.LogEvent(context, startTime, DateTime.Now, apiContext.Parameters, executionResult);
