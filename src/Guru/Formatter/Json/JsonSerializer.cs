@@ -680,7 +680,7 @@ namespace Guru.Formatter.Json
             }
             else if (typeof(IList).GetTypeInfo().IsAssignableFrom(targetType))
             {
-                var elementType = targetType.GetTypeInfo().GetGenericArguments().FirstOrDefault() ?? typeof(object);
+                var elementType = targetType.GetGenericArguments().FirstOrDefault() ?? (targetType.BaseType.GetGenericArguments().FirstOrDefault() ?? typeof(object));
                 var collection = Activator.CreateInstance(targetType) as IList;
                 for (int i = 0; i < collectionObject.Elements.Length; i++)
                 {

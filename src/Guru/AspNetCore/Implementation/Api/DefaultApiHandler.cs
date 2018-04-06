@@ -77,6 +77,25 @@ namespace Guru.AspNetCore.Implementation.Api
                         Value = apiFormatter?.ContentType,
                     });
 
+                    if (context.ApplicationConfiguration?.Api?.Headers.HasLength() == true)
+                    {
+                        foreach (var header in context.ApplicationConfiguration.Api.Headers)
+                        {
+                            if (header.Name.HasValue() && header.Values.HasLength())
+                            {
+                                foreach (var value in header.Values)
+                                {
+                                    context.SetOutputParameter(new ContextParameter()
+                                    {
+                                        Name = header.Name,
+                                        Source = ContextParameterSource.Header,
+                                        Value = value,
+                                    });
+                                }
+                            }
+                        }
+                    }
+
                     await apiFormatter.Write(executionResult, context.OutputStream);
                 }
             }
@@ -93,25 +112,6 @@ namespace Guru.AspNetCore.Implementation.Api
             }
             finally
             {
-                if (context.ApplicationConfiguration?.Api?.ResponseHeaders.HasLength() == true)
-                {
-                    foreach (var header in context.ApplicationConfiguration.Api.ResponseHeaders)
-                    {
-                        if (header.Name.HasValue() && header.Values.HasLength())
-                        {
-                            foreach (var value in header.Values)
-                            {
-                                context.SetOutputParameter(new ContextParameter()
-                                {
-                                    Name = header.Name,
-                                    Source = ContextParameterSource.Header,
-                                    Value = value,
-                                });
-                            }
-                        }
-                    }
-                }
-
                 if (context.ApplicationConfiguration?.Api?.EnableLog == true)
                 {
                     _ApiLogger.LogEvent(context, startTime, DateTime.Now, apiContext.Parameters, executionResult);
