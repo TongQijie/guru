@@ -48,9 +48,10 @@ namespace ConsoleApp
             return 0;
         }
 
-        public Task<int> RunAsync(string[] args)
+        public async Task<int> RunAsync(string[] args)
         {
-            throw new NotImplementedException();
+            await new Network.TestRunner().Run();
+            return 0;
         }
     }
 }

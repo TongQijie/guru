@@ -6,7 +6,7 @@ namespace ConsoleApp
     {
         public static void Main(string[] args)
         {
-            ConsoleAppInstance.Default.Run(args, true);
+            ConsoleAppInstance.Default.RunAsync(args, true);
         }
     }
 }

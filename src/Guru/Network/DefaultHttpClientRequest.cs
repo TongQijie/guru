@@ -1,4 +1,6 @@
- using System;
+using System;
+using System.IO;
+using System.Text;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -9,8 +11,6 @@ using Guru.Utils;
 using Guru.ExtensionMethod;
 using Guru.Network.Abstractions;
 using Guru.Formatter.Abstractions;
-using System.IO;
-using System.Text;
 
 namespace Guru.Network
 {
@@ -101,7 +101,7 @@ namespace Guru.Network
 
         private string AddQueryString(string uri, IDictionary<string, string> queryString)
         {
-            uri = uri.TrimEnd('/', '?');
+            //uri = uri.TrimEnd('/', '?');
 
             if (uri.ContainsIgnoreCase("?"))
             {
@@ -112,7 +112,10 @@ namespace Guru.Network
                 uri = uri + "?";
             }
 
-            return uri + string.Join("&", queryString.Select(x => $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}"));
+            return uri + string.Join("&", queryString.Where(x => x.Key.HasValue())
+                .Select(x => x.Value.HasValue() ? 
+                    $"{WebUtils.UrlEncode(x.Key)}={WebUtils.UrlEncode(x.Value)}" : 
+                    $"{WebUtils.UrlEncode(x.Key)}"));
         }
 
         private async Task<IHttpClientResponse> InternalPostAsync<TFormatter>(string uri, object body, TFormatter formatter, Dictionary<string, string> contentHeaders) where TFormatter : ILightningFormatter
