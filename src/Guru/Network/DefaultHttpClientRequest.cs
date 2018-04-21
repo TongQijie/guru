@@ -70,6 +70,22 @@ namespace Guru.Network
                 uri = AddQueryString(uri, queryString);
             }
 
+            if (contentHeaders == null || !contentHeaders.ContainsKey("Content-Type"))
+            {
+                if (contentHeaders == null)
+                {
+                    contentHeaders = new Dictionary<string, string>();
+                }
+                if (formatter.Tag.EqualsIgnoreCase("JSON"))
+                {
+                    contentHeaders.Add("Content-Type", "application/json");
+                }
+                else if (formatter.Tag.EqualsIgnoreCase("XML"))
+                {
+                    contentHeaders.Add("Content-Type", "application/xml");
+                }
+            }
+
             return await InternalPostAsync(uri, body, formatter, contentHeaders);
         }
 
@@ -84,6 +100,15 @@ namespace Guru.Network
             if (queryString != null)
             {
                 uri = AddQueryString(uri, queryString);
+            }
+
+            if (contentHeaders == null || !contentHeaders.ContainsKey("Content-Type"))
+            {
+                if (contentHeaders == null)
+                {
+                    contentHeaders = new Dictionary<string, string>();
+                }
+                contentHeaders.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
             }
 
             return await InternalPostAsync(uri, Encoding.UTF8.GetBytes(body), contentHeaders);

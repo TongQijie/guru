@@ -9,6 +9,8 @@ namespace Guru.Formatter.Implementation
 {
     internal abstract class DefaultAbstractLightningFormatter : ILightningFormatter
     {
+        public virtual string Tag => "NA";
+
         public object ReadObject(Type targetType, Stream stream)
         {
             return ReadObjectAsync(targetType, stream).GetAwaiter().GetResult();

@@ -12,6 +12,8 @@ namespace Guru.Formatter.Implementation
     [Injectable(typeof(IXmlLightningFormatter), Lifetime.Transient)]
     internal class DefaultXmlLightningFormatter : DefaultAbstractLightningFormatter, IXmlLightningFormatter
     {
+        public override string Tag => "XML";
+
         public override async Task<object> ReadObjectAsync(Type targetType, Stream stream)
         {
             return await XmlSerializer.GetSerializer(targetType, Encoding.UTF8, false).DeserializeAsync(stream);

@@ -9,6 +9,8 @@ namespace Guru.Formatter.Abstractions
     // write to bytes(stream) asynchronously
     public interface ILightningFormatter
     {
+        string Tag { get; }
+
         object ReadObject(Type targetType, Stream stream);
 
         Task<object> ReadObjectAsync(Type targetType, Stream stream);

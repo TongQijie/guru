@@ -17,9 +17,16 @@ namespace Guru.RestApi.Implementation
             _CacheProvider = DependencyContainer.ResolveOrDefault<ICacheProvider, IMemoryCacheProvider>("DefaultCache");
         }
 
-        public void Create(string auth, string uid)
+        public string New(string uid, TimeSpan expiryTimeSpan)
         {
-            _CacheProvider.Set(auth, uid, TimeSpan.FromDays(3));
+            var auth = Guid.NewGuid().ToString().Replace("-", "").ToLower();
+            _CacheProvider.Set(auth, new CacheEntity()
+            {
+                Uid = uid,
+                Deadline = DateTime.Now.Add(expiryTimeSpan),
+                Milliseconds = (long)expiryTimeSpan.TotalMilliseconds,
+            }, expiryTimeSpan);
+            return auth;
         }
 
         public bool Validate(IAuthRestApiRequest request)
@@ -30,14 +37,33 @@ namespace Guru.RestApi.Implementation
                 return false;
             }
 
-            var uid = _CacheProvider.Get<string>(auth);
-            if (!uid.HasValue())
+            var entity = _CacheProvider.Get<CacheEntity>(auth);
+            if (entity == null)
             {
                 return false;
             }
 
-            request.SetUid(uid);
+            if ((entity.Deadline - DateTime.Now) < TimeSpan.FromMinutes(10))
+            {
+                _CacheProvider.Set(auth, new CacheEntity()
+                {
+                    Uid = entity.Uid,
+                    Deadline = DateTime.Now.AddMilliseconds(entity.Milliseconds),
+                    Milliseconds = entity.Milliseconds,
+                }, TimeSpan.FromMilliseconds(entity.Milliseconds));
+            }
+
+            request.SetUid(entity.Uid);
             return true;
+        }
+
+        public class CacheEntity
+        {
+            public string Uid { get; set; }
+
+            public DateTime Deadline { get; set; }
+
+            public long Milliseconds { get; set; }
         }
     }
 }

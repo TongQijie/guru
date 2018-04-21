@@ -6,13 +6,159 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Guru.DependencyInjection;
+using Guru.Formatter.Abstractions;
 using Guru.Network.Abstractions;
+using Guru.ExtensionMethod;
+using System.Threading;
 
 namespace ConsoleApp.Network
 {
     public class TestRunner
     {
         public async Task Run()
+        {
+            var request = DependencyContainer.Resolve<IHttpClientBroker>().Get();
+            var formatter = DependencyContainer.Resolve<IJsonLightningFormatter>();
+            var publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDB1qHpg0sWNVTXyq8VmVaxvALIW5K0zD1AjU3Eh7etjhqZcVN7ww/mRoWkPsoQf2IXhxSZA4/zL08TQkd2BZjXzIYzyJ8U6pKt/MdL462960VfwfBzlBcQsC60rzE6IJfZ5IBxrDJZjOZSIQv24BZc5+16/U2gNWvNsC/iSzR6KQIDAQAB";
+
+            var id = 1524289193758;
+
+            var songid = "";
+            var t = "";
+            var sign = "";
+            using (RSA rsa = CreateRsaFromPublicKey(publicKey))
+            {
+                var timestamp = GenerateTimestamp().ToString();
+                songid = Convert.ToBase64String(rsa.Encrypt(Encoding.UTF8.GetBytes(id.ToString()), RSAEncryptionPadding.Pkcs1));
+                t = Convert.ToBase64String(rsa.Encrypt(Encoding.UTF8.GetBytes(timestamp), RSAEncryptionPadding.Pkcs1));
+                sign = Convert.ToBase64String(rsa.Encrypt(Encoding.UTF8.GetBytes($"{id.ToString()}|{timestamp}".Md5()), RSAEncryptionPadding.Pkcs1));
+            }
+
+            var url = "";
+            var name = "";
+
+            using (var response = await request.PostAsync("https://www.aekun.com/api/getMusicbyid/", null, new Dictionary<string, string>()
+                {
+                    { "songid", songid },
+                    { "t", t },
+                    { "sign", sign },
+                }))
+            {
+                if (response.StatusCode == 200)
+                {
+                    var rsp = await response.GetBodyAsync<Response>(formatter);
+                    if (rsp.state == "success" && rsp.data != null && rsp.data.url.HasValue())
+                    {
+                        url = rsp.data.url;
+                        name = rsp.data.song_name;
+                    }
+                }
+            }
+
+            if (url.HasValue())
+            {
+                await new DownloadTask(name, url).Download();
+            }
+        }
+
+        public class DownloadTask
+        {
+            public DownloadTask(string filename, string downloadUrl)
+            {
+                Filename = filename;
+                DownloadUrl = downloadUrl;
+            }
+
+            public string Filename { get; set; }
+
+            public string DownloadUrl { get; set; }
+
+            private Stream OutputStream { get; set; }
+
+            private volatile int _DownloadedBytes = 0;
+
+            private long TotalBytes = 1;
+
+            private volatile bool _Downloading = false;
+
+            private volatile int _Speed = 0;
+
+            public async Task Download()
+            {
+                Console.WriteLine($"start to download: {DownloadUrl}");
+                var request = DependencyContainer.Resolve<IHttpClientBroker>().Get();
+                using (var response = await request.GetAsync(DownloadUrl))
+                {
+                    if (response.StatusCode == 200)
+                    {
+                        TotalBytes = response.ContentLength;
+                        _Downloading = true;
+
+                        new Thread(new ThreadStart(() =>
+                        {
+                            var downloadedBytesUntilLastSecond = 0;
+                            while (_Downloading)
+                            {
+                                Thread.Sleep(1000);
+                                _Speed = _DownloadedBytes - downloadedBytesUntilLastSecond;
+                                downloadedBytesUntilLastSecond = _DownloadedBytes;
+                                Console.Write($"\r{Filename}: {_Speed / 1024}kb/s {string.Format("{0:N2}", Math.Round(_DownloadedBytes * 100.0 / TotalBytes, 2))}% {_DownloadedBytes}/{TotalBytes}");
+                            }
+                        }))
+                        {
+                            IsBackground = true,
+                        }.Start();
+
+                        try
+                        {
+                            $"./downloads".EnsureFolder();
+
+                            using (OutputStream = new FileStream($"./downloads/{Filename}".FullPath(), FileMode.Create, FileAccess.Write))
+                            {
+                                await response.GetBodyAsync(DownloadHandler, 16 * 1024);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            File.Delete($"./downloads/{Filename}".FullPath());
+                        }
+                        finally
+                        {
+                            _Downloading = false;
+                        }
+
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Http Response ErrorCode: {response.StatusCode}");
+                    }
+                }
+            }
+
+            private async Task DownloadHandler(byte[] data, int startIndex, int count)
+            {
+                await OutputStream.WriteAsync(data, 0, count);
+                _DownloadedBytes += count;
+
+            }
+        }
+
+        public class Response
+        {
+            public string state { get; set; }
+
+            public ResponseData data { get; set; }
+
+            public class ResponseData
+            {
+                public string url { get; set; }
+
+                public string song_name { get; set; }
+            }
+        }
+
+        private async Task Baidu()
         {
             var browser = DependencyContainer.Resolve<IWebBrowser>();
             await browser.Browse("https://pan.baidu.com/", null);

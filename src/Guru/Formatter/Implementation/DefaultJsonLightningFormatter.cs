@@ -12,6 +12,8 @@ namespace Guru.Formatter.Implementation
     [Injectable(typeof(IJsonLightningFormatter), Lifetime.Transient)]
     internal class DefaultJsonLightningFormatter : DefaultAbstractLightningFormatter, IJsonLightningFormatter
     {
+        public override string Tag => "JSON";
+
         public bool OmitDefaultValue { get; set; }
 
         public string DateTimeFormat { get; set; }

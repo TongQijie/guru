@@ -1,9 +1,11 @@
-﻿namespace Guru.RestApi.Abstractions
+﻿using System;
+
+namespace Guru.RestApi.Abstractions
 {
     public interface IAuthManager
     {
-        bool Validate(IAuthRestApiRequest request);
+        string New(string uid, TimeSpan expiryTimeSpan);
 
-        void Create(string auth, string uid);
+        bool Validate(IAuthRestApiRequest request);
     }
 }
