@@ -105,6 +105,10 @@ namespace Guru.AspNetCore
                     {
                         httpContext.Response.ContentType = p.Value;
                     }
+                    else if (p.Name.EqualsIgnoreCase("Content-Length"))
+                    {
+                        httpContext.Response.ContentLength = p.Value.ConvertTo<long>(-1);
+                    }
                     else
                     {
                         httpContext.Response.Headers.Add(p.Name, p.Value);

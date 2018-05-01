@@ -35,7 +35,7 @@ namespace ClassLib
         public string Login(string uid)
         {
             var auth = Guid.NewGuid().ToString().Replace("-", "");
-            _AuthManager.Create(auth, uid);
+            _AuthManager.New(auth, TimeSpan.FromHours(1));
             return auth;
         }
 

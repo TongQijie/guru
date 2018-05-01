@@ -98,7 +98,7 @@ namespace Guru.ExtensionMethod
             }
         }
 
-        public static T ConvertTo<T>(this object obj, object defaultValue)
+        public static T ConvertTo<T>(this object obj, T defaultValue)
         {
             return (T)ConvertTo(obj, typeof(T), defaultValue);
         }
