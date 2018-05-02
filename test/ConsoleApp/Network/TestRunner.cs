@@ -218,7 +218,7 @@ namespace ConsoleApp.Network
             Console.WriteLine($"rsakey:{rsakey}");
 
             var password = "";
-            using (RSA rsa = CreateRsaFromPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDU5ASF+Vtbhuct3XiFkczwWFijU0xhm1R7cPqC+ix/Ut+9zBbYfvifel3a8gRAX4ETvASh9rtwEeR3iFin0WAZa6DxcpyljXgd6ip6WG3ZJDIdx/TiqkGuu7lPbEADHJODfdTSIJYP6IYZ0XsV7B/xPP5i/ZP9EJfMaauJFdboVQIDAQAB"))
+            using (RSA rsa = CreateRsaFromPublicKey(pubkey))
             {
                 var cipherBytes = rsa.Encrypt(Encoding.UTF8.GetBytes("baiduzhidao"), RSAEncryptionPadding.Pkcs1);
                 password = Convert.ToBase64String(cipherBytes);

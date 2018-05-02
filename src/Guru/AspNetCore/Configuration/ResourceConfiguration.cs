@@ -9,6 +9,7 @@ namespace Guru.AspNetCore.Configuration
         {
             Prefix = "res";
             Directory = "./wwwroot";
+            MaxRangeBytes = 2 * 1024 * 1024; // default 2Mb
         }
 
         [JsonProperty("prefix")]
@@ -19,5 +20,11 @@ namespace Guru.AspNetCore.Configuration
 
         [JsonProperty("mineTypes")]
         public Dictionary<string, string> MineTypes { get; set; }
+
+        [JsonProperty("maxRangeBytes")]
+        public long MaxRangeBytes { get; set; }
+
+        [JsonProperty("enableLog")]
+        public bool EnableLog { get; set; }
     }
 }

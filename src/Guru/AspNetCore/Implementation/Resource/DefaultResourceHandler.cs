@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Guru.AspNetCore.Abstractions;
@@ -15,9 +16,12 @@ namespace Guru.AspNetCore.Implementation.Resource
     {
         private readonly ILogger _Logger;
 
-        public DefaultResourceHandler(IFileLogger logger)
+        private readonly IResourceLogger _ResourceLogger;
+
+        public DefaultResourceHandler(IFileLogger logger, IResourceLogger resourceLogger)
         {
             _Logger = logger;
+            _ResourceLogger = resourceLogger;
         }
 
         public async Task ProcessRequest(CallingContext context)
@@ -81,134 +85,130 @@ namespace Guru.AspNetCore.Implementation.Resource
                 return;
             }
 
-            context.SetOutputParameter(new ContextParameter()
-            {
-                Name = "Content-Type",
-                Source = ContextParameterSource.Header,
-                Value = mineType,
-            });
-
             var parameter = context.InputParameters.Get("Range");
-            if (parameter != null && parameter.Source == ContextParameterSource.Header && Regex.IsMatch(parameter.Value.Trim(), "bytes=\\d*-\\d*", RegexOptions.IgnoreCase))
+            if (parameter != null && parameter.Source == ContextParameterSource.Header && RangeHeaderValue.TryParse(parameter.Value, out var rangeHeaderValue))
             {
-                context.SetOutputParameter(new ContextParameter()
-                {
-                    Name = "Accept-Ranges",
-                    Source = ContextParameterSource.Header,
-                    Value = "bytes",
-                });
-
-                var match = Regex.Match(parameter.Value.Trim(), "bytes=(?<start>\\d*)-(?<end>\\d*)", RegexOptions.IgnoreCase);
-                var startIndex = -1L;
-                if (match.Groups["start"].Captures[0].Value.HasValue())
-                {
-                    startIndex = match.Groups["start"].Captures[0].Value.ConvertTo<long>(0);
-                }
-                var endIndex = -1L;
-                if (match.Groups["end"].Captures[0].Value.HasValue())
-                {
-                    endIndex = match.Groups["end"].Captures[0].Value.ConvertTo<long>(0);
-                }
-
                 var totalLength = new FileInfo(resourcePath).Length;
 
-                if (startIndex >= 0 && endIndex == -1 && startIndex < totalLength)
+                foreach (var range in rangeHeaderValue.Ranges)
                 {
-                    var totalRead = 0L;
-
-                    if ((startIndex + 2 * 1024 * 1024) <= totalLength)
+                    if (range.From != null && range.From >= 0 && range.To == null && range.From < totalLength)
                     {
-                        totalRead = 2 * 1024 * 1024;
+                        var startIndex = (long)range.From;
+
+                        var totalRead = 0L;
+                        if ((startIndex + context.ApplicationConfiguration.Resource.MaxRangeBytes) <= totalLength)
+                        {
+                            totalRead = context.ApplicationConfiguration.Resource.MaxRangeBytes;
+                        }
+                        else
+                        {
+                            totalRead = totalLength - startIndex;
+                        }
+
+                        await OutputPartialContent(context, resourcePath, mineType, startIndex, totalRead, totalLength);
+
+                        break;
+                    }
+                    else if (range.From != null && range.From >= 0 && range.To != null && range.To >= 0 && range.From <= range.To && range.To < totalLength)
+                    {
+                        var startIndex = (long)range.From;
+                        var endIndex = (long)range.To;
+
+                        var totalRead = endIndex - startIndex + 1;
+
+                        await OutputPartialContent(context, resourcePath, mineType, startIndex, totalRead, totalLength);
+
+                        break;
                     }
                     else
                     {
-                        totalRead = totalLength - startIndex;
-                    }
-
-                    context.SetOutputParameter(new ContextParameter()
-                    {
-                        Name = "Content-Range",
-                        Source = ContextParameterSource.Header,
-                        Value = $"bytes {startIndex}-{startIndex + totalRead - 1}/{totalLength}",
-                    });
-
-                    context.SetOutputParameter(new ContextParameter()
-                    {
-                        Name = "StatusCode",
-                        Source = ContextParameterSource.Http,
-                        Value = "206",
-                    });
-
-                    using (var inputStream = new FileStream(resourcePath, FileMode.Open, FileAccess.Read))
-                    {
-                        inputStream.Seek(startIndex, SeekOrigin.Begin);
-
-                        var count = 0L;
-                        var buffer = new byte[16 * 1024];
-                        while ((count = inputStream.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            totalRead -= count;
-                            if (totalRead <= 0)
-                            {
-                                count = count + totalRead;
-                            }
-                            await context.OutputStream.WriteAsync(buffer, 0, (int)count);
-                            if (totalRead <= 0)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-                else if (startIndex >= 0 && endIndex >= 0 && startIndex <= endIndex && endIndex < totalLength)
-                {
-                    var totalRead = endIndex - startIndex + 1;
-
-                    context.SetOutputParameter(new ContextParameter()
-                    {
-                        Name = "Content-Range",
-                        Source = ContextParameterSource.Header,
-                        Value = $"bytes {startIndex}-{endIndex}/{totalLength}",
-                    });
-
-                    context.SetOutputParameter(new ContextParameter()
-                    {
-                        Name = "StatusCode",
-                        Source = ContextParameterSource.Http,
-                        Value = "206",
-                    });
-
-                    using (var inputStream = new FileStream(resourcePath, FileMode.Open, FileAccess.Read))
-                    {
-                        inputStream.Seek(startIndex, SeekOrigin.Begin);
-
-                        var count = 0L;
-                        var buffer = new byte[16 * 1024];
-                        while ((count = inputStream.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            totalRead -= count;
-                            if (totalRead <= 0)
-                            {
-                                count = count + totalRead;
-                            }
-                            await context.OutputStream.WriteAsync(buffer, 0, (int)count);
-                            if (totalRead <= 0)
-                            {
-                                break;
-                            }
-                        }
+                        // not support
                     }
                 }
             }
             else
             {
-                using (var inputStream = new FileStream(resourcePath, FileMode.Open, FileAccess.Read))
+                await OutputTotalContent(context, resourcePath, mineType);
+            }
+
+            if (context.ApplicationConfiguration?.Resource?.EnableLog == true)
+            {
+                _ResourceLogger.LogEvent(context);
+            }
+        }
+
+        private async Task OutputTotalContent(CallingContext context, string resourcePath, string contentType)
+        {
+            context.SetOutputParameter(new ContextParameter()
+            {
+                Name = "Content-Type",
+                Source = ContextParameterSource.Header,
+                Value = contentType,
+            });
+            context.SetOutputParameter(new ContextParameter()
+            {
+                Name = "StatusCode",
+                Source = ContextParameterSource.Http,
+                Value = "200",
+            });
+
+            using (var inputStream = new FileStream(resourcePath, FileMode.Open, FileAccess.Read))
+            {
+                var count = 0;
+                var buffer = new byte[16 * 1024];
+                while ((count = inputStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    var count = 0;
-                    var buffer = new byte[16 * 1024];
-                    while ((count = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+                    await context.OutputStream.WriteAsync(buffer, 0, count);
+                }
+            }
+        }
+
+        private async Task OutputPartialContent(CallingContext context, string resourcePath, string contentType, 
+            long startIndex, long totalRead, long totalLength)
+        {
+            context.SetOutputParameter(new ContextParameter()
+            {
+                Name = "Content-Type",
+                Source = ContextParameterSource.Header,
+                Value = contentType,
+            });
+            context.SetOutputParameter(new ContextParameter()
+            {
+                Name = "Accept-Ranges",
+                Source = ContextParameterSource.Header,
+                Value = "bytes",
+            });
+            context.SetOutputParameter(new ContextParameter()
+            {
+                Name = "Content-Range",
+                Source = ContextParameterSource.Header,
+                Value = $"bytes {startIndex}-{startIndex + totalRead - 1}/{totalLength}",
+            });
+            context.SetOutputParameter(new ContextParameter()
+            {
+                Name = "StatusCode",
+                Source = ContextParameterSource.Http,
+                Value = "206",
+            });
+
+            using (var inputStream = new FileStream(resourcePath, FileMode.Open, FileAccess.Read))
+            {
+                inputStream.Seek(startIndex, SeekOrigin.Begin);
+
+                var count = 0L;
+                var buffer = new byte[16 * 1024];
+                while ((count = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    totalRead -= count;
+                    if (totalRead <= 0)
                     {
-                        await context.OutputStream.WriteAsync(buffer, 0, count);
+                        count = count + totalRead;
+                    }
+                    await context.OutputStream.WriteAsync(buffer, 0, (int)count);
+                    if (totalRead <= 0)
+                    {
+                        break;
                     }
                 }
             }

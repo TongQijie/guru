@@ -9,6 +9,8 @@ namespace Guru.AspNetCore
     {
         public DictionaryIgnoreCase<ContextParameter> InputParameters { get; set; }
 
+        public DictionaryIgnoreCase<ContextParameter> OutputParameters { get; set; }
+
         public Stream InputStream { get; set; }
 
         public string[] RouteData { get; set; }

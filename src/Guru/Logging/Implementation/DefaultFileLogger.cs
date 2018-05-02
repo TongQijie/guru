@@ -225,6 +225,15 @@ namespace Guru.Logging.Implementation
                             }
                             else
                             {
+                                var text = "";
+                                try
+                                {
+                                    text = Item._Formatter.WriteObject(kv.Value);
+                                }
+                                catch (Exception)
+                                {
+                                    text = "serialization error.";
+                                }
                                 stringBuilder.Append(Item._Formatter.WriteObject(kv.Value));
                             }
                         }

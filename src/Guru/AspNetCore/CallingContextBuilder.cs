@@ -13,6 +13,7 @@ namespace Guru.AspNetCore
             var context = new CallingContext()
             {
                 InputParameters = new DictionaryIgnoreCase<ContextParameter>(),
+                OutputParameters = new DictionaryIgnoreCase<ContextParameter>(),
                 ApplicationConfiguration = DependencyContainer.Resolve<IApplicationConfiguration>(),
             };
 
@@ -99,6 +100,7 @@ namespace Guru.AspNetCore
             context.OutputStream = httpContext.Response.Body;
             context.SetOutputParameter = p =>
             {
+                context.OutputParameters.AddOrUpdate(p.Name, p);
                 if (p.Source == ContextParameterSource.Header)
                 {
                     if (p.Name.EqualsIgnoreCase("Content-Type"))

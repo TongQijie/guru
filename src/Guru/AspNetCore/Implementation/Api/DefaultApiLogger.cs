@@ -15,14 +15,11 @@ namespace Guru.AspNetCore.Implementation.Api
     [Injectable(typeof(IApiLogger), Lifetime.Singleton)]
     internal class DefaultApiLogger : DefaultFileLogger, IApiLogger
     {
-        private readonly ILightningFormatter _Formatter;
-
-        public DefaultApiLogger(IZooKeeper zooKeeper, IJsonLightningFormatter formatter)
+        public DefaultApiLogger(IZooKeeper zooKeeper)
             : base(zooKeeper)
         {
             Folder = "./ApiLog".FullPath();
             Interval = 5000;
-            _Formatter = formatter;
         }
 
         public void LogEvent(CallingContext context,
