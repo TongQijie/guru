@@ -28,12 +28,20 @@ namespace Guru.DependencyInjection
                 var directoryInfo = new DirectoryInfo("./".FullPath());
                 foreach (var fileInfo in directoryInfo.GetFiles("*.dll", SearchOption.TopDirectoryOnly).Where(x => Filter(x.Name)))
                 {
-                    var assemblyName = AssemblyLoadContext.GetAssemblyName(fileInfo.FullName);
-
-                    if (!assemblyNames.Exists(x => x.Name.EqualsIgnoreCase(assemblyName.Name)))
+                    try
                     {
-                        assemblyNames = assemblyNames.Append(assemblyName);
+                        var assemblyName = AssemblyLoadContext.GetAssemblyName(fileInfo.FullName);
+
+                        if (!assemblyNames.Exists(x => x.Name.EqualsIgnoreCase(assemblyName.Name)))
+                        {
+                            assemblyNames = assemblyNames.Append(assemblyName);
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                    
                 }
 
                 foreach (var assemblyName in assemblyNames)
