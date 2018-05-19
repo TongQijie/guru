@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
-using Guru.ExtensionMethod;
 using Guru.Logging;
 using Guru.Logging.Abstractions;
 using Guru.Network.Abstractions;
