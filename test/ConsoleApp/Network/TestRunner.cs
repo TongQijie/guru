@@ -160,11 +160,14 @@ namespace ConsoleApp.Network
 
         private async Task Baidu()
         {
-            var browser = DependencyContainer.Resolve<IWebBrowser>();
-            await browser.Browse("https://pan.baidu.com/", null);
+            var browser = DependencyContainer.Resolve<IHttpSession>();
+            using (var response = await browser.GetAsync("https://pan.baidu.com/", null))
+            {
+                
+            }
             var gid = GenerateGid();
             var token = "";
-            await browser.Browse("https://passport.baidu.com/v2/api/", new Dictionary<string, string>()
+            using (var response = await browser.GetAsync("https://passport.baidu.com/v2/api/", new Dictionary<string, string>()
             {
                 { "getapi", "" },
                 { "tpl", "netdisk" },
@@ -177,18 +180,22 @@ namespace ConsoleApp.Network
                 { "logintype", "basicLogin" },
                 { "traceid", "" },
                 { "callback", "bd__cbs__mx2p3r" },
-            }, async (response) => {
-                var content = await response.GetStringAsync();
-                var match = Regex.Match(content, "\"token\"\\s*:\\s*\"(?<token>.+?)\"");
-                if (match.Success)
+            }))
+            {
+                if (response != null && response.StatusCode == 200)
                 {
-                    token = match.Groups["token"].Captures[0].Value;
+                    var content = await response.GetStringAsync();
+                    var match = Regex.Match(content, "\"token\"\\s*:\\s*\"(?<token>.+?)\"");
+                    if (match.Success)
+                    {
+                        token = match.Groups["token"].Captures[0].Value;
+                    }
                 }
-            });
+            }
             Console.WriteLine($"Token:{token}");
             var pubkey = "";
             var rsakey = "";
-            await browser.Browse("https://passport.baidu.com/v2/getpublickey", new Dictionary<string, string>()
+            using (var response = await browser.GetAsync("https://passport.baidu.com/v2/getpublickey", new Dictionary<string, string>()
             {
                 { "token", token },
                 { "tpl", "netdisk" },
@@ -198,22 +205,26 @@ namespace ConsoleApp.Network
                 { "gid", gid },
                 { "traceid", "" },
                 { "callback", "bd__cbs__sqvtqi" },
-            }, async (response) => {
-                var content = await response.GetStringAsync();
-                var match1 = Regex.Match(content, "\"pubkey\"\\s*:\\s*'(?<pubkey>.+?)'");
-                if (match1.Success)
+            }))
+            {
+                if (response != null && response.StatusCode == 200)
                 {
-                    pubkey = match1.Groups["pubkey"].Captures[0].Value
-                        .Replace("\\n", "")
-                        .Replace("-----BEGIN PUBLIC KEY-----", "")
-                        .Replace("-----END PUBLIC KEY-----", "");
+                    var content = await response.GetStringAsync();
+                    var match1 = Regex.Match(content, "\"pubkey\"\\s*:\\s*'(?<pubkey>.+?)'");
+                    if (match1.Success)
+                    {
+                        pubkey = match1.Groups["pubkey"].Captures[0].Value
+                            .Replace("\\n", "")
+                            .Replace("-----BEGIN PUBLIC KEY-----", "")
+                            .Replace("-----END PUBLIC KEY-----", "");
+                    }
+                    var match2 = Regex.Match(content, "\"key\"\\s*:\\s*'(?<rsakey>.+?)'");
+                    if (match2.Success)
+                    {
+                        rsakey = match2.Groups["rsakey"].Captures[0].Value;
+                    }
                 }
-                var match2 = Regex.Match(content, "\"key\"\\s*:\\s*'(?<rsakey>.+?)'");
-                if (match2.Success)
-                {
-                    rsakey = match2.Groups["rsakey"].Captures[0].Value;
-                }
-            });
+            }
             Console.WriteLine($"pubkey:{pubkey}");
             Console.WriteLine($"rsakey:{rsakey}");
 
