@@ -62,6 +62,10 @@ namespace Guru.AspNetCore.Implementation.Resource
                     mineType = context.ApplicationConfiguration.Resource.MineTypes[ext.ToLower()];
                 }
             }
+            else
+            {
+                mineType = "application/octet-stream";
+            }
             if (!mineType.HasValue())
             {
                 context.SetOutputParameter(new ContextParameter()
