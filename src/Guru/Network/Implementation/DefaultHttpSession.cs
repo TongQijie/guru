@@ -44,6 +44,11 @@ namespace Guru.Network.Implementation
 
         private IDictionary<string, string> AppendCookies(IDictionary<string, string> headers)
         {
+            if (headers == null || headers.Count == 0)
+            {
+                return headers;
+            }
+
             var cookieKey = headers.Keys.FirstOrDefault(x => x.EqualsIgnoreCase("Cookie"));
             if (cookieKey == null)
             {
@@ -58,7 +63,7 @@ namespace Guru.Network.Implementation
 
         private IHttpResponse SetCookies(IHttpResponse response)
         {
-            if (response.Headers != null && response.Headers.ContainsKey("Set-Cookie"))
+            if (response != null && response.Headers != null && response.Headers.ContainsKey("Set-Cookie"))
             {
                 var setCookes = response.Headers["Set-Cookie"];
                 if (setCookes.HasLength())

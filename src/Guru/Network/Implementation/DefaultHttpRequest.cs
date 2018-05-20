@@ -11,6 +11,8 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
 using Guru.Formatter.Abstractions;
+using Guru.Logging;
+using Guru.Logging.Abstractions;
 using Guru.Network.Abstractions;
 using Guru.Utils;
 
@@ -52,6 +54,13 @@ namespace Guru.Network.Implementation
 
         private TimeSpan? _Timeout = null;
 
+        private readonly ILogger _Logger;
+
+        public DefaultHttpRequest(IFileLogger logger)
+        {
+            _Logger = logger;
+        }
+
         public void Configure(IWebProxy webProxy, TimeSpan? timeout)
         {
             _WebProxy = webProxy;
@@ -60,8 +69,7 @@ namespace Guru.Network.Implementation
 
         public async Task<IHttpResponse> GetAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> headers = null)
         {
-            var requestMessage = AppendHeaders(new HttpRequestMessage(HttpMethod.Get, AppendQueryString(url, queryString)), headers);
-            return new DefaultHttpResponse(await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
+            return await InternalGetAsync(AppendQueryString(url, queryString), headers);
         }
 
         public async Task<IHttpResponse> PostAsync<TFormatter>(string url, IDictionary<string, string> queryString, object body, TFormatter formatter, IDictionary<string, string> headers = null) where TFormatter : ILightningFormatter
@@ -89,7 +97,7 @@ namespace Guru.Network.Implementation
                 byteArrayContent = memoryStream.ToArray();
             }
 
-            return new DefaultHttpResponse(await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers));
+            return await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers);
         }
 
         public async Task<IHttpResponse> PostAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> formData, IDictionary<string, string> headers = null)
@@ -119,12 +127,12 @@ namespace Guru.Network.Implementation
                 headers.Add("Content-Type", "application/x-www-form-urlencoded");
             }
 
-            return new DefaultHttpResponse(await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers));
+            return await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers);
         }
 
         public async Task<IHttpResponse> PostAsync(string url, IDictionary<string, string> queryString, byte[] byteArrayContent, IDictionary<string, string> headers = null)
         {
-            return new DefaultHttpResponse(await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers));
+            return await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers);
         }
 
         private string AppendQueryString(string url, IDictionary<string, string> queryString)
@@ -184,7 +192,22 @@ namespace Guru.Network.Implementation
             return httpRequestMessage;
         }
 
-        private async Task<HttpResponseMessage> InternalPostAsync(string url, byte[] byteArrayContent, IDictionary<string, string> headers)
+        private async Task<IHttpResponse> InternalGetAsync(string url, IDictionary<string, string> headers)
+        {
+            var requestMessage = AppendHeaders(new HttpRequestMessage(HttpMethod.Get, url), headers);
+            try
+            {
+                return new DefaultHttpResponse(await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
+            }
+            catch (Exception e)
+            {
+                _Logger.LogEvent(nameof(DefaultHttpRequest), Severity.Error, $"failed to request: {url}", e);
+            }
+
+            return null;
+        }
+
+        private async Task<IHttpResponse> InternalPostAsync(string url, byte[] byteArrayContent, IDictionary<string, string> headers)
         {
             using (var content = new ByteArrayContent(byteArrayContent))
             {
@@ -200,7 +223,16 @@ namespace Guru.Network.Implementation
                 }
                 var requestMessage = AppendHeaders(new HttpRequestMessage(HttpMethod.Post, url), headers);
                 requestMessage.Content = content;
-                return await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+                try
+                {
+                    return new DefaultHttpResponse(await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
+                }
+                catch (Exception e)
+                {
+                    _Logger.LogEvent(nameof(DefaultHttpRequest), Severity.Error, $"failed to request: {url}", e);
+                }
+
+                return null;
             }
         }
     }
