@@ -17,50 +17,16 @@ namespace Guru.Executable
 
         private readonly IZooKeeper _ZooKeeper;
 
+        private readonly ICommandLineArgsParser _CommandLineArgsParser;
+
         private ConsoleAppInstance()
         {
             _Logger = DependencyContainer.Resolve<IFileLogger>();
             _ZooKeeper = DependencyContainer.Resolve<IZooKeeper>();
+            _CommandLineArgsParser = DependencyContainer.Resolve<ICommandLineArgsParser>();
         }
 
         private bool _InstanceAlive = false;
-
-        public void Run(string[] args, bool loop = false)
-        {
-            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application started.");
-
-            try
-            {
-                if (DependencyContainer.Resolve<IConsoleExecutable>().Run(args) == 0)
-                {
-                    if (loop)
-                    {
-                        _InstanceAlive = true;
-
-                        Console.CancelKeyPress += (sender, eventArgs) =>
-                        {
-                            _InstanceAlive = false;
-                            eventArgs.Cancel = true;
-                        };
-
-                        Console.WriteLine("Application started. Press Ctrl+C to shut down.");
-                        while (_InstanceAlive)
-                        {
-                            Thread.Sleep(1000);
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application occurred an unhandled exception.", e);
-                Console.WriteLine($"Application aborted. {e.Message}");
-            }
-
-            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application stopped.");
-
-            _ZooKeeper.RemoveAll();
-        }
 
         public void RunAsync(string[] args, bool loop = false)
         {
@@ -68,7 +34,7 @@ namespace Guru.Executable
 
             try
             {
-                if (DependencyContainer.Resolve<IConsoleExecutable>().RunAsync(args).GetAwaiter().GetResult() == 0)
+                if (DependencyContainer.Resolve<IConsoleExecutable>().RunAsync(_CommandLineArgsParser.Parse(args)).GetAwaiter().GetResult() == 0)
                 {
                     if (loop)
                     {

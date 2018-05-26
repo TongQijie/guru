@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using Guru.Cache.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
@@ -22,12 +21,16 @@ namespace Guru.Restful.Implementation
         {
             var token = GenerateToken();
 
+            var config = DependencyContainer.Resolve<IIdentityConfiguration>();
+
+            var expire = config.ExpireMillis <= 0 ? (long)TimeSpan.FromDays(30).TotalMilliseconds : config.ExpireMillis;
+
             _CacheProvider.Set(token, new CacheEntity()
             {
                 UserId = userId,
-                Deadline = DateTime.Now.AddDays(30),
-                Milliseconds = (long)TimeSpan.FromDays(30).TotalMilliseconds,
-            }, TimeSpan.FromDays(30));
+                Deadline = DateTime.Now.AddMilliseconds(expire),
+                Milliseconds = expire,
+            }, TimeSpan.FromMilliseconds(expire));
 
             return token;
         }
@@ -45,14 +48,20 @@ namespace Guru.Restful.Implementation
                 return false;
             }
 
-            if ((entity.Deadline - DateTime.Now) < TimeSpan.FromDays(1))
+            var config = DependencyContainer.Resolve<IIdentityConfiguration>();
+
+            var renew = config.RenewMillis <= 0 ? (long)TimeSpan.FromDays(1).TotalMilliseconds : config.RenewMillis;
+
+            if ((entity.Deadline - DateTime.Now) < TimeSpan.FromMilliseconds(renew))
             {
+                var expire = config.ExpireMillis <= 0 ? (long)TimeSpan.FromDays(30).TotalMilliseconds : config.ExpireMillis;
+
                 _CacheProvider.Set(head.Token, new CacheEntity()
                 {
                     UserId = entity.UserId,
-                    Deadline = DateTime.Now.AddMilliseconds(entity.Milliseconds),
-                    Milliseconds = entity.Milliseconds,
-                }, TimeSpan.FromMilliseconds(entity.Milliseconds));
+                    Deadline = DateTime.Now.AddMilliseconds(expire),
+                    Milliseconds = expire,
+                }, TimeSpan.FromMilliseconds(expire));
             }
 
             head.SetUserId(entity.UserId);

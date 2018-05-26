@@ -45,9 +45,7 @@ namespace Guru.Restful
                 {
                     if (typeof(ResponseBase).IsAssignableFrom(returnType))
                     {
-                        var response = returnType.CreateInstance() as ResponseBase;
-                        response.Head = new ResponseHead() { Status = -99, Message = "token is not valid." };
-                        return HandlingResult.Fail(response);
+                        return HandlingResult.Fail((returnType.CreateInstance() as ResponseBase).Illegal());
                     }
                     else
                     {
