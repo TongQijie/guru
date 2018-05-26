@@ -9,19 +9,14 @@ using Guru.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using System.Threading.Tasks;
 using Guru.AspNetCore.Abstractions;
+using Guru.Executable;
 
 namespace AspNetCoreAppII
 {
     [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
     public class Startup : IConsoleExecutable
     {
-        public int Run(string[] args)
-        {
-            Host.Run();
-            return 0;
-        }
-
-        public async Task<int> RunAsync(string[] args)
+        public async Task<int> RunAsync(CommandLineArgs args)
         {
             await Host.RunAsync();
             return 0;
