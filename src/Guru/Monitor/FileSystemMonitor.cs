@@ -6,12 +6,20 @@ using Guru.Monitor.Internal;
 using Guru.DependencyInjection;
 using Guru.Monitor.Abstractions;
 using Guru.DependencyInjection.Attributes;
+using Guru.Logging.Abstractions;
 
 namespace Guru.Monitor
 {
     [Injectable(typeof(IFileSystemMonitor), Lifetime.Singleton)]
     internal class FileSystemMonitor : IFileSystemMonitor
     {
+        private readonly ILogger _Logger;
+
+        public FileSystemMonitor(IFileLogger logger)
+        {
+            _Logger = logger;
+        }
+
         private ConcurrentDictionary<string, FolderMonitor> _FolderMonitors = new ConcurrentDictionary<string, FolderMonitor>();
 
         public void Add(object referenceObject, string path, 
@@ -43,7 +51,7 @@ namespace Guru.Monitor
             }
             else
             {
-                folderMonitor = new FolderMonitor(p);
+                folderMonitor = new FolderMonitor(p, _Logger);
 
                 if (!_FolderMonitors.TryAdd(key, folderMonitor))
                 {

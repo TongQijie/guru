@@ -3,14 +3,20 @@ using System.IO;
 using System.Collections.Generic;
 
 using Guru.ExtensionMethod;
+using Guru.DependencyInjection;
+using Guru.Logging.Abstractions;
+using Guru.Logging;
 
 namespace Guru.Monitor.Internal
 {
     internal class FolderMonitor
     {
-        public FolderMonitor(string folderPath)
+        private readonly ILogger _Logger;
+
+        public FolderMonitor(string folderPath, ILogger logger)
         {
             Path = folderPath;
+            _Logger = logger;
         }
 
         private FileSystemWatcher _Watcher = null;
@@ -28,6 +34,7 @@ namespace Guru.Monitor.Internal
                 _Watcher.Created += new FileSystemEventHandler(OnCreated);
                 _Watcher.Deleted += new FileSystemEventHandler(OnDeleted);
                 _Watcher.Renamed += new RenamedEventHandler(OnRenamed);
+                _Watcher.Error += new ErrorEventHandler(OnError);
             }
 
             _Watcher.EnableRaisingEvents = true;
@@ -41,6 +48,7 @@ namespace Guru.Monitor.Internal
                 _Watcher.Created -= new FileSystemEventHandler(OnCreated);
                 _Watcher.Deleted -= new FileSystemEventHandler(OnDeleted);
                 _Watcher.Renamed -= new RenamedEventHandler(OnRenamed);
+                _Watcher.Error -= new ErrorEventHandler(OnError); 
                 _Watcher.EnableRaisingEvents = false;
                 _Watcher = null;
             }
@@ -76,12 +84,26 @@ namespace Guru.Monitor.Internal
                 {
                     if (lastWriteTime - ChangeTimes[e.FullPath] > TimeSpan.FromMilliseconds(1))
                     {
-                        FileChanged.Invoke(e.FullPath.FullPath());
+                        try
+                        {
+                            FileChanged.Invoke(e.FullPath.FullPath());
+                        }
+                        catch (Exception ex)
+                        {
+                            _Logger.LogEvent(nameof(FolderMonitor), Severity.Error, $"error occurred when '{e.FullPath}' changed.", ex);
+                        }
                     }
                 }
                 else
                 {
-                    FileChanged.Invoke(e.FullPath.FullPath());
+                    try
+                    {
+                        FileChanged.Invoke(e.FullPath.FullPath());
+                    }
+                    catch (Exception ex)
+                    {
+                        _Logger.LogEvent(nameof(FolderMonitor), Severity.Error, $"error occurred when '{e.FullPath}' changed.", ex);                        
+                    }
                 }
 
                 ChangeTimes[e.FullPath] = lastWriteTime;
@@ -102,7 +124,14 @@ namespace Guru.Monitor.Internal
                     lastWriteTime = new DirectoryInfo(e.FullPath).LastWriteTime;
                 }
 
-                FileCreated.Invoke(e.FullPath.FullPath());
+                try
+                {
+                    FileCreated.Invoke(e.FullPath.FullPath());
+                }
+                catch (Exception ex)
+                {
+                    _Logger.LogEvent(nameof(FolderMonitor), Severity.Error, $"error occurred when '{e.FullPath}' created.", ex);                                            
+                }
 
                 ChangeTimes[e.FullPath] = lastWriteTime;
             }
@@ -112,7 +141,14 @@ namespace Guru.Monitor.Internal
         {
             if (FileDeleted != null)
             {
-                FileDeleted.Invoke(e.FullPath.FullPath());
+                try
+                {
+                    FileDeleted.Invoke(e.FullPath.FullPath());
+                }
+                catch (Exception ex)
+                {
+                    _Logger.LogEvent(nameof(FolderMonitor), Severity.Error, $"error occurred when '{e.FullPath}' deleted.", ex);                                                                
+                }
             }
         }
 
@@ -120,8 +156,20 @@ namespace Guru.Monitor.Internal
         {
             if (FileRenamed != null)
             {
-                FileRenamed.Invoke(e.OldFullPath.FullPath(), e.FullPath.FullPath());
+                try
+                {
+                    FileRenamed.Invoke(e.OldFullPath.FullPath(), e.FullPath.FullPath());
+                }
+                catch (Exception ex)
+                {
+                    _Logger.LogEvent(nameof(FolderMonitor), Severity.Error, $"error occurred when '{e.FullPath}' renamed.", ex);                                                                                    
+                }
             }
+        }
+
+        private void OnError(object source, ErrorEventArgs e)
+        {
+            _Logger.LogEvent(nameof(FolderMonitor), Severity.Error, "error occurred in folder monitor.", e.GetException());
         }
     }
 }
