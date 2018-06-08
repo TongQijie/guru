@@ -17,7 +17,7 @@ namespace ConsoleApp.Network
     {
         public async Task Run()
         {
-            var request = DependencyContainer.Resolve<IHttpClientBroker>().Get();
+            var request = DependencyContainer.Resolve<IHttpManager>().Create();
             var formatter = DependencyContainer.Resolve<IJsonLightningFormatter>();
             var publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDB1qHpg0sWNVTXyq8VmVaxvALIW5K0zD1AjU3Eh7etjhqZcVN7ww/mRoWkPsoQf2IXhxSZA4/zL08TQkd2BZjXzIYzyJ8U6pKt/MdL462960VfwfBzlBcQsC60rzE6IJfZ5IBxrDJZjOZSIQv24BZc5+16/U2gNWvNsC/iSzR6KQIDAQAB";
 
@@ -86,8 +86,8 @@ namespace ConsoleApp.Network
             public async Task Download()
             {
                 Console.WriteLine($"start to download: {DownloadUrl}");
-                var request = DependencyContainer.Resolve<IHttpClientBroker>().Get();
-                using (var response = await request.GetAsync(DownloadUrl))
+                var request = DependencyContainer.Resolve<IHttpManager>().Create();
+                using (var response = await request.GetAsync(DownloadUrl, null))
                 {
                     if (response.StatusCode == 200)
                     {
