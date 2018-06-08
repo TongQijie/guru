@@ -60,9 +60,11 @@ namespace Guru.Executable
                 Console.WriteLine($"Application aborted. {e.Message}");
             }
 
+            _ZooKeeper.RemoveAll();
+
             _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application stopped.");
 
-            _ZooKeeper.RemoveAll();
+            Console.WriteLine($"Application stopped.");
         }
     }
 }
