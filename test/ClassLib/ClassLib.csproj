@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Guru.RestApi\Guru.RestApi.csproj" />
     <ProjectReference Include="..\..\src\Guru\Guru.csproj" />
   </ItemGroup>
 
