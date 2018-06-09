@@ -24,7 +24,7 @@ namespace Guru.Cache.Implementation
         public DefaultMemoryCacheProvider(IFileLogger fileLogger, IZooKeeper zooKeeper)
         {
             _Logger = fileLogger;
-            Persistent = true;
+            Persistent = false;
             SecondsToClean = 60;
             zooKeeper.Add(this);
         }

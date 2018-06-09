@@ -173,14 +173,18 @@ namespace Guru.Formatter.Json
 
         private byte[] GetUnescapeByteValues(IReaderStream stream)
         {
-            var buffer = new byte[0];
+            var buffer = new byte[1024];
+            var index = 0;
 
             var buf = new byte[0];
             while ((buf = stream.ReadBytesUntil(new byte[] { JsonConstants.Double_Quotes, JsonConstants.Backslash })) != null)
             {
                 if (buf[buf.Length - 1] == JsonConstants.Double_Quotes)
                 {
-                    return Concat(buffer, 0, buffer.Length, buf, 0, buf.Length - 1);
+                    buffer = Append(buffer, ref index, buf);
+                    var result = new byte[index - 1];
+                    System.Buffer.BlockCopy(buffer, 0, result, 0, result.Length);
+                    return result;
                 }
 
                 if (buf[buf.Length - 1] == JsonConstants.Backslash)
@@ -201,7 +205,7 @@ namespace Guru.Formatter.Json
                         buf[buf.Length - 1] = JsonCharacterEscape.Unescape(b);
                     }
 
-                    buffer = Concat(buffer, 0, buffer.Length, buf, 0, buf.Length);
+                    buffer = Append(buffer, ref index, buf);
                 }
             }
 
@@ -210,14 +214,18 @@ namespace Guru.Formatter.Json
 
         private async Task<byte[]> GetUnescapeByteValuesAsync(IReaderStream stream)
         {
-            var buffer = new byte[0];
+            var buffer = new byte[1024];
+            var index = 0;
 
             var buf = new byte[0];
             while ((buf = await stream.ReadBytesUntilAsync(new byte[] { JsonConstants.Double_Quotes, JsonConstants.Backslash })) != null)
             {
                 if (buf[buf.Length - 1] == JsonConstants.Double_Quotes)
                 {
-                    return Concat(buffer, 0, buffer.Length, buf, 0, buf.Length - 1);
+                    buffer = Append(buffer, ref index, buf);
+                    var result = new byte[index - 1];
+                    System.Buffer.BlockCopy(buffer, 0, result, 0, result.Length);
+                    return result;
                 }
 
                 if (buf[buf.Length - 1] == JsonConstants.Backslash)
@@ -238,11 +246,33 @@ namespace Guru.Formatter.Json
                         buf[buf.Length - 1] = JsonCharacterEscape.Unescape(b);
                     }
 
-                    buffer = Concat(buffer, 0, buffer.Length, buf, 0, buf.Length);
+                    buffer = Append(buffer, ref index, buf);
                 }
             }
 
             return buffer;
+        }
+
+        private byte[] Append(byte[] buffer, ref int index, byte[] source)
+        {
+            if (index + source.Length <= buffer.Length)
+            {
+                System.Buffer.BlockCopy(source, 0, buffer, index, source.Length);
+                index += source.Length;
+                return buffer;
+            }
+            else
+            {
+                buffer = Bigger(buffer);
+                return Append(buffer, ref index, source);
+            }
+        }
+
+        private byte[] Bigger(byte[] buffer)
+        {
+            var buf = new byte[buffer.Length * 2];
+            System.Buffer.BlockCopy(buffer, 0, buf, 0, buffer.Length);
+            return buf;
         }
 
         private byte[] Concat(byte[] firstArray, int firstStart, int firstCount, byte[] secondArray, int secondStart, int secondCount)
