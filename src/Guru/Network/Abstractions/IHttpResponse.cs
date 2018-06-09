@@ -14,6 +14,8 @@ namespace Guru.Network.Abstractions
 
         long ContentLength { get; }
 
+        string Location { get; }
+
         Task<TBody> GetBodyAsync<TBody>(ILightningFormatter formatter);
 
         Task GetBodyAsync(Func<byte[], int, int, Task> handler, int bufferSize = 4 * 1024);

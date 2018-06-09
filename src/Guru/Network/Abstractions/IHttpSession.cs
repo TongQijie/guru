@@ -6,6 +6,8 @@ namespace Guru.Network.Abstractions
 {
     public interface IHttpSession
     {
+        bool LocationEnabled { get; set; }
+
         Task<IHttpResponse> GetAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> headers = null);
 
         Task<IHttpResponse> PostAsync<TFormatter>(string uri, IDictionary<string, string> queryString,
