@@ -173,7 +173,7 @@ namespace Guru.Formatter.Json
 
         private byte[] GetUnescapeByteValues(IReaderStream stream)
         {
-            var buffer = new byte[1024];
+            var buffer = new byte[64];
             var index = 0;
 
             var buf = new byte[0];
@@ -214,7 +214,7 @@ namespace Guru.Formatter.Json
 
         private async Task<byte[]> GetUnescapeByteValuesAsync(IReaderStream stream)
         {
-            var buffer = new byte[1024];
+            var buffer = new byte[64];
             var index = 0;
 
             var buf = new byte[0];
