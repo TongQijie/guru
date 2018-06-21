@@ -29,17 +29,18 @@ namespace Guru.Network.Implementation
             {
                 if (_Client == null)
                 {
+                    var handler = new HttpClientHandler()
+                    {
+                        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                    };
+
                     if (_WebProxy != null)
                     {
-                        var handler = new HttpClientHandler();
                         handler.Proxy = _WebProxy;
-                        handler.Credentials = _WebProxy.Credentials;
-                        _Client = new HttpClient(handler);
+                        handler.Credentials = _WebProxy.Credentials;   
                     }
-                    else
-                    {
-                        _Client = new HttpClient();
-                    }
+
+                    _Client = new HttpClient(handler);
 
                     if (_Timeout != null)
                     {
