@@ -24,7 +24,7 @@ namespace Guru.Cache.Implementation
         public DefaultMemoryCacheProvider(IFileLogger fileLogger, IZooKeeper zooKeeper)
         {
             _Logger = fileLogger;
-            Persistent = true;
+            Persistent = false;
             SecondsToClean = 60;
             zooKeeper.Add(this);
         }
@@ -128,9 +128,9 @@ namespace Guru.Cache.Implementation
             return default(T);
         }
 
-        public Task<T> GetAsync<T>(string key)
+        public async Task<T> GetAsync<T>(string key)
         {
-            throw new NotImplementedException();
+            return await Task.FromResult(Get<T>(key));
         }
 
         public T GetOrSet<T>(string key, SetDelegate<T> setDelegate, TimeSpan expiry)
@@ -177,9 +177,48 @@ namespace Guru.Cache.Implementation
             }
         }
 
-        public Task<T> GetOrSetAsync<T>(string key, SetAsyncDelegate<T> setDelegate, TimeSpan expiry)
+        public async Task<T> GetOrSetAsync<T>(string key, SetAsyncDelegate<T> setDelegate, TimeSpan expiry)
         {
-            throw new NotImplementedException();
+            if (!_Alive)
+            {
+                Startup();
+            }
+
+            if (_Memory.TryGetValue(key.Md5(), out var item))
+            {
+                if (DateTime.Now < item.ExpiryTime)
+                {
+                    return (T)item.Value;
+                }
+                else
+                {
+                    var addItem = new DefaultMemoryCacheItem()
+                    {
+                        Key = key.Md5(),
+                        Value = await setDelegate(this),
+                        ExpiryTime = DateTime.Now.Add(expiry),
+                    };
+                    try
+                    {
+                        return (T)_Memory.AddOrUpdate(key, addItem, (x, y) => addItem).Value;
+                    }
+                    catch (Exception e)
+                    {
+                        _Logger.LogEvent(nameof(DefaultMemoryCacheProvider), Severity.Error, e);
+                    }
+
+                    return (T)item.Value;
+                }
+            }
+            else
+            {
+                return (T)_Memory.GetOrAdd(key.Md5(), new DefaultMemoryCacheItem()
+                {
+                    Key = key.Md5(),
+                    Value = await setDelegate(this),
+                    ExpiryTime = DateTime.Now.Add(expiry),
+                }).Value;
+            }
         }
 
         public bool Remove(string key)
@@ -192,9 +231,9 @@ namespace Guru.Cache.Implementation
             return _Memory.TryRemove(key.Md5(), out var value);
         }
 
-        public Task<bool> RemoveAsync(string key)
+        public async Task<bool> RemoveAsync(string key)
         {
-            throw new NotImplementedException();
+            return await Task.FromResult(Remove(key));
         }
 
         public bool Set<T>(string key, T value, TimeSpan expiry)
@@ -224,9 +263,9 @@ namespace Guru.Cache.Implementation
             return false;
         }
 
-        public Task<bool> SetAsync<T>(string key, T value, TimeSpan expiry)
+        public async Task<bool> SetAsync<T>(string key, T value, TimeSpan expiry)
         {
-            throw new NotImplementedException();
+            return await Task.FromResult(Set(key, value, expiry));
         }
 
         public void Dispose()

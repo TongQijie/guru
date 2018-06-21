@@ -67,6 +67,18 @@ namespace Guru.Network.Implementation
             }
         }
 
+        public string Location
+        {
+            get
+            {
+                if (Headers != null && Headers.ContainsKey("Location") && Headers["Location"].HasLength())
+                {
+                    return Headers["Location"][0];
+                }
+                return null;
+            }
+        }
+
         public async Task<TBody> GetBodyAsync<TBody>(ILightningFormatter formatter)
         {
             using (var stream = await _Response.Content.ReadAsStreamAsync())

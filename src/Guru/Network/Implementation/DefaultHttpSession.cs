@@ -22,9 +22,16 @@ namespace Guru.Network.Implementation
             _CookieManager = cookieManager;
         }
 
+        public bool LocationEnabled { get; set; }
+
         public async Task<IHttpResponse> GetAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> headers = null)
         {
-            return SetCookies(await _HttpManager.Create().GetAsync(url, queryString, AppendCookies(headers)));
+            var response = SetCookies(await _HttpManager.Create().GetAsync(url, queryString, AppendCookies(headers)));
+            if (LocationEnabled && response.Location.HasValue())
+            {
+                return await GetAsync(response.Location, null);
+            }
+            return response;
         }
 
         public async Task<IHttpResponse> PostAsync<TFormatter>(string url, IDictionary<string, string> queryString, object body, TFormatter formatter, IDictionary<string, string> headers = null) where TFormatter : ILightningFormatter

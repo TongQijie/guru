@@ -58,6 +58,25 @@ namespace Guru.AspNetCore.Implementation.Api
                     Value = "200",
                 });
 
+                if (context.ApplicationConfiguration?.Api?.Headers.HasLength() == true)
+                {
+                    foreach (var header in context.ApplicationConfiguration.Api.Headers)
+                    {
+                        if (header.Name.HasValue() && header.Values.HasLength())
+                        {
+                            foreach (var value in header.Values)
+                            {
+                                context.SetOutputParameter(new ContextParameter()
+                                {
+                                    Name = header.Name,
+                                    Source = ContextParameterSource.Header,
+                                    Value = value,
+                                });
+                            }
+                        }
+                    }
+                }
+
                 if (executionResult != null)
                 {
                     AbstractApiFormatter apiFormatter = null;
@@ -76,25 +95,6 @@ namespace Guru.AspNetCore.Implementation.Api
                         Source = ContextParameterSource.Header,
                         Value = apiFormatter?.ContentType,
                     });
-
-                    if (context.ApplicationConfiguration?.Api?.Headers.HasLength() == true)
-                    {
-                        foreach (var header in context.ApplicationConfiguration.Api.Headers)
-                        {
-                            if (header.Name.HasValue() && header.Values.HasLength())
-                            {
-                                foreach (var value in header.Values)
-                                {
-                                    context.SetOutputParameter(new ContextParameter()
-                                    {
-                                        Name = header.Name,
-                                        Source = ContextParameterSource.Header,
-                                        Value = value,
-                                    });
-                                }
-                            }
-                        }
-                    }
 
                     await apiFormatter.Write(executionResult, context.OutputStream);
                 }
