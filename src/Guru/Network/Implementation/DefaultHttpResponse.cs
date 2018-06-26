@@ -79,6 +79,18 @@ namespace Guru.Network.Implementation
             }
         }
 
+        public RequestUri RequestUri
+        {
+            get
+            {
+                return new RequestUri()
+                {
+                    Host = _Response?.RequestMessage?.RequestUri?.Host,
+                    Scheme = _Response?.RequestMessage?.RequestUri?.Scheme,
+                };
+            }
+        }
+
         public async Task<TBody> GetBodyAsync<TBody>(ILightningFormatter formatter)
         {
             using (var stream = await _Response.Content.ReadAsStreamAsync())

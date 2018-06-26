@@ -1,5 +1,7 @@
 ﻿using Guru.Formatter.Abstractions;
+using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Guru.Network.Abstractions
@@ -7,6 +9,8 @@ namespace Guru.Network.Abstractions
     public interface IHttpSession
     {
         bool LocationEnabled { get; set; }
+
+        IHttpSession Configure(IWebProxy webProxy, TimeSpan? timeout);
 
         Task<IHttpResponse> GetAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> headers = null);
 
