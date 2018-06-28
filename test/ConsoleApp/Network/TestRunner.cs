@@ -274,10 +274,8 @@ namespace ConsoleApp.Network
             byte[] SeqOID = { 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00 };
             byte[] x509key;
             byte[] seq = new byte[15];
-            int x509size;
 
             x509key = Convert.FromBase64String(publicKeyString);
-            x509size = x509key.Length;
 
             using (var mem = new MemoryStream(x509key))
             {
