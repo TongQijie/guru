@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 
 namespace Guru.Utils
 {
-    internal static class CryptoUtils
+    public static class CryptoUtils
     {
         public static string Md5(string plainText)
         {
@@ -64,15 +64,15 @@ namespace Guru.Utils
             {
                 using (var reader = new BinaryReader(memoryStream))
                 {
-                    SeekX509(reader);
+                    SeekX509x30(reader);
 
                     reader.ReadBytes(15);
 
-                    SeekX509(reader);
+                    SeekX509x03(reader);
 
                     reader.ReadByte();
 
-                    SeekX509(reader);
+                    SeekX509x30(reader);
 
                     var modulusSize = GetModulusSize(reader);
                     var modulus = reader.ReadBytes(modulusSize);
@@ -91,7 +91,7 @@ namespace Guru.Utils
             }
         }
 
-        private static void SeekX509(BinaryReader reader)
+        private static void SeekX509x30(BinaryReader reader)
         {
             var integer = reader.ReadUInt16();
             if (integer == 0x8130)
@@ -99,6 +99,19 @@ namespace Guru.Utils
                 reader.ReadByte();
             }
             else if (integer == 0x8230)
+            {
+                reader.ReadInt16();
+            }
+        }
+
+        private static void SeekX509x03(BinaryReader reader)
+        {
+            var integer = reader.ReadUInt16();
+            if (integer == 0x8103)
+            {
+                reader.ReadByte();
+            }
+            else if (integer == 0x8203)
             {
                 reader.ReadInt16();
             }
