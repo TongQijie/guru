@@ -42,11 +42,11 @@ namespace Guru.Network.Implementation
             {
                 if (response.Location.StartsWith("/"))
                 {
-                    return await GetAsync(response.RequestUri.Scheme + "://" + response.RequestUri.Host + response.Location, null);
+                    return await GetAsync(response.RequestUri.Scheme + "://" + response.RequestUri.Host + response.Location, null, headers);
                 }
                 else
                 {
-                    return await GetAsync(response.Location, null);
+                    return await GetAsync(response.Location, null, headers);
                 }
             }
             return response;
@@ -69,19 +69,23 @@ namespace Guru.Network.Implementation
 
         private IDictionary<string, string> AppendCookies(IDictionary<string, string> headers)
         {
-            if (headers == null || headers.Count == 0)
+            if (headers == null)
             {
-                return headers;
+                headers = new Dictionary<string, string>();
             }
 
-            var cookieKey = headers.Keys.FirstOrDefault(x => x.EqualsIgnoreCase("Cookie"));
-            if (cookieKey == null)
+            var cookies = _CookieManager.GetCookies();
+            if (cookies.HasValue())
             {
-                headers.Add("Cookie", _CookieManager.GetCookies());
-            }
-            else
-            {
-                headers["Cookie"] = headers["Cookie"].TrimEnd(';') + ";" + _CookieManager.GetCookies();
+                var cookieKey = headers.Keys.FirstOrDefault(x => x.EqualsIgnoreCase("Cookie"));
+                if (cookieKey == null)
+                {
+                    headers.Add("Cookie", _CookieManager.GetCookies());
+                }
+                else
+                {
+                    headers["Cookie"] = headers["Cookie"].TrimEnd(';') + ";" + _CookieManager.GetCookies();
+                }
             }
             return headers;
         }

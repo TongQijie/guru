@@ -11,7 +11,7 @@ namespace Guru.Executable.Implementation
     {
         public CommandLineArgs Parse(string[] args)
         {
-            var commandLineArgs = new CommandLineArgs();
+            var commandLineArgs = new CommandLineArgs(args);
 
             if (!args.HasLength())
             {
@@ -33,7 +33,6 @@ namespace Guru.Executable.Implementation
                     }
                     else
                     {
-                        Console.WriteLine("Illegal input args.");
                         return commandLineArgs;
                     }
                 }

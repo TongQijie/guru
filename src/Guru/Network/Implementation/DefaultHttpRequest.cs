@@ -32,6 +32,7 @@ namespace Guru.Network.Implementation
                     var handler = new HttpClientHandler()
                     {
                         AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                        AllowAutoRedirect = false,
                     };
 
                     if (_WebProxy != null)
