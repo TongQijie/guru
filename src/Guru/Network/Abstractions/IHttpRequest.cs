@@ -8,7 +8,7 @@ namespace Guru.Network.Abstractions
 {
     public interface IHttpRequest
     {
-        void Configure(IWebProxy webProxy, TimeSpan? timeout);
+        void Configure(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout);
 
         Task<IHttpResponse> GetAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> headers = null);
 

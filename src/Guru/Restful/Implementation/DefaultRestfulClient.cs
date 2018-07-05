@@ -32,9 +32,9 @@ namespace Guru.Restful.Implementation
             _HttpRequest = httpManager.Create();
         }
 
-        public void Configure(IWebProxy webProxy, TimeSpan? timeout)
+        public void Configure(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout)
         {
-            _HttpRequest = _HttpManager.Create(webProxy, timeout);
+            _HttpRequest = _HttpManager.Create(webProxy, ignoredCertificateValidation, timeout);
         }
 
         public string BaseUrl { get; set; }

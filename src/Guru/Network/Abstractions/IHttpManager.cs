@@ -7,6 +7,6 @@ namespace Guru.Network.Abstractions
     {
         IHttpRequest Create();
 
-        IHttpRequest Create(IWebProxy webProxy, TimeSpan? timeout);
+        IHttpRequest Create(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout);
     }
 }

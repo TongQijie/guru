@@ -38,7 +38,12 @@ namespace Guru.Network.Implementation
                     if (_WebProxy != null)
                     {
                         handler.Proxy = _WebProxy;
-                        handler.Credentials = _WebProxy.Credentials;   
+                        handler.Credentials = _WebProxy.Credentials;
+                    }
+
+                    if (_IgnoredCertificateValidation)
+                    {
+                        handler.ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
                     }
 
                     _Client = new HttpClient(handler);
@@ -56,6 +61,8 @@ namespace Guru.Network.Implementation
 
         private TimeSpan? _Timeout = null;
 
+        private bool _IgnoredCertificateValidation = false;
+
         private readonly ILogger _Logger;
 
         public DefaultHttpRequest(IFileLogger logger)
@@ -63,9 +70,10 @@ namespace Guru.Network.Implementation
             _Logger = logger;
         }
 
-        public void Configure(IWebProxy webProxy, TimeSpan? timeout)
+        public void Configure(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout)
         {
             _WebProxy = webProxy;
+            _IgnoredCertificateValidation = ignoredCertificateValidation;
             _Timeout = timeout;
         }
 

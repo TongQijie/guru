@@ -10,7 +10,7 @@ namespace Guru.Restful.Abstractions
 
         string Token { get; set; }
 
-        void Configure(IWebProxy webProxy, TimeSpan? timeout);
+        void Configure(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout);
 
         Task<TResponse> Request<TRequest, TResponse>(TRequest request, string serviceName, string methodName)
             where TRequest : RequestBase

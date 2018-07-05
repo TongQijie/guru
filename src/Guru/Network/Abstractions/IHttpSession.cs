@@ -10,7 +10,7 @@ namespace Guru.Network.Abstractions
     {
         bool LocationEnabled { get; set; }
 
-        IHttpSession Configure(IWebProxy webProxy, TimeSpan? timeout);
+        IHttpSession Configure(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout);
 
         Task<IHttpResponse> GetAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> headers = null);
 

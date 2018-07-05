@@ -29,9 +29,9 @@ namespace Guru.Network.Implementation
 
         public bool LocationEnabled { get; set; }
 
-        public IHttpSession Configure(IWebProxy webProxy, TimeSpan? timeout)
+        public IHttpSession Configure(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout)
         {
-            _HttpRequest = _HttpManager.Create(webProxy, timeout);
+            _HttpRequest = _HttpManager.Create(webProxy, ignoredCertificateValidation, timeout);
             return this;
         }
 

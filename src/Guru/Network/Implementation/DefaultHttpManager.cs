@@ -24,9 +24,9 @@ namespace Guru.Network.Implementation
             return request;
         }
 
-        public IHttpRequest Create(IWebProxy webProxy, TimeSpan? timeout)
+        public IHttpRequest Create(IWebProxy webProxy, bool ignoredCertificateValidation, TimeSpan? timeout)
         {
-            if (webProxy == null && timeout == null)
+            if (webProxy == null && !ignoredCertificateValidation && timeout == null)
             {
                 return Create();
             }
@@ -35,6 +35,10 @@ namespace Guru.Network.Implementation
             if (webProxy != null)
             {
                 stringBuilder.Append(webProxy.GetHashCode());
+            }
+            if (ignoredCertificateValidation)
+            {
+                stringBuilder.Append(ignoredCertificateValidation);
             }
             if (timeout != null)
             {
@@ -45,7 +49,7 @@ namespace Guru.Network.Implementation
             if (!_Requests.TryGetValue(stringBuilder.ToString(), out request))
             {
                 request = DependencyContainer.Resolve<IHttpRequest>();
-                request.Configure(webProxy, timeout);
+                request.Configure(webProxy, ignoredCertificateValidation, timeout);
                 _Requests.AddOrUpdate(stringBuilder.ToString(), request, (i, b) => request);
             }
 
