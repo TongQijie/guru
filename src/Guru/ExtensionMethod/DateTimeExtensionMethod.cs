@@ -8,7 +8,7 @@ namespace Guru.ExtensionMethod
 
         public static long Timestamp(this DateTime dateTime)
         {
-            return (long)((dateTime - ZeroDateTime).TotalSeconds);
+            return (long)((dateTime - ZeroDateTime).TotalMilliseconds);
         }
     }
 }

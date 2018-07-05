@@ -8,7 +8,7 @@ namespace Guru.ExtensionMethod
 
         public static DateTime DateTime(this long timestamp)
         {
-            return ZeroDateTime.AddSeconds(timestamp);
+            return ZeroDateTime.AddMilliseconds(timestamp);
         }
     }
 }

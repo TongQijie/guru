@@ -82,21 +82,28 @@ namespace Guru.Network.Implementation
                 {
                     headers = new Dictionary<string, string>();
                 }
-                if (formatter.Tag.EqualsIgnoreCase("JSON"))
+                if (formatter != null && formatter.Tag.EqualsIgnoreCase("JSON"))
                 {
                     headers.Add("Content-Type", "application/json");
                 }
-                else if (formatter.Tag.EqualsIgnoreCase("XML"))
+                else if (formatter != null && formatter.Tag.EqualsIgnoreCase("XML"))
                 {
                     headers.Add("Content-Type", "application/xml");
                 }
             }
 
             byte[] byteArrayContent;
-            using (var memoryStream = new MemoryStream())
+            if (body is String)
             {
-                await formatter.WriteObjectAsync(body, memoryStream);
-                byteArrayContent = memoryStream.ToArray();
+                byteArrayContent = Encoding.UTF8.GetBytes(body.ToString());
+            }
+            else
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await formatter.WriteObjectAsync(body, memoryStream);
+                    byteArrayContent = memoryStream.ToArray();
+                }
             }
 
             return await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers);
