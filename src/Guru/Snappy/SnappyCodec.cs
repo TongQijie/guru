@@ -135,7 +135,7 @@ namespace Guru.Snappy
         /// <param name="compressedOffset">The offset.</param>
         /// <param name="compressedLength">Length of input.</param>
         /// <returns></returns>
-        public static unsafe byte[] Uncompress(byte[] compressed, int compressedOffset, int compressedLength)
+        public static unsafe byte[] Uncompress(byte[] compressed, int compressedOffset, int compressedLength, bool ignoreError)
         {
             fixed (byte* i = &compressed[compressedOffset])
             {
@@ -144,7 +144,17 @@ namespace Guru.Snappy
                 var output = new byte[uncompressedLength];
                 fixed (byte* o = &output[0])
                 {
-                    Ensure(Uncompress(i, compressedLength, o, ref uncompressedLength));
+                    try
+                    {
+                        Ensure(Uncompress(i, compressedLength, o, ref uncompressedLength));
+                    }
+                    catch (Exception)
+                    {
+                        if (!ignoreError)
+                        {
+                            throw;
+                        }
+                    }
                 }
                 return output;
             }

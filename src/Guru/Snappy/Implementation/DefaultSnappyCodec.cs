@@ -34,9 +34,9 @@ namespace Guru.Snappy.Implementation
             return SnappyCodec.Compress(input, inputOffset, inputLength);
         }
 
-        public byte[] Uncompress(byte[] compressed, int compressedOffset, int compressedLength)
+        public byte[] Uncompress(byte[] compressed, int compressedOffset, int compressedLength, bool ignoreError = false)
         {
-            return SnappyCodec.Uncompress(compressed, compressedOffset, compressedLength);
+            return SnappyCodec.Uncompress(compressed, compressedOffset, compressedLength, ignoreError);
         }
     }
 }
