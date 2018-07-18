@@ -1,0 +1,50 @@
+{
+    # App ID you can specify to identify your app
+    appId: AspNetCoreAppII
+
+    # Domains or IPs you want to bind
+    urls: [
+        http://localhost:5000
+    ]
+
+    # configuration about route
+    router: {
+        # default route
+        default: index.html
+
+        # rewrite rules
+        rewrites: [
+            {
+                # regex pattern
+                pattern: "^(?!api).*(?<!\\.(html|js|css|woff|jpg|ico|gif|md))$"
+
+                # regex value
+                value: index.html
+
+                # regex mode
+                mode: Replace
+            }
+        ]
+    }
+
+    # config about resource
+    res: {
+        # MineType
+        mineTypes: {
+            html: text/html
+            js: application/x-javascript
+            css: text/css
+            woff: application/font-woff
+            jpg: image/jpeg
+            ico: image/x-icon
+            gif: image/gif
+            md: text/plain
+        }
+    }
+
+    # config about api
+    api: {
+        # log switch
+        enableLog: true
+    }
+}

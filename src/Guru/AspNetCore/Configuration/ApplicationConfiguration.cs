@@ -4,7 +4,7 @@ using Guru.Formatter.Json;
 
 namespace Guru.AspNetCore.Configuration
 {
-    [StaticFile(typeof(IApplicationConfiguration), "./Configuration/app.json")]
+    [StaticFile(typeof(IApplicationConfiguration), "./Configuration/app.hjson", Format = "hjson")]
     public class ApplicationConfiguration : IApplicationConfiguration
     {
         public ApplicationConfiguration()

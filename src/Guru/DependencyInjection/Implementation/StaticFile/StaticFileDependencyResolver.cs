@@ -11,6 +11,7 @@ using Guru.Monitor.Abstractions;
 using Guru.Formatter.Abstractions;
 using Guru.DependencyInjection.Abstractions;
 using Guru.Logging;
+using Guru.Utils;
 
 namespace Guru.DependencyInjection.Implementation.StaticFile
 {
@@ -18,7 +19,7 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
     {
         private readonly IFileSystemMonitor _FileSystemMonitor;
 
-        private readonly IFormatter _Formatter;
+        private readonly ILightningFormatter _Formatter;
 
         private readonly ILogger _Logger;
 
@@ -32,13 +33,14 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
 
             var dec = descriptor as StaticFileDependencyDescriptor;
 
-            if (dec.Format == StaticFileDependencyDescriptor.StaticFileFormat.Json)
+            if (dec.Format == StaticFileDependencyDescriptor.StaticFileFormat.Json ||
+                dec.Format == StaticFileDependencyDescriptor.StaticFileFormat.Hjson)
             {
-                _Formatter = DependencyContainer.Resolve<IJsonFormatter>();
+                _Formatter = DependencyContainer.Resolve<IJsonLightningFormatter>();
             }
             else if (dec.Format == StaticFileDependencyDescriptor.StaticFileFormat.Xml)
             {
-                _Formatter = DependencyContainer.Resolve<IXmlFormatter>();
+                _Formatter = DependencyContainer.Resolve<IXmlLightningFormatter>();
             }
 
             if (dec.MultiFiles)
@@ -87,7 +89,17 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
                                         _SingletonObject = decorator.ImplementationType.CreateInstance();
                                     }
 
-                                    _SingletonObject = _Formatter.ReadObject(decorator.ImplementationType, decorator.Path.FullPath());
+                                    using (var inputStream = new FileStream(decorator.Path.FullPath(), FileMode.Open, FileAccess.Read))
+                                    {
+                                        if (decorator.Format == StaticFileDependencyDescriptor.StaticFileFormat.Hjson)
+                                        {
+                                            _SingletonObject = _Formatter.ReadObject(decorator.ImplementationType, HjsonUtils.ToJson(inputStream));
+                                        }
+                                        else
+                                        {
+                                            _SingletonObject = _Formatter.ReadObject(decorator.ImplementationType, inputStream);
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -98,7 +110,19 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
                                     {
                                         if (Regex.IsMatch(fileInfo.Name, _PathExpression))
                                         {
-                                            var elements = _Formatter.ReadObject(decorator.ImplementationType, fileInfo.FullName) as IList;
+                                            IList elements = null;
+                                            using (var inputStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read))
+                                            {
+                                                if (decorator.Format == StaticFileDependencyDescriptor.StaticFileFormat.Hjson)
+                                                {
+                                                    elements = _Formatter.ReadObject(decorator.ImplementationType, HjsonUtils.ToJson(inputStream)) as IList;
+                                                }
+                                                else
+                                                {
+                                                    elements = _Formatter.ReadObject(decorator.ImplementationType, inputStream) as IList;
+                                                }
+                                            }
+                                            
                                             if (elements == null || elements.Count == 0)
                                             {
                                                 continue;

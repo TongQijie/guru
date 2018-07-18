@@ -20,6 +20,10 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
             {
                 Format = StaticFileFormat.Xml;
             }
+            else if (format.EqualsIgnoreCase("hjson"))
+            {
+                Format = StaticFileFormat.Hjson;
+            }
             else
             {
                 Format = StaticFileFormat.Json;
@@ -45,6 +49,8 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
             Json = 0,
 
             Xml = 1,
+
+            Hjson = 2,
         }
     }
 }
