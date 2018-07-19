@@ -5,20 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Configuration\default.deps" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Configuration\default.deps">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
   </ItemGroup>
 
@@ -28,8 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Configuration\app.json">
+    <None Update="wwwroot\**\*;Configuration\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
+
 </Project>
