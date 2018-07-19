@@ -20,17 +20,16 @@
  */
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml;
 
 namespace Guru.FastInfoset
 {
-	/// <summary>
-	/// Summary description for FastInfosetReader.
-	/// </summary>
-	internal sealed class FIParser
+    /// <summary>
+    /// Summary description for FastInfosetReader.
+    /// </summary>
+    internal sealed class FIParser
 	{
 		private const int NS_GROW_SIZE = 10;
 

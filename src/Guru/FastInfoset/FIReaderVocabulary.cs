@@ -19,13 +19,11 @@
  *  http://www.liquid-technologies.com
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Guru.FastInfoset
 {
-	internal class FIReaderVocabulary
+    internal class FIReaderVocabulary
 	{
 		#region Constructors
 		internal FIReaderVocabulary()

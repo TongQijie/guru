@@ -19,14 +19,13 @@
  *  http://www.liquid-technologies.com
  */
 
-using System;
 
 namespace Guru.FastInfoset
 {
-	/// <summary>
-	/// Summary description for Util.
-	/// </summary>
-	internal class Utils
+    /// <summary>
+    /// Summary description for Util.
+    /// </summary>
+    internal class Utils
 	{
 		internal static bool CompareByteArrays(byte[] array1, byte[] array2, int length)
 		{

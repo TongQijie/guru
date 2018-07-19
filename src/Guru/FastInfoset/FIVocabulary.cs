@@ -20,16 +20,13 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 
 namespace Guru.FastInfoset
 {
-	/// <summary>
-	/// Implementation of a set of Fast Infoset vocabulary tables.
-	/// </summary>
-	public class FIVocabulary
+    /// <summary>
+    /// Implementation of a set of Fast Infoset vocabulary tables.
+    /// </summary>
+    public class FIVocabulary
 	{
 		/// <summary>
 		/// Initializes a new instance of the FIVocabulary class with the specified URI [X.891 Section 7.2.11].

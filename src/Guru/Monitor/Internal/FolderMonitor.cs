@@ -3,7 +3,6 @@ using System.IO;
 using System.Collections.Generic;
 
 using Guru.ExtensionMethod;
-using Guru.DependencyInjection;
 using Guru.Logging.Abstractions;
 using Guru.Logging;
 

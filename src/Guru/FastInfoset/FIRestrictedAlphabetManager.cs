@@ -20,11 +20,10 @@
  */
 
 using System;
-using System.Text;
 
 namespace Guru.FastInfoset
 {
-	internal class FIRestrictedAlphabetManager
+    internal class FIRestrictedAlphabetManager
 	{
 		#region Consts
 		private const int GROW_ARRAY_SIZE = 2;

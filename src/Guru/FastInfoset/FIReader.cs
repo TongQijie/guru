@@ -20,49 +20,46 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Xml;
 
 namespace Guru.FastInfoset
 {
-	/// <summary>
-	/// Represents a reader that provides fast, non-cached, forward-only access to XML binary encoded data that conforms to the ITU-T: Fast infoset X.891 (05/2005) recommendation.
-	/// </summary>
-	/// <remarks>The FIReader class derives from the System.Xml.XmlReader .Net Framework class and supports the abstract methods required to integrate with other .Net Framework XML classes such as System.Xml.XmlDocument.</remarks>
-	/// <seealso cref="FIWriter"/>
-	/// <example>
-	/// <code>
-	/// string filename1 = new string(@"c:\MyFile.xml");
-	/// XmlDocument doc = new XmlDocument();
-	/// 
-	/// // Read standard XML file into an XmlDocument
-	/// XmlReader reader = XmlReader.Create(new XmlTextReader(filename1), null);
-	/// doc.Load(reader);
-	/// reader.Close();
-	/// 
-	/// // Write XML to file encoded as Fast Infoset
-	/// XmlWriter fiWriter = XmlWriter.Create(new FIWriter(filename1 + ".finf"));
-	/// doc.WriteTo(fiWriter);
-	/// fiWriter.Close();
-	/// 
-	/// string filename2 = new string(@"c:\MyFile2.xml");
-	/// XmlDocument doc2 = new XmlDocument();
-	/// 
-	/// // Read Fast Infoset encoded XML file into an XmlDocument
-	/// XmlReader fiReader = XmlReader.Create(new FIReader(filename1 + ".finf"), null);
-	/// doc2.Load(fiReader);
-	/// fiReader.Close();
-	/// 
-	/// // Write standard XML to file
-	/// XmlWriter writer = XmlWriter.Create(new XmlTextWriter(filename2, Encoding.Default));
-	/// doc2.WriteTo(writer);
-	/// writer.Close();
-	/// </code>
-	/// </example>
-	public sealed class FIReader : XmlReader
+    /// <summary>
+    /// Represents a reader that provides fast, non-cached, forward-only access to XML binary encoded data that conforms to the ITU-T: Fast infoset X.891 (05/2005) recommendation.
+    /// </summary>
+    /// <remarks>The FIReader class derives from the System.Xml.XmlReader .Net Framework class and supports the abstract methods required to integrate with other .Net Framework XML classes such as System.Xml.XmlDocument.</remarks>
+    /// <seealso cref="FIWriter"/>
+    /// <example>
+    /// <code>
+    /// string filename1 = new string(@"c:\MyFile.xml");
+    /// XmlDocument doc = new XmlDocument();
+    /// 
+    /// // Read standard XML file into an XmlDocument
+    /// XmlReader reader = XmlReader.Create(new XmlTextReader(filename1), null);
+    /// doc.Load(reader);
+    /// reader.Close();
+    /// 
+    /// // Write XML to file encoded as Fast Infoset
+    /// XmlWriter fiWriter = XmlWriter.Create(new FIWriter(filename1 + ".finf"));
+    /// doc.WriteTo(fiWriter);
+    /// fiWriter.Close();
+    /// 
+    /// string filename2 = new string(@"c:\MyFile2.xml");
+    /// XmlDocument doc2 = new XmlDocument();
+    /// 
+    /// // Read Fast Infoset encoded XML file into an XmlDocument
+    /// XmlReader fiReader = XmlReader.Create(new FIReader(filename1 + ".finf"), null);
+    /// doc2.Load(fiReader);
+    /// fiReader.Close();
+    /// 
+    /// // Write standard XML to file
+    /// XmlWriter writer = XmlWriter.Create(new XmlTextWriter(filename2, Encoding.Default));
+    /// doc2.WriteTo(writer);
+    /// writer.Close();
+    /// </code>
+    /// </example>
+    public sealed class FIReader : XmlReader
 	{
 		#region Constructors
 		/// <summary>

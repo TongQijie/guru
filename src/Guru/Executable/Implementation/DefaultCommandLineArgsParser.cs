@@ -2,7 +2,6 @@
 using Guru.DependencyInjection.Attributes;
 using Guru.Executable.Abstractions;
 using Guru.ExtensionMethod;
-using System;
 
 namespace Guru.Executable.Implementation
 {

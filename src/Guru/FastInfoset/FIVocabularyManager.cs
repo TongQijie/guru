@@ -18,16 +18,14 @@
  *  For product and commercial licensing details please contact us:
  *  http://www.liquid-technologies.com
  */
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Guru.FastInfoset
 {
-	/// <summary>
-	/// Manages external vocabulary objects
-	/// </summary>
-	public class FIVocabularyManager
+    /// <summary>
+    /// Manages external vocabulary objects
+    /// </summary>
+    public class FIVocabularyManager
 	{
 		/// <summary>
 		/// Create an instance of the VocabularyManager class.

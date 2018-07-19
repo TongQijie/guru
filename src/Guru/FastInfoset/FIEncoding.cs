@@ -20,17 +20,16 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 
 namespace Guru.FastInfoset
 {
-	/// <summary>
-	/// Abstract base class of Fast Infoset encodings <see cref="FIRestrictedAlphabet"/> and <see cref="FIEncodingAlgorithm"/>.
-	/// </summary>
-	public abstract class FIEncoding
+    /// <summary>
+    /// Abstract base class of Fast Infoset encodings <see cref="FIRestrictedAlphabet"/> and <see cref="FIEncodingAlgorithm"/>.
+    /// </summary>
+    public abstract class FIEncoding
 	{
 		/// <summary>
 		/// Creates an instance of FIEncoding.

@@ -1,5 +1,3 @@
-using System;
-
 namespace Guru.Restful.Abstractions
 {
     public interface IIdentityValidator

@@ -19,15 +19,12 @@
  *  http://www.liquid-technologies.com
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Guru.FastInfoset
 {
 
 
-	internal struct QualifiedName
+    internal struct QualifiedName
 	{
 		internal void Init(string prefix, string ns, string localName)
 		{

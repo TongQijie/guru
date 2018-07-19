@@ -21,11 +21,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Guru.FastInfoset
 {
-	internal class FIWriterVocabulary
+    internal class FIWriterVocabulary
 	{
 		#region Inner Classes
 		internal struct QNameIndex

@@ -6,7 +6,6 @@ using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.Executable.Abstractions;
 using Guru.ExtensionMethod;
-using Guru.Formatter.Abstractions;
 using Guru.Logging;
 using Guru.Logging.Implementation;
 

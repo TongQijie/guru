@@ -19,13 +19,11 @@
  *  http://www.liquid-technologies.com
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Guru.FastInfoset
 {
-	internal class FIEncodingAlgorithmManager
+    internal class FIEncodingAlgorithmManager
 	{
 		#region Consts
 		private const byte ENCODING_ALGORITHM_COUNT = 10;
