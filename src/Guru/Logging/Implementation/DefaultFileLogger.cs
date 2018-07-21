@@ -234,7 +234,7 @@ namespace Guru.Logging.Implementation
                                 {
                                     text = "serialization error.";
                                 }
-                                stringBuilder.Append(Item._Formatter.WriteObject(kv.Value));
+                                stringBuilder.Append(text);
                             }
                         }
                         
