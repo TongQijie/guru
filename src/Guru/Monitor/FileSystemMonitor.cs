@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 using Guru.ExtensionMethod;
 using Guru.Monitor.Internal;
@@ -20,7 +20,9 @@ namespace Guru.Monitor
             _Logger = logger;
         }
 
-        private ConcurrentDictionary<string, FolderMonitor> _FolderMonitors = new ConcurrentDictionary<string, FolderMonitor>();
+        private object _SyncLocker = new object();
+
+        private Dictionary<string, FolderMonitor> _FolderMonitors = new Dictionary<string, FolderMonitor>();
 
         public void Add(object referenceObject, string path, 
             Delegates.FileChangedHandlerDelegate fileChanged,
@@ -38,27 +40,26 @@ namespace Guru.Monitor
 
             FolderMonitor folderMonitor = null;
 
-            if (_FolderMonitors.ContainsKey(key))
+            lock (_SyncLocker)
             {
-                if (!_FolderMonitors[key].ReferencedObjects.Exists(x => x.Equals(referenceObject)))
+                if (_FolderMonitors.ContainsKey(key))
                 {
-                    folderMonitor = _FolderMonitors[key];
+                    if (!_FolderMonitors[key].ReferencedObjects.Exists(x => x.Equals(referenceObject)))
+                    {
+                        folderMonitor = _FolderMonitors[key];
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
                 else
                 {
-                    return;
+                    folderMonitor = new FolderMonitor(p, _Logger);
+                    _FolderMonitors.Add(key, folderMonitor);
                 }
             }
-            else
-            {
-                folderMonitor = new FolderMonitor(p, _Logger);
-
-                if (!_FolderMonitors.TryAdd(key, folderMonitor))
-                {
-                    throw new Exception(string.Format("failed to add folder '{0}' monitor.", p));
-                }
-            }
-
+            
             folderMonitor.ReferencedObjects = folderMonitor.ReferencedObjects.Append(referenceObject);
 
             if (fileChanged != null)
@@ -121,9 +122,10 @@ namespace Guru.Monitor
             if (folderMonitor.ReferencedObjects.Length == 0)
             {
                 folderMonitor.Stop();
-                if (!_FolderMonitors.TryRemove(key, out folderMonitor))
+
+                lock (_SyncLocker)
                 {
-                    // TODO: throw
+                    _FolderMonitors.Remove(key);
                 }
             }
         }
