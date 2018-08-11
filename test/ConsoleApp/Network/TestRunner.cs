@@ -42,7 +42,7 @@ namespace ConsoleApp.Network
                     { "songid", songid },
                     { "t", t },
                     { "sign", sign },
-                }))
+                }, null))
             {
                 if (response.StatusCode == 200)
                 {
@@ -87,7 +87,7 @@ namespace ConsoleApp.Network
             {
                 Console.WriteLine($"start to download: {DownloadUrl}");
                 var request = DependencyContainer.Resolve<IHttpManager>().Create();
-                using (var response = await request.GetAsync(DownloadUrl, null))
+                using (var response = await request.GetAsync(DownloadUrl, null, null))
                 {
                     if (response.StatusCode == 200)
                     {

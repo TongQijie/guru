@@ -79,7 +79,7 @@ namespace Guru.Network.Implementation
 
         public async Task<IHttpResponse> GetAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> headers = null)
         {
-            return await InternalGetAsync(AppendQueryString(url, queryString), headers);
+            return await HttpInvokeAsync(HttpMethod.Get, AppendQueryString(url, queryString), headers, null);
         }
 
         public async Task<IHttpResponse> PostAsync<TFormatter>(string url, IDictionary<string, string> queryString, object body, TFormatter formatter, IDictionary<string, string> headers = null) where TFormatter : ILightningFormatter
@@ -114,7 +114,7 @@ namespace Guru.Network.Implementation
                 }
             }
 
-            return await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers);
+            return await HttpInvokeAsync(HttpMethod.Post, AppendQueryString(url, queryString), headers, byteArrayContent);
         }
 
         public async Task<IHttpResponse> PostAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> formData, IDictionary<string, string> headers = null)
@@ -144,12 +144,82 @@ namespace Guru.Network.Implementation
                 headers.Add("Content-Type", "application/x-www-form-urlencoded");
             }
 
-            return await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers);
+            return await HttpInvokeAsync(HttpMethod.Post, AppendQueryString(url, queryString), headers, byteArrayContent);
         }
 
         public async Task<IHttpResponse> PostAsync(string url, IDictionary<string, string> queryString, byte[] byteArrayContent, IDictionary<string, string> headers = null)
         {
-            return await InternalPostAsync(AppendQueryString(url, queryString), byteArrayContent, headers);
+            return await HttpInvokeAsync(HttpMethod.Post, AppendQueryString(url, queryString), headers, byteArrayContent);
+        }
+
+        public async Task<IHttpResponse> PutAsync<TFormatter>(string url, IDictionary<string, string> queryString, object body, TFormatter formatter, IDictionary<string, string> headers = null) where TFormatter : ILightningFormatter
+        {
+            if (headers == null || !headers.ContainsKey("Content-Type"))
+            {
+                if (headers == null)
+                {
+                    headers = new Dictionary<string, string>();
+                }
+                if (formatter != null && formatter.Tag.EqualsIgnoreCase("JSON"))
+                {
+                    headers.Add("Content-Type", "application/json");
+                }
+                else if (formatter != null && formatter.Tag.EqualsIgnoreCase("XML"))
+                {
+                    headers.Add("Content-Type", "application/xml");
+                }
+            }
+
+            byte[] byteArrayContent;
+            if (body is String)
+            {
+                byteArrayContent = Encoding.UTF8.GetBytes(body.ToString());
+            }
+            else
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await formatter.WriteObjectAsync(body, memoryStream);
+                    byteArrayContent = memoryStream.ToArray();
+                }
+            }
+
+            return await HttpInvokeAsync(HttpMethod.Put, AppendQueryString(url, queryString), headers, byteArrayContent);
+        }
+
+        public async Task<IHttpResponse> PutAsync(string url, IDictionary<string, string> queryString, IDictionary<string, string> formData, IDictionary<string, string> headers = null)
+        {
+            byte[] byteArrayContent = new byte[0];
+            if (formData != null && formData.Count > 0)
+            {
+                var stringBuilder = new StringBuilder();
+                foreach (var kv in formData)
+                {
+                    if (!kv.Key.HasValue())
+                    {
+                        continue;
+                    }
+                    stringBuilder.Append($"{WebUtils.UrlEncode(kv.Key)}={WebUtils.UrlEncode(kv.Value)}&");
+                }
+                byteArrayContent = Encoding.UTF8.GetBytes(stringBuilder.ToString().TrimEnd('&'));
+            }
+
+            if (headers == null || !headers.ContainsKey("Content-Type"))
+            {
+                if (headers == null)
+                {
+                    headers = new Dictionary<string, string>();
+                }
+
+                headers.Add("Content-Type", "application/x-www-form-urlencoded");
+            }
+
+            return await HttpInvokeAsync(HttpMethod.Put, AppendQueryString(url, queryString), headers, byteArrayContent);
+        }
+
+        public async Task<IHttpResponse> PutAsync(string url, IDictionary<string, string> queryString, byte[] byteArrayContent, IDictionary<string, string> headers = null)
+        {
+            return await HttpInvokeAsync(HttpMethod.Put, AppendQueryString(url, queryString), headers, byteArrayContent);
         }
 
         private string AppendQueryString(string url, IDictionary<string, string> queryString)
@@ -209,37 +279,27 @@ namespace Guru.Network.Implementation
             return httpRequestMessage;
         }
 
-        private async Task<IHttpResponse> InternalGetAsync(string url, IDictionary<string, string> headers)
+        private async Task<IHttpResponse> HttpInvokeAsync(HttpMethod method, string url, IDictionary<string, string> headers, byte[] body)
         {
-            var requestMessage = AppendHeaders(new HttpRequestMessage(HttpMethod.Get, url), headers);
-            try
+            if (method == HttpMethod.Post || method == HttpMethod.Put)
             {
-                return new DefaultHttpResponse(await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
-            }
-            catch (Exception e)
-            {
-                _Logger.LogEvent(nameof(DefaultHttpRequest), Severity.Error, $"failed to request: {url}", e);
-            }
-
-            return null;
-        }
-
-        private async Task<IHttpResponse> InternalPostAsync(string url, byte[] byteArrayContent, IDictionary<string, string> headers)
-        {
-            using (var content = new ByteArrayContent(byteArrayContent))
-            {
-                content.Headers.ContentLength = byteArrayContent.Length;
-                var contentTypeKey = headers.Keys.FirstOrDefault(x => x.EqualsIgnoreCase("Content-Type"));
-                if (contentTypeKey != null)
+                using (var content = CreateHttpContent(headers, body))
                 {
-                    if (MediaTypeHeaderValue.TryParse(headers[contentTypeKey], out var parsedValue))
+                    var requestMessage = AppendHeaders(new HttpRequestMessage(method, url), headers);
+                    requestMessage.Content = content;
+                    try
                     {
-                        content.Headers.ContentType = parsedValue;
+                        return new DefaultHttpResponse(await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
                     }
-                    headers.Remove(contentTypeKey);
+                    catch (Exception e)
+                    {
+                        _Logger.LogEvent(nameof(DefaultHttpRequest), Severity.Error, $"failed to request: {url}", e);
+                    }
                 }
-                var requestMessage = AppendHeaders(new HttpRequestMessage(HttpMethod.Post, url), headers);
-                requestMessage.Content = content;
+            }
+            else
+            {
+                var requestMessage = AppendHeaders(new HttpRequestMessage(method, url), headers);
                 try
                 {
                     return new DefaultHttpResponse(await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
@@ -248,9 +308,33 @@ namespace Guru.Network.Implementation
                 {
                     _Logger.LogEvent(nameof(DefaultHttpRequest), Severity.Error, $"failed to request: {url}", e);
                 }
-
-                return null;
             }
+
+            return null;
+        }
+
+        private HttpContent CreateHttpContent(IDictionary<string, string> headers, byte[] body)
+        {
+            var httpContent = new ByteArrayContent(body ?? new byte[0]);
+
+            foreach (var key in headers.Keys.ToArray())
+            {
+                if (key.EqualsIgnoreCase("Content-Type"))
+                {
+                    if (MediaTypeHeaderValue.TryParse(headers[key], out var contentType))
+                    {
+                        httpContent.Headers.ContentType = contentType;
+                    }
+                    headers.Remove(key);
+                }
+            }
+
+            if (body != null)
+            {
+                httpContent.Headers.ContentLength = body.Length;
+            }
+
+            return httpContent;
         }
     }
 }
