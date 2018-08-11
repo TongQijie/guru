@@ -19,7 +19,7 @@ namespace ConsoleApp
 
         public async Task<int> RunAsync(CommandLineArgs args)
         {
-            await new Network.TestRunner().Run();
+            await new ElasticSearch.TestRunner().Run();
             return 0;
         }
     }

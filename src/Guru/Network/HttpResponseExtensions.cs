@@ -8,5 +8,10 @@ namespace Guru.Network
         {
             return response != null && response.StatusCode == 200;
         }
+
+        public static bool IsHttpCreated(this IHttpResponse response)
+        {
+            return response != null && response.StatusCode == 201;
+        }
     }
 }

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Guru.Network;
@@ -34,7 +33,7 @@ namespace Guru.ElasticSearch.Implementation
         {
             using (var httpResponse = await _HttpRequest.PutAsync(CreateUrlByCreateIndex(index), null, new byte[0], null))
             {
-                return httpResponse.IsHttpOk();
+                return httpResponse.IsHttpCreated();
             }
         }
 
@@ -42,7 +41,7 @@ namespace Guru.ElasticSearch.Implementation
         {
             using (var httpResponse = await _HttpRequest.PutAsync(CreateUrlByPutDocument(index, type, id), null, document, _LightningFormatter, null))
             {
-                return httpResponse.IsHttpOk();
+                return httpResponse.IsHttpCreated();
             }
         }
 
