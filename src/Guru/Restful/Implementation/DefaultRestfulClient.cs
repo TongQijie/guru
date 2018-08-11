@@ -2,6 +2,7 @@
 using Guru.DependencyInjection.Attributes;
 using Guru.Formatter.Abstractions;
 using Guru.Logging;
+using Guru.Network;
 using Guru.Logging.Abstractions;
 using Guru.Network.Abstractions;
 using Guru.Restful.Abstractions;
@@ -61,15 +62,15 @@ namespace Guru.Restful.Implementation
 
             try
             {
-                using (var response = await _HttpManager.Create().PostAsync(url, null, request, _Formatter, null))
+                using (var httpResponse = await _HttpManager.Create().PostAsync(url, null, request, _Formatter, null))
                 {
-                    if (response != null && response.StatusCode == 200)
+                    if (httpResponse.IsHttpOk())
                     {
-                        return await response.GetBodyAsync<TResponse>(_Formatter);
+                        return await httpResponse.GetBodyAsync<TResponse>(_Formatter);
                     }
                     else
                     {
-                        _Logger.LogEvent(nameof(DefaultRestfulClient), Severity.Error, await BuildErrorDesc(url, request, response));
+                        _Logger.LogEvent(nameof(DefaultRestfulClient), Severity.Error, await BuildErrorDesc(url, request, httpResponse));
                     }
                 }
             }

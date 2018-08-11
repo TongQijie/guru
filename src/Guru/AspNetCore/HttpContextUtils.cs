@@ -14,6 +14,19 @@ namespace Guru.AspNetCore
             _HttpContextAccessor = httpContextAccessor;
         }
 
+        public static string GetHeaderValue(string key)
+        {
+            if (Current != null &&
+                Current.Request != null &&
+                Current.Request.Headers != null &&
+                Current.Request.Headers.ContainsKey(key))
+            {
+                return string.Join(";", Current.Request.Headers[key]);
+            }
+
+            return string.Empty;
+        }
+
         public static void SetValue(object key, object value)
         {
             if (Current.Items.ContainsKey(key))

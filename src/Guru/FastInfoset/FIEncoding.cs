@@ -170,39 +170,28 @@ namespace Guru.FastInfoset
 			{
 				// easy 1 to 1 mapping
 
-				buffer = new StringBuilder(len);
-
-                for (int i = 0; i < len; i++)
-                {
-                    buffer.Append('0');
-                }
+				buffer = new StringBuilder();
 
 				for (int n = 0; n < len; n++)
 				{
-					buffer[n] = AlphabetChars[data[n]];
+                    buffer.Append(AlphabetChars[data[n]]);
 				}
 			}
 			else if (bits == 4)
 			{
 				// semi-easy 2 to 1 mapping
 
-				buffer = new StringBuilder(len * 2);
-
-                for (int i = 0; i < len * 2; i++)
-                {
-                    buffer.Append('0');
-                }
-
-				int nChars = 0;
+				buffer = new StringBuilder();
+                
 				for (int n = 0; n < len; n++)
 				{
-					buffer[nChars++] = AlphabetChars[data[n] >> 4];
+                    buffer.Append(AlphabetChars[data[n] >> 4]);
 
 					// check for terminator xxxx1111
 					if ((data[n] & 0xF) == 0xF)
 						break;
 
-					buffer[nChars++] = AlphabetChars[data[n] & 0xF];
+                    buffer.Append(AlphabetChars[data[n] & 0xF]);
 				}
 			}
 			else
@@ -217,12 +206,7 @@ namespace Guru.FastInfoset
 				int charCount = (len * 8) / bits;
 
 				// populate buffer from stream
-				buffer = new StringBuilder(charCount);
-
-                for (int i = 0; i < charCount; i++)
-                {
-                    buffer.Append('0');
-                }
+				buffer = new StringBuilder();
 
 				int pos = 0;
 				int bitsLen = bits;
@@ -258,7 +242,7 @@ namespace Guru.FastInfoset
 					if (offset == terminator)
 						break;
 
-					buffer[bufferOffset] = AlphabetChars[offset];
+                    buffer.Append(AlphabetChars[offset]);
 				}
 			}
 
