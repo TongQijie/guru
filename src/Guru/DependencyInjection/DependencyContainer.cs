@@ -3,6 +3,7 @@ using Guru.DependencyInjection.Implementation;
 using Guru.DependencyInjection.Implementation.Configurable;
 using Guru.DependencyInjection.Implementation.DynamicProxy;
 using Guru.DependencyInjection.Implementation.StaticFile;
+using Guru.ExtensionMethod;
 using System;
 
 namespace Guru.DependencyInjection
@@ -36,10 +37,18 @@ namespace Guru.DependencyInjection
                     {
                         _ContainerInstance = new DefaultContainerInstance();
 
-                        _ContainerInstance.Register(new DefaultDependencyRegister())
-                            .Register(new DynamicProxyDependencyRegister())
-                            .Register(new StaticFileDependencyRegister())
-                            .Register(new ConfigurableDependencyRegister());
+                        try
+                        {
+                            _ContainerInstance
+                                .Register(new DefaultDependencyRegister())
+                                .Register(new DynamicProxyDependencyRegister())
+                                .Register(new StaticFileDependencyRegister())
+                                .Register(new ConfigurableDependencyRegister());
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"dependency register failed.{Environment.NewLine}{e.GetInfo()}");
+                        }
                     }
                 }
             }

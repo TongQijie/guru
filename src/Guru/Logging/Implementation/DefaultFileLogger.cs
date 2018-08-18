@@ -194,7 +194,7 @@ namespace Guru.Logging.Implementation
                     {
                         if (parameter is Exception)
                         {
-                            stringBuilder.Append(new ExceptionWrapper(parameter as Exception).ToString());
+                            stringBuilder.Append((parameter as Exception).GetInfo());
                         }
                         else
                         {
@@ -221,7 +221,7 @@ namespace Guru.Logging.Implementation
                             }
                             else if (kv.Value is Exception)
                             {
-                                stringBuilder.Append(new ExceptionWrapper(kv.Value as Exception).ToString());
+                                stringBuilder.Append((kv.Value as Exception).GetInfo());
                             }
                             else
                             {

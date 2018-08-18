@@ -37,7 +37,7 @@ namespace Guru.AspNetCore
             }
             catch (Exception e)
             {
-                Console.WriteLine(new Logging.ExceptionWrapper(e).ToString());
+                Console.WriteLine(e.GetInfo());
                 Console.WriteLine($"AspNetCore App Instance '{_Name ?? string.Empty}' startup failed.");
             }
         }
