@@ -4,7 +4,7 @@ using System.Net;
 using System.Text;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
-using Guru.Network.Abstractions;
+using Guru.Http.Abstractions;
 
 namespace Guru.Http.Implementation
 {
