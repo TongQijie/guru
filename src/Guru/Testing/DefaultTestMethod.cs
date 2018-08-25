@@ -1,4 +1,6 @@
-﻿using Guru.ExtensionMethod;
+﻿using Guru.DependencyInjection;
+using Guru.ExtensionMethod;
+using Guru.Formatter.Abstractions;
 using Guru.Testing.Abstractions;
 using Guru.Testing.Attributes;
 using System;
@@ -57,7 +59,14 @@ namespace Guru.Testing
                     var parameterValues = new object[testInputAttribute.InputValues.Length];
                     for (int i = 0; i < testInputAttribute.InputValues.Length; i++)
                     {
-                        parameterValues[i] = testInputAttribute.InputValues[i].ConvertTo(parameterTypes[i]);
+                        if (parameterTypes[i].IsClass && testInputAttribute.InputValues[i].GetType() == typeof(string))
+                        {
+                            parameterValues[i] = DependencyContainer.Resolve<IJsonLightningFormatter>().ReadObject(parameterTypes[i], testInputAttribute.InputValues[i].ToString());
+                        }
+                        else
+                        {
+                            parameterValues[i] = testInputAttribute.InputValues[i].ConvertTo(parameterTypes[i]);
+                        }
                     }
                     TestInputs = TestInputs.Append(new DefaultTestInput(parameterValues));
                 }

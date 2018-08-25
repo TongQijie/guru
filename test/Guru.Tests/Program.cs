@@ -6,7 +6,7 @@ namespace Guru.Tests
     {
         public static void Main(string[] args)
         {
-            AppInstance.Default.RunAsync(args, true);
+            AppInstance.Default.RunAsync(args, false);
         }
     }
 }
