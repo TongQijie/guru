@@ -353,15 +353,18 @@ namespace Guru.Http.Implementation
         {
             var httpContent = new ByteArrayContent(body ?? new byte[0]);
 
-            foreach (var key in headers.Keys.ToArray())
+            if (headers != null)
             {
-                if (key.EqualsIgnoreCase("Content-Type"))
+                foreach (var key in headers.Keys.ToArray())
                 {
-                    if (MediaTypeHeaderValue.TryParse(headers[key], out var contentType))
+                    if (key.EqualsIgnoreCase("Content-Type"))
                     {
-                        httpContent.Headers.ContentType = contentType;
+                        if (MediaTypeHeaderValue.TryParse(headers[key], out var contentType))
+                        {
+                            httpContent.Headers.ContentType = contentType;
+                        }
+                        headers.Remove(key);
                     }
-                    headers.Remove(key);
                 }
             }
 

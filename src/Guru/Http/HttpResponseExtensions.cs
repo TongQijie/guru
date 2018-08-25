@@ -1,4 +1,4 @@
-﻿using Guru.Network.Abstractions;
+﻿using Guru.Http.Abstractions;
 
 namespace Guru.Http
 {

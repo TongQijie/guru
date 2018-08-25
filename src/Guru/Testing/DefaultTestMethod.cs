@@ -49,10 +49,6 @@ namespace Guru.Testing
                 }
             }
             Name = name;
-            foreach (var testInputAttribute in prototype.GetCustomAttributes<TestInputAttribute>())
-            {
-                TestInputs = TestInputs.Append(new DefaultTestInput(testInputAttribute.InputValues));
-            }
             var parameterTypes = prototype.GetParameters().Select(x => x.ParameterType);
             foreach (var testInputAttribute in prototype.GetCustomAttributes<TestInputAttribute>())
             {
