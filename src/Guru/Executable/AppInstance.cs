@@ -7,11 +7,11 @@ using Guru.Logging;
 
 namespace Guru.Executable
 {
-    public class ConsoleAppInstance
+    public class AppInstance
     {
-        private static ConsoleAppInstance _Default = null;
+        private static AppInstance _Default = null;
 
-        public static ConsoleAppInstance Default { get { return _Default ?? (_Default = new ConsoleAppInstance()); } }
+        public static AppInstance Default { get { return _Default ?? (_Default = new AppInstance()); } }
 
         private readonly ILogger _Logger;
 
@@ -19,7 +19,7 @@ namespace Guru.Executable
 
         private readonly ICommandLineArgsParser _CommandLineArgsParser;
 
-        private ConsoleAppInstance()
+        private AppInstance()
         {
             _Logger = DependencyContainer.Resolve<IFileLogger>();
             _ZooKeeper = DependencyContainer.Resolve<IZooKeeper>();
@@ -30,7 +30,7 @@ namespace Guru.Executable
 
         public void RunAsync(string[] args, bool loop = false)
         {
-            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application started.");
+            _Logger.LogEvent(nameof(AppInstance), Severity.Information, "Application started.");
 
             try
             {
@@ -56,11 +56,11 @@ namespace Guru.Executable
             }
             catch (Exception e)
             {
-                _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application occurred an unhandled exception.", e);
+                _Logger.LogEvent(nameof(AppInstance), Severity.Information, "Application occurred an unhandled exception.", e);
                 Console.WriteLine($"Application aborted. {e.Message}");
             }
 
-            _Logger.LogEvent(nameof(ConsoleAppInstance), Severity.Information, "Application stopped.");
+            _Logger.LogEvent(nameof(AppInstance), Severity.Information, "Application stopped.");
 
             _ZooKeeper.RemoveAll();
 

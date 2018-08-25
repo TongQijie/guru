@@ -47,15 +47,15 @@ namespace Guru.Testing
             while ((input = Console.ReadLine()) != "quit")
             {
                 var index = input.ConvertTo(0);
-                if (index <= 0 || index >= allTestMethods.Length)
+                if (index <= 0 || index > allTestMethods.Length)
                 {
                     Console.WriteLine("index is invalid.");
                 }
                 else
                 {
-                    var testMethod = allTestMethods[index];
+                    var testMethod = allTestMethods[index - 1];
                     var testClass = testClasses.FirstOrDefault(x => x.GetAllMethods().Exists(y => y == testMethod));
-                    _TestProvider.Run(testClass.Name, allTestMethods[index].Name);
+                    _TestProvider.Run(testClass.Name, testMethod.Name);
                 }
                 Console.Write("Input index: ");
             }
