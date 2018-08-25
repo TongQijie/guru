@@ -1,20 +1,19 @@
-﻿using Guru.Executable.Abstractions;
-using Guru.DependencyInjection.Attributes;
+﻿using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Http;
-using Guru.AspNetCore;
-using Microsoft.AspNetCore.Builder;
-using System.Threading.Tasks;
-using Guru.AspNetCore.Abstractions;
+using Guru.DependencyInjection.Attributes;
 using Guru.Executable;
+using Guru.Executable.Abstractions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace AspNetCoreAppII
+namespace Guru.AspNetCore
 {
     [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
-    public class Startup : IConsoleExecutable
+    internal class AspNetCoreStartup : IConsoleExecutable
     {
         public async Task<int> RunAsync(CommandLineArgs args)
         {

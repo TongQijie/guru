@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Guru.AspNetCore\Guru.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\Guru\Guru.csproj" />
     <ProjectReference Include="..\ClassLib\ClassLib.csproj" />
   </ItemGroup>
