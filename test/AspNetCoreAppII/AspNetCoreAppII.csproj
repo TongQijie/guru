@@ -12,7 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Guru.AspNetCore\Guru.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\Guru\Guru.csproj" />
-    <ProjectReference Include="..\ClassLib\ClassLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
