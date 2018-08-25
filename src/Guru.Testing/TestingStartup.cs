@@ -14,13 +14,18 @@ namespace Guru.Testing
     {
         private readonly ITestProvider _TestProvider;
 
-        public TestingStartup(ITestProvider testProvider)
+        private readonly ITestManager _TestManager;
+
+        public TestingStartup(ITestManager testManager, ITestProvider testProvider)
         {
+            _TestManager = testManager;
             _TestProvider = testProvider;
         }
 
         public async Task<int> RunAsync(CommandLineArgs args)
         {
+            _TestManager.EnableTestMode();
+
             var allTestMethods = new ITestMethod[0];
             var testClasses = _TestProvider.GetAllClasses();
             if (!testClasses.HasLength())
@@ -55,10 +60,24 @@ namespace Guru.Testing
                 {
                     var testMethod = allTestMethods[index - 1];
                     var testClass = testClasses.FirstOrDefault(x => x.GetAllMethods().Exists(y => y == testMethod));
-                    _TestProvider.Run(testClass.Name, testMethod.Name);
+                    try
+                    {
+                        _TestProvider.Run(testClass.Name, testMethod.Name);
+                    }
+                    catch (AssertFailureException e)
+                    {
+                        Console.WriteLine($"{e.GetInfo()}");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
                 Console.Write("Input index: ");
             }
+
+            _TestManager.DisableTestMode();
+
             return await Task.FromResult(0);
         }
     }

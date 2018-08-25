@@ -75,13 +75,24 @@ namespace Guru.Testing
 
         public object Invoke(object instance, params object[] parameters)
         {
-            if (!_IsAsyncMethod)
+            try
             {
-                return _Prototype.Invoke(instance, parameters);
+                if (!_IsAsyncMethod)
+                {
+                    return _Prototype.Invoke(instance, parameters);
+                }
+                else
+                {
+                    return _HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters).Invoke(this, new object[] { _Prototype.Invoke(instance, parameters) });
+                }
             }
-            else
+            catch (Exception e)
             {
-                return _HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters).Invoke(this, new object[] { _Prototype.Invoke(instance, parameters) });
+                if (e.InnerException.GetType() == typeof(AssertFailureException))
+                {
+                    throw new AssertFailureException($"test method '{Name}' assert failed.", e.InnerException);
+                }
+                throw;
             }
         }
     }

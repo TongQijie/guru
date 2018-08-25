@@ -89,13 +89,24 @@ namespace Guru.Testing.Implementation
 
             if (!testMethod.TestInputs.HasLength())
             {
-                return;
+                throw new Exception($"input of test method '{testMethodName}' not found.");
             }
 
             var instance = DependencyContainer.Resolve(testClass.Prototype);
             foreach (var testInput in testMethod.TestInputs)
             {
-                testMethod.Invoke(instance, testInput.InputValues);
+                try
+                {
+                    testMethod.Invoke(instance, testInput.InputValues);
+                }
+                catch (AssertFailureException e)
+                {
+                    throw new AssertFailureException($"test method '{testClassName}.{testMethodName}' assert failed.", e);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
         }
     }
