@@ -1,14 +1,12 @@
-using Guru.DependencyInjection;
-using Guru.DependencyInjection.Attributes;
-using Guru.Executable.Abstractions;
-using Guru.Logging.Abstractions;
-using System.Threading.Tasks;
-using Guru.Executable;
+﻿using Guru.Executable.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace ConsoleApp
+namespace Guru.Console
 {
-    [Injectable(typeof(IStartup), Lifetime.Singleton)]
-    public class Executable : IStartup
+    [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
+    public class ConsoleStartup : IConsoleExecutable
     {
         private readonly ILogger _Logger;
 

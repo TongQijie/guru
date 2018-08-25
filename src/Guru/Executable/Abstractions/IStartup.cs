@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Guru.Executable.Abstractions
 {
-    public interface IConsoleExecutable
+    public interface IStartup
     {
         Task<int> RunAsync(CommandLineArgs args);
     }

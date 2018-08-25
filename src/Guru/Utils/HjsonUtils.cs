@@ -3,7 +3,7 @@ using Guru.Hjson;
 
 namespace Guru.Utils
 {
-    public class HjsonUtils
+    public static class HjsonUtils
     {
         public static string ToJson(Stream stream)
         {

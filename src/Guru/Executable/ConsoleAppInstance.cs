@@ -34,7 +34,7 @@ namespace Guru.Executable
 
             try
             {
-                if (DependencyContainer.Resolve<IConsoleExecutable>().RunAsync(_CommandLineArgsParser.Parse(args)).GetAwaiter().GetResult() == 0)
+                if (DependencyContainer.Resolve<IStartup>().RunAsync(_CommandLineArgsParser.Parse(args)).GetAwaiter().GetResult() == 0)
                 {
                     if (loop)
                     {

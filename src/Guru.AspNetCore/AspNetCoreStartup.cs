@@ -2,7 +2,6 @@
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.Executable;
-using Guru.Executable.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,8 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Guru.AspNetCore
 {
-    [Injectable(typeof(IConsoleExecutable), Lifetime.Singleton)]
-    internal class AspNetCoreStartup : IConsoleExecutable
+    [Injectable(typeof(Executable.Abstractions.IStartup), Lifetime.Singleton)]
+    internal class AspNetCoreStartup : Executable.Abstractions.IStartup
     {
         public async Task<int> RunAsync(CommandLineArgs args)
         {
