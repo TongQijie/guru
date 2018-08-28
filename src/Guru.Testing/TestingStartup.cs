@@ -63,6 +63,7 @@ namespace Guru.Testing
                     try
                     {
                         _TestProvider.Run(testClass.Name, testMethod.Name);
+                        Console.WriteLine($"{testClass.Name}:{testMethod.Name} Passed.");
                     }
                     catch (AssertFailureException e)
                     {

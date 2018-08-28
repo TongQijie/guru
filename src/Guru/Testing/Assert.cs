@@ -1,5 +1,6 @@
 ﻿using Guru.DependencyInjection;
 using Guru.Testing.Abstractions;
+using Guru.ExtensionMethod;
 
 namespace Guru.Testing
 {
@@ -25,6 +26,18 @@ namespace Guru.Testing
                     throw new AssertFailureException();
                 }
             }
+        }
+
+        public static string MustHasValue(string stringValue)
+        {
+            if (CheckIfEnableTestMode())
+            {
+                if (!stringValue.HasValue())
+                {
+                    throw new AssertFailureException();
+                }
+            }
+            return stringValue;
         }
 
         private static ITestManager TestManager;

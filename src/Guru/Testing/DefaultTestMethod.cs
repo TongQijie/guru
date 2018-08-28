@@ -59,7 +59,7 @@ namespace Guru.Testing
                     var parameterValues = new object[testInputAttribute.InputValues.Length];
                     for (int i = 0; i < testInputAttribute.InputValues.Length; i++)
                     {
-                        if (parameterTypes[i].IsClass && testInputAttribute.InputValues[i].GetType() == typeof(string))
+                        if (parameterTypes[i].IsClass && parameterTypes[i] != typeof(string) && testInputAttribute.InputValues[i].GetType() == typeof(string))
                         {
                             parameterValues[i] = DependencyContainer.Resolve<IJsonLightningFormatter>().ReadObject(parameterTypes[i], testInputAttribute.InputValues[i].ToString());
                         }
