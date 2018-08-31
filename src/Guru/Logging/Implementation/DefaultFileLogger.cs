@@ -11,6 +11,7 @@ using Guru.Logging.Abstractions;
 using Guru.DependencyInjection.Attributes;
 using Guru.Executable.Abstractions;
 using Guru.Formatter.Abstractions;
+using Guru.Foundation;
 
 namespace Guru.Logging.Implementation
 {
@@ -40,7 +41,7 @@ namespace Guru.Logging.Implementation
             }
         }
 
-        public void LogEvent(string category, Severity severity, List<KeyValuePair<string, object>> namedParameters)
+        public void LogEvent(string category, Severity severity, IgnoreCaseKeyValues<object> namedParameters)
         {
             _Items.Enqueue(new Item(category, severity, namedParameters));
 
@@ -165,7 +166,7 @@ namespace Guru.Logging.Implementation
                 Timestamp = DateTime.Now;
             }
 
-            public Item(string category, Severity severity, List<KeyValuePair<string, object>> namedParameters)
+            public Item(string category, Severity severity, IgnoreCaseKeyValues<object> namedParameters)
             {
                 Category = category;
                 Severity = severity;
@@ -179,7 +180,7 @@ namespace Guru.Logging.Implementation
 
             public object[] Parameters { get; set; }
 
-            public List<KeyValuePair<string, object>> NamedParameters { get; set; }
+            public IgnoreCaseKeyValues<object> NamedParameters { get; set; }
 
             public DateTime Timestamp { get; private set; }
 
@@ -205,7 +206,7 @@ namespace Guru.Logging.Implementation
                 }
                 if (NamedParameters != null)
                 {
-                    foreach (var kv in NamedParameters)
+                    foreach (var kv in NamedParameters.KeyValues)
                     {
                         stringBuilder.Append($"[{kv.Key}] ");
                         if (kv.Value == null)

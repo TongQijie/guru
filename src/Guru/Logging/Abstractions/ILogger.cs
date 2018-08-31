@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using Guru.Foundation;
 
 namespace Guru.Logging.Abstractions
 {
@@ -6,6 +6,6 @@ namespace Guru.Logging.Abstractions
     {
         void LogEvent(string category, Severity severity, params object[] parameters);
 
-        void LogEvent(string category, Severity severity, List<KeyValuePair<string, object>> namedParameters);
+        void LogEvent(string category, Severity severity, IgnoreCaseKeyValues<object> namedParameters);
     }
 }

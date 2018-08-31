@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection;
