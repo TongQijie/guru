@@ -12,66 +12,54 @@ namespace Guru.AspNetCore
         {
             var context = new CallingContext()
             {
-                InputParameters = new DictionaryIgnoreCase<ContextParameter>(),
-                OutputParameters = new DictionaryIgnoreCase<ContextParameter>(),
+                RequestHttpParameters = new IgnoreCaseKeyValues<string>(),
+                RequestHeaderParameters = new IgnoreCaseKeyValues<string>(),
+                InputParameters = new IgnoreCaseKeyValues<ContextParameter>(),
+                ResponseHttpParameters = new IgnoreCaseKeyValues<string>(),
+                ResponseHeaderParameters = new IgnoreCaseKeyValues<string>(),
                 ApplicationConfiguration = DependencyContainer.Resolve<IApplicationConfiguration>(),
             };
 
+            if (!string.IsNullOrEmpty(httpContext.Request.Method))
+            {
+                context.RequestHttpParameters.Add("Method", httpContext.Request.Method.ToUpper());
+            }
+            if (!string.IsNullOrEmpty(httpContext.Request.Scheme))
+            {
+                context.RequestHttpParameters.Add("Scheme", httpContext.Request.Scheme);
+            }
             if (httpContext.Request.Host != null)
             {
-                context.InputParameters.AddOrUpdate("RequestHost", new ContextParameter()
-                {
-                    Name = "RequestHost",
-                    Source = ContextParameterSource.Http,
-                    Value = httpContext.Request.Host.Value,
-                });
+                context.RequestHttpParameters.Add("Host", httpContext.Request.Host.Value);
             }
             if (httpContext.Request.Path != null)
             {
-                context.InputParameters.AddOrUpdate("RequestPath", new ContextParameter()
-                {
-                    Name = "RequestPath",
-                    Source = ContextParameterSource.Http,
-                    Value = httpContext.Request.Path.Value,
-                });
+                context.RequestHttpParameters.Add("Path", httpContext.Request.Path.Value);
             }
-            if (!string.IsNullOrEmpty(httpContext.Request.Method))
+            if (httpContext.Request.QueryString.HasValue)
             {
-                context.InputParameters.AddOrUpdate("HttpMethod", new ContextParameter()
-                {
-                    Name = "HttpMethod",
-                    Source = ContextParameterSource.Http,
-                    Value = httpContext.Request.Method.ToUpper(),
-                });
-            }
-
-            if (httpContext.Request.Query != null)
-            {
-                foreach (var kv in httpContext.Request.Query)
-                {
-                    if (!context.InputParameters.ContainsKey(kv.Key) && kv.Value.Count > 0)
-                    {
-                        context.InputParameters.AddOrUpdate(kv.Key, new ContextParameter()
-                        {
-                            Name = kv.Key,
-                            Source = ContextParameterSource.QueryString,
-                            Value = kv.Value[0],
-                        });
-                    }
-                }
+                context.RequestHttpParameters.Add("QueryString", httpContext.Request.QueryString.Value);
             }
 
             if (httpContext.Request.Headers != null)
             {
                 foreach (var header in httpContext.Request.Headers)
                 {
-                    if (!context.InputParameters.ContainsKey(header.Key))
+                    context.RequestHeaderParameters.Add(header.Key, string.Join(";", header.Value));
+                }
+            }
+
+            if (httpContext.Request.Query != null)
+            {
+                foreach (var kv in httpContext.Request.Query)
+                {
+                    foreach (var value in kv.Value)
                     {
-                        context.InputParameters.AddOrUpdate(header.Key, new ContextParameter()
+                        context.InputParameters.Add(kv.Key, new ContextParameter()
                         {
-                            Name = header.Key,
-                            Source = ContextParameterSource.Header,
-                            Value = string.Join(";", header.Value),
+                            Name = kv.Key,
+                            Source = ContextParameterSource.QueryString,
+                            Value = value,
                         });
                     }
                 }
@@ -81,28 +69,25 @@ namespace Guru.AspNetCore
             {
                 foreach (var kv in httpContext.Request.Form)
                 {
-                    if (!context.InputParameters.ContainsKey(kv.Key) && kv.Value.Count > 0)
+                    foreach (var value in kv.Value)
                     {
-                        context.InputParameters.AddOrUpdate(kv.Key, new ContextParameter()
+                        context.InputParameters.Add(kv.Key, new ContextParameter()
                         {
                             Name = kv.Key,
                             Source = ContextParameterSource.Form,
-                            Value = kv.Value[0],
+                            Value = value,
                         });
                     }
                 }
             }
-            else
-            {
-                context.InputStream = httpContext.Request.Body;
-            }
 
+            context.InputStream = httpContext.Request.Body;
             context.OutputStream = httpContext.Response.Body;
             context.SetOutputParameter = p =>
             {
-                context.OutputParameters.AddOrUpdate(p.Name, p);
                 if (p.Source == ContextParameterSource.Header)
                 {
+                    context.ResponseHeaderParameters.Add(p.Name, p.Value);
                     if (p.Name.EqualsIgnoreCase("Content-Type"))
                     {
                         httpContext.Response.ContentType = p.Value;
@@ -118,6 +103,7 @@ namespace Guru.AspNetCore
                 }
                 else if (p.Source == ContextParameterSource.Http)
                 {
+                    context.ResponseHttpParameters.Add(p.Name, p.Value);
                     if (p.Name.EqualsIgnoreCase("StatusCode"))
                     {
                         if (int.TryParse(p.Value, out var statusCode))

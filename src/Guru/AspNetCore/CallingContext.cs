@@ -7,9 +7,15 @@ namespace Guru.AspNetCore
 {
     public class CallingContext
     {
-        public DictionaryIgnoreCase<ContextParameter> InputParameters { get; set; }
+        public IgnoreCaseKeyValues<string> RequestHttpParameters { get; set; }
 
-        public DictionaryIgnoreCase<ContextParameter> OutputParameters { get; set; }
+        public IgnoreCaseKeyValues<string> RequestHeaderParameters { get; set; }
+
+        public IgnoreCaseKeyValues<ContextParameter> InputParameters { get; set; }
+
+        public IgnoreCaseKeyValues<string> ResponseHttpParameters { get; set; }
+
+        public IgnoreCaseKeyValues<string> ResponseHeaderParameters { get; set; }
 
         public Stream InputStream { get; set; }
 

@@ -5,7 +5,7 @@ namespace Guru.Executable
 {
     public class CommandLineArgs
     {
-        private readonly DictionaryIgnoreCase<string> _Dictionary = new DictionaryIgnoreCase<string>();
+        private readonly IgnoreCaseKeyValues<string> _Dictionary = new IgnoreCaseKeyValues<string>();
 
         private readonly string[] _SourceArgs;
 
@@ -35,7 +35,7 @@ namespace Guru.Executable
             {
                 if (_Dictionary.ContainsKey(name))
                 {
-                    return _Dictionary.Get(name);
+                    return _Dictionary.GetStringValue(name);
                 }
                 else
                 {
@@ -56,7 +56,7 @@ namespace Guru.Executable
                 {
                     if (_Dictionary.ContainsKey(name))
                     {
-                        return _Dictionary.Get(name);
+                        return _Dictionary.GetStringValue(name);
                     }
                 }
                 return null;
@@ -85,7 +85,7 @@ namespace Guru.Executable
 
         public void Add(string name, string value)
         {
-            _Dictionary.AddOrUpdate(name, value);
+            _Dictionary.Add(name, value);
         }
     }
 }

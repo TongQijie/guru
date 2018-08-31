@@ -31,9 +31,9 @@ namespace Guru.AspNetCore.Implementation.Api
 
         public AbstractApiFormatter Get(CallingContext context)
         {
-            if (context.InputParameters.ContainsKey("formatter"))
+            if (context.RequestHeaderParameters.ContainsKey("Formatter"))
             {
-                var formatter = context.InputParameters.Get("formatter").Value;
+                var formatter = context.RequestHeaderParameters.GetValue("Formatter");
                 if (formatter.ContainsIgnoreCase("json"))
                 {
                     return _Json;
@@ -47,34 +47,34 @@ namespace Guru.AspNetCore.Implementation.Api
                     return _Text;
                 }
             }
-            else if (context.InputParameters.ContainsKey("content-type"))
+            else if (context.RequestHeaderParameters.ContainsKey("Content-Type"))
             {
-                var contentType = context.InputParameters.Get("content-type").Value;
-                if (contentType.ContainsIgnoreCase("json"))
+                var contentType = context.RequestHeaderParameters.GetStringValue("Content-Type");
+                if (contentType.ContainsIgnoreCase("application/json"))
                 {
                     return _Json;
                 }
-                else if (contentType.ContainsIgnoreCase("xml"))
+                else if (contentType.ContainsIgnoreCase("application/xml"))
                 {
                     return _Xml;
                 }
-                else if (contentType.ContainsIgnoreCase("text"))
+                else if (contentType.ContainsIgnoreCase("plain/text"))
                 {
                     return _Text;
                 }
             }
-            else if (context.InputParameters.ContainsKey("accept"))
+            else if (context.RequestHeaderParameters.ContainsKey("Accept"))
             {
-                var accept = context.InputParameters.Get("accept").Value;
-                if (accept.ContainsIgnoreCase("json"))
+                var accept = context.RequestHeaderParameters.GetStringValue("Accept");
+                if (accept.ContainsIgnoreCase("application/json"))
                 {
                     return _Json;
                 }
-                else if (accept.ContainsIgnoreCase("xml"))
+                else if (accept.ContainsIgnoreCase("application/xml"))
                 {
                     return _Xml;
                 }
-                else if (accept.ContainsIgnoreCase("text"))
+                else if (accept.ContainsIgnoreCase("plain/text"))
                 {
                     return _Text;
                 }

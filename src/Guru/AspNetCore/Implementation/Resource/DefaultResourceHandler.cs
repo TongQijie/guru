@@ -88,8 +88,8 @@ namespace Guru.AspNetCore.Implementation.Resource
                 return;
             }
 
-            var parameter = context.InputParameters.Get("Range");
-            if (parameter != null && parameter.Source == ContextParameterSource.Header && RangeHeaderValue.TryParse(parameter.Value, out var rangeHeaderValue))
+            var parameter = context.RequestHeaderParameters.GetStringValue("Range");
+            if (parameter.HasValue() && RangeHeaderValue.TryParse(parameter, out var rangeHeaderValue))
             {
                 var totalLength = new FileInfo(resourcePath).Length;
 

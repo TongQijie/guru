@@ -85,7 +85,7 @@ namespace Guru.AspNetCore.Implementation.Api
                     }
                     else if (context.InputParameters.ContainsKey(apiParameterInfo.ParameterName))
                     {
-                        parameterValues[i] = context.InputParameters.Get(apiParameterInfo.ParameterName).Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
+                        parameterValues[i] = context.InputParameters.GetValue(apiParameterInfo.ParameterName).Value.ConvertTo(apiParameterInfo.Prototype.ParameterType);
                     }
                     else
                     {
