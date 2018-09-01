@@ -39,7 +39,7 @@ namespace Guru.AspNetCore.Implementation.Api
             {
                 context.SetOutputParameter(new ContextParameter()
                 {
-                    Name = "StatusCode",
+                    Name = CallingContextConstants.HttpStatusCode,
                     Source = ContextParameterSource.Http,
                     Value = "400",
                 });
@@ -53,7 +53,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                 context.SetOutputParameter(new ContextParameter()
                 {
-                    Name = "StatusCode",
+                    Name = CallingContextConstants.HttpStatusCode,
                     Source = ContextParameterSource.Http,
                     Value = "200",
                 });
@@ -91,7 +91,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                     context.SetOutputParameter(new ContextParameter()
                     {
-                        Name = "Content-Type",
+                        Name = CallingContextConstants.HeaderContentType,
                         Source = ContextParameterSource.Header,
                         Value = apiFormatter?.ContentType,
                     });
@@ -104,7 +104,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 _DefaultLogger.LogEvent(nameof(DefaultApiHandler), Severity.Error, "an error occurred when processing api request.", e);
                 context.SetOutputParameter(new ContextParameter()
                 {
-                    Name = "StatusCode",
+                    Name = CallingContextConstants.HttpStatusCode,
                     Source = ContextParameterSource.Http,
                     Value = "500",
                 });

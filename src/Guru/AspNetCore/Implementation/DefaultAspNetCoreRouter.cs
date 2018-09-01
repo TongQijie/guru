@@ -12,14 +12,14 @@ namespace Guru.AspNetCore.Implementation
     {
         public void GetRouteData(CallingContext context)
         {
-            if (!context.RequestHttpParameters.ContainsKey("Path"))
+            if (!context.RequestHttpParameters.ContainsKey(CallingContextConstants.HttpPath))
             {
                 return;
             }
 
             var router = context.ApplicationConfiguration?.Router;
 
-            var requestPath = context.RequestHttpParameters.GetValue("Path").Trim('/');
+            var requestPath = context.RequestHttpParameters.GetValue(CallingContextConstants.HttpPath).Trim('/');
             if (requestPath == null || !requestPath.HasValue())
             {
                 if (router == null || !router.Default.HasValue())

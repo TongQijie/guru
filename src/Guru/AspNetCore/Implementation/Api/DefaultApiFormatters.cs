@@ -10,24 +10,18 @@ namespace Guru.AspNetCore.Implementation.Api
     [Injectable(typeof(IApiFormatters), Lifetime.Singleton)]
     internal class DefaultApiFormatters : IApiFormatters
     {
-        private readonly AbstractApiFormatter _Json;
-
-        private readonly AbstractApiFormatter _Xml;
-
-        private readonly AbstractApiFormatter _Text;
-
         public DefaultApiFormatters()
         {
-            _Json = new JsonApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IJsonLightningFormatter>("JsonApiFormatter"));
-            _Xml = new XmlApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IXmlLightningFormatter>("XmlApiFormatter"));
-            _Text = new TextApiFormatter();
+            Json = new JsonApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IJsonLightningFormatter>("JsonApiFormatter"));
+            Xml = new XmlApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IXmlLightningFormatter>("XmlApiFormatter"));
+            Text = new TextApiFormatter();
         }
 
-        public AbstractApiFormatter Json => _Json;
+        public AbstractApiFormatter Json { get; private set; }
 
-        public AbstractApiFormatter Xml => _Xml;
+        public AbstractApiFormatter Xml { get; private set; }
 
-        public AbstractApiFormatter Text => _Text;
+        public AbstractApiFormatter Text { get; private set; }
 
         public AbstractApiFormatter Get(CallingContext context)
         {
@@ -36,31 +30,31 @@ namespace Guru.AspNetCore.Implementation.Api
                 var formatter = context.RequestHeaderParameters.GetValue("Formatter");
                 if (formatter.ContainsIgnoreCase("json"))
                 {
-                    return _Json;
+                    return Json;
                 }
                 else if (formatter.ContainsIgnoreCase("xml"))
                 {
-                    return _Xml;
+                    return Xml;
                 }
                 else if (formatter.ContainsIgnoreCase("text"))
                 {
-                    return _Text;
+                    return Text;
                 }
             }
-            else if (context.RequestHeaderParameters.ContainsKey("Content-Type"))
+            else if (context.RequestHeaderParameters.ContainsKey(CallingContextConstants.HeaderContentType))
             {
-                var contentType = context.RequestHeaderParameters.GetStringValue("Content-Type");
+                var contentType = context.RequestHeaderParameters.GetStringValue(CallingContextConstants.HeaderContentType);
                 if (contentType.ContainsIgnoreCase("application/json"))
                 {
-                    return _Json;
+                    return Json;
                 }
                 else if (contentType.ContainsIgnoreCase("application/xml"))
                 {
-                    return _Xml;
+                    return Xml;
                 }
                 else if (contentType.ContainsIgnoreCase("plain/text"))
                 {
-                    return _Text;
+                    return Text;
                 }
             }
             else if (context.RequestHeaderParameters.ContainsKey("Accept"))
@@ -68,20 +62,20 @@ namespace Guru.AspNetCore.Implementation.Api
                 var accept = context.RequestHeaderParameters.GetStringValue("Accept");
                 if (accept.ContainsIgnoreCase("application/json"))
                 {
-                    return _Json;
+                    return Json;
                 }
                 else if (accept.ContainsIgnoreCase("application/xml"))
                 {
-                    return _Xml;
+                    return Xml;
                 }
                 else if (accept.ContainsIgnoreCase("plain/text"))
                 {
-                    return _Text;
+                    return Text;
                 }
             }
 
             // default json api formatter
-            return _Json;
+            return Json;
         }
     }
 }

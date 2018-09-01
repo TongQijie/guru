@@ -25,7 +25,7 @@ namespace Guru.AspNetCore.Implementation
             {
                 context.SetOutputParameter(new ContextParameter()
                 {
-                    Name = "StatusCode",
+                    Name = CallingContextConstants.HttpStatusCode,
                     Source = ContextParameterSource.Http,
                     Value = "400",
                 });
@@ -58,7 +58,7 @@ namespace Guru.AspNetCore.Implementation
 
             context.SetOutputParameter(new ContextParameter()
             {
-                Name = "StatusCode",
+                Name = CallingContextConstants.HttpStatusCode,
                 Source = ContextParameterSource.Http,
                 Value = "400",
             });

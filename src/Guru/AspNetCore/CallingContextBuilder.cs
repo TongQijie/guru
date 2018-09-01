@@ -22,23 +22,23 @@ namespace Guru.AspNetCore
 
             if (!string.IsNullOrEmpty(httpContext.Request.Method))
             {
-                context.RequestHttpParameters.Add("Method", httpContext.Request.Method.ToUpper());
+                context.RequestHttpParameters.Add(CallingContextConstants.HttpMethod, httpContext.Request.Method.ToUpper());
             }
             if (!string.IsNullOrEmpty(httpContext.Request.Scheme))
             {
-                context.RequestHttpParameters.Add("Scheme", httpContext.Request.Scheme);
+                context.RequestHttpParameters.Add(CallingContextConstants.HttpScheme, httpContext.Request.Scheme);
             }
             if (httpContext.Request.Host != null)
             {
-                context.RequestHttpParameters.Add("Host", httpContext.Request.Host.Value);
+                context.RequestHttpParameters.Add(CallingContextConstants.HttpHost, httpContext.Request.Host.Value);
             }
             if (httpContext.Request.Path != null)
             {
-                context.RequestHttpParameters.Add("Path", httpContext.Request.Path.Value);
+                context.RequestHttpParameters.Add(CallingContextConstants.HttpPath, httpContext.Request.Path.Value);
             }
             if (httpContext.Request.QueryString.HasValue)
             {
-                context.RequestHttpParameters.Add("QueryString", httpContext.Request.QueryString.Value);
+                context.RequestHttpParameters.Add(CallingContextConstants.HttpQueryString, httpContext.Request.QueryString.Value);
             }
 
             if (httpContext.Request.Headers != null)
@@ -88,11 +88,11 @@ namespace Guru.AspNetCore
                 if (p.Source == ContextParameterSource.Header)
                 {
                     context.ResponseHeaderParameters.Add(p.Name, p.Value);
-                    if (p.Name.EqualsIgnoreCase("Content-Type"))
+                    if (p.Name.EqualsIgnoreCase(CallingContextConstants.HeaderContentType))
                     {
                         httpContext.Response.ContentType = p.Value;
                     }
-                    else if (p.Name.EqualsIgnoreCase("Content-Length"))
+                    else if (p.Name.EqualsIgnoreCase(CallingContextConstants.HeaderContentLength))
                     {
                         httpContext.Response.ContentLength = p.Value.ConvertTo<long>(-1);
                     }
@@ -104,7 +104,7 @@ namespace Guru.AspNetCore
                 else if (p.Source == ContextParameterSource.Http)
                 {
                     context.ResponseHttpParameters.Add(p.Name, p.Value);
-                    if (p.Name.EqualsIgnoreCase("StatusCode"))
+                    if (p.Name.EqualsIgnoreCase(CallingContextConstants.HttpStatusCode))
                     {
                         if (int.TryParse(p.Value, out var statusCode))
                         {
