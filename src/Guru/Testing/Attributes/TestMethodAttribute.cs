@@ -5,6 +5,8 @@ namespace Guru.Testing.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public class TestMethodAttribute : Attribute
     {
+        public TestMethodAttribute() { }
+
         public TestMethodAttribute(string name)
         {
             Name = name;

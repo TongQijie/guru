@@ -4,6 +4,8 @@
     {
         string Name { get; }
 
+        ITestClass TestClass { get; }
+
         ITestInput[] TestInputs { get; }
 
         object Invoke(object instance, params object[] parameters);

@@ -32,7 +32,7 @@ namespace Guru.Testing
 
                 if (!_TestMethods.ContainsKey(methodName))
                 {
-                    _TestMethods.Add(methodName, new DefaultTestMethod(methodInfo, methodName));
+                    _TestMethods.Add(methodName, new DefaultTestMethod(this, methodInfo, methodName));
                 }
             }
         }

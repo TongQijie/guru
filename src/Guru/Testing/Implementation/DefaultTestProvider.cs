@@ -36,7 +36,10 @@ namespace Guru.Testing.Implementation
 
                     var name = testClassAttribute.Name.HasValue() ? testClassAttribute.Name : testClassType.Name;
 
-                    DependencyContainer.RegisterSingleton(testClassType, testClassType);
+                    if (!testClassType.IsAbstract)
+                    {
+                        DependencyContainer.RegisterSingleton(testClassType, testClassType);
+                    }
 
                     if (!_TestClasses.ContainsKey(name))
                     {
@@ -56,58 +59,22 @@ namespace Guru.Testing.Implementation
             return testClasses;
         }
 
-        public object Invoke(string testClassName, string testMethodName, object[] parameters)
+        public ITestMethod GetTestMethod(string testClassName, string testMethodName)
         {
             if (!_TestClasses.ContainsKey(testClassName))
             {
-                throw new Exception($"test class '{testClassName}' not found.");
+                Console.WriteLine($"test class '{testClassName}' not found.");
+                return null;
             }
 
             var testClass = _TestClasses[testClassName];
             var testMethod = testClass.GetTestMethod(testMethodName);
             if (testMethod == null)
             {
-                throw new Exception($"test method '{testMethodName}' not found.");
+                Console.WriteLine($"test method '{testMethodName}' not found.");
             }
 
-            return testMethod.Invoke(DependencyContainer.Resolve(testClass.Prototype), parameters);
-        }
-
-        public void Run(string testClassName, string testMethodName)
-        {
-            if (!_TestClasses.ContainsKey(testClassName))
-            {
-                throw new Exception($"test class '{testClassName}' not found.");
-            }
-
-            var testClass = _TestClasses[testClassName];
-            var testMethod = testClass.GetTestMethod(testMethodName);
-            if (testMethod == null)
-            {
-                throw new Exception($"test method '{testMethodName}' not found.");
-            }
-
-            if (!testMethod.TestInputs.HasLength())
-            {
-                throw new Exception($"input of test method '{testMethodName}' not found.");
-            }
-
-            var instance = DependencyContainer.Resolve(testClass.Prototype);
-            foreach (var testInput in testMethod.TestInputs)
-            {
-                try
-                {
-                    testMethod.Invoke(instance, testInput.InputValues);
-                }
-                catch (AssertFailureException e)
-                {
-                    throw new AssertFailureException($"test method '{testClassName}.{testMethodName}' assert failed.", e);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-            }
+            return testMethod;
         }
     }
 }

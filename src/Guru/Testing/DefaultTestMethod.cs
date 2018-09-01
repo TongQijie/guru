@@ -33,9 +33,11 @@ namespace Guru.Testing
 
         public ITestInput[] TestInputs { get; private set; }
 
+        public ITestClass TestClass { get; private set; }
+
         public string Name { get; private set; }
 
-        public DefaultTestMethod(MethodInfo prototype, string name)
+        public DefaultTestMethod(ITestClass testClass, MethodInfo prototype, string name)
         {
             _Prototype = prototype;
             _IsAsyncMethod = prototype.IsDefined(typeof(AsyncStateMachineAttribute));
@@ -50,6 +52,7 @@ namespace Guru.Testing
                     _ReturnTypeGenericParameters = prototype.ReturnType.GetGenericArguments();
                 }
             }
+            TestClass = testClass;
             Name = name;
             var parameterTypes = prototype.GetParameters().Select(x => x.ParameterType);
             foreach (var testInputAttribute in prototype.GetCustomAttributes<TestInputAttribute>())

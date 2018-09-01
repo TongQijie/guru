@@ -62,12 +62,7 @@ namespace Guru.Testing
                     var testClass = testClasses.FirstOrDefault(x => x.GetAllMethods().Exists(y => y == testMethod));
                     try
                     {
-                        _TestProvider.Run(testClass.Name, testMethod.Name);
-                        Console.WriteLine($"{testClass.Name}:{testMethod.Name} Passed.");
-                    }
-                    catch (AssertFailureException e)
-                    {
-                        Console.WriteLine($"{e.GetInfo()}");
+                        _TestManager.RunTest(testClass.Name, testMethod.Name);
                     }
                     catch (Exception e)
                     {

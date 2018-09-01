@@ -7,5 +7,7 @@
         void EnableTestMode();
 
         void DisableTestMode();
+
+        void RunTest(string testClassName, string testMethodName);
     }
 }

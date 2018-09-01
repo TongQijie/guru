@@ -4,8 +4,6 @@
     {
         ITestClass[] GetAllClasses();
 
-        object Invoke(string testClassName, string testMethodName, object[] parameters);
-
-        void Run(string testClassName, string testMethodName);
+        ITestMethod GetTestMethod(string testClassName, string testMethodName);
     }
 }
