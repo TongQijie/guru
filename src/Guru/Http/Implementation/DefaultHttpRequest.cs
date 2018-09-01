@@ -112,7 +112,11 @@ namespace Guru.Http.Implementation
             }
 
             byte[] byteArrayContent;
-            if (body is String)
+            if (body == null)
+            {
+                byteArrayContent = new byte[0];
+            }
+            else if (body is string)
             {
                 byteArrayContent = Encoding.UTF8.GetBytes(body.ToString());
             }
@@ -197,7 +201,11 @@ namespace Guru.Http.Implementation
             }
 
             byte[] byteArrayContent;
-            if (body is String)
+            if (body == null)
+            {
+                byteArrayContent = new byte[0];
+            }
+            else if (body is string)
             {
                 byteArrayContent = Encoding.UTF8.GetBytes(body.ToString());
             }
