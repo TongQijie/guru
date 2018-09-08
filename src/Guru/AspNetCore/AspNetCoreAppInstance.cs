@@ -26,9 +26,9 @@ namespace Guru.AspNetCore
                     _Name = config.AppId;
                 }
 
-                if (_Component == null)
+                if (Component == null)
                 {
-                    _Component = DependencyContainer.Resolve<IAspNetCoreComponent>();
+                    Component = DependencyContainer.Resolve<IAspNetCoreComponent>();
                 }
 
                 startup?.Invoke(this);
@@ -42,25 +42,30 @@ namespace Guru.AspNetCore
             }
         }
 
-        private IAspNetCoreComponent _Component = null;
-
-        public IAspNetCoreComponent Component => _Component;
+        public IAspNetCoreComponent Component { get; private set; }
 
         public void RegisterComponent(IAspNetCoreComponent component)
         {
-            _Component = component;
+            Component = component;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            if (_Component == null)
+            if (Component == null)
             {
                 Console.WriteLine("AspNetCoreComponent is not initialized.");
+                return;
             }
 
             try
             {
-                await _Component?.Process(CallingContextBuilder.Build(context));
+                var callingContext = CallingContextBuilder.Build(context);
+                if (callingContext != null)
+                {
+                    context.Items["CallingContext"] = callingContext;
+                }
+
+                await Component.Process(callingContext);
             }
             catch (Exception e)
             {

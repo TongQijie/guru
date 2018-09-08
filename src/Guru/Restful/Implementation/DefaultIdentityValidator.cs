@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Guru.Cache.Abstractions;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
@@ -35,6 +36,24 @@ namespace Guru.Restful.Implementation
             return token;
         }
 
+        public async Task<string> CreateAsync(string userId)
+        {
+            var token = GenerateToken();
+
+            var config = DependencyContainer.Resolve<IIdentityConfiguration>();
+
+            var expire = config.ExpireMillis <= 0 ? (long)TimeSpan.FromDays(30).TotalMilliseconds : config.ExpireMillis;
+
+            await _CacheProvider.SetAsync(token, new CacheEntity()
+            {
+                UserId = userId,
+                Deadline = DateTime.Now.AddMilliseconds(expire),
+                Milliseconds = expire,
+            }, TimeSpan.FromMilliseconds(expire));
+
+            return token;
+        }
+
         public bool Validate(RequestHead head)
         {
             if (head == null || !head.Token.HasValue())
@@ -57,6 +76,39 @@ namespace Guru.Restful.Implementation
                 var expire = config.ExpireMillis <= 0 ? (long)TimeSpan.FromDays(30).TotalMilliseconds : config.ExpireMillis;
 
                 _CacheProvider.Set(head.Token, new CacheEntity()
+                {
+                    UserId = entity.UserId,
+                    Deadline = DateTime.Now.AddMilliseconds(expire),
+                    Milliseconds = expire,
+                }, TimeSpan.FromMilliseconds(expire));
+            }
+
+            head.SetUserId(entity.UserId);
+            return true;
+        }
+
+        public async Task<bool> ValidateAsync(RequestHead head)
+        {
+            if (head == null || !head.Token.HasValue())
+            {
+                return false;
+            }
+
+            var entity = await _CacheProvider.GetAsync<CacheEntity>(head.Token);
+            if (entity == null)
+            {
+                return false;
+            }
+
+            var config = DependencyContainer.Resolve<IIdentityConfiguration>();
+
+            var renew = config.RenewMillis <= 0 ? (long)TimeSpan.FromDays(1).TotalMilliseconds : config.RenewMillis;
+
+            if ((entity.Deadline - DateTime.Now) < TimeSpan.FromMilliseconds(renew))
+            {
+                var expire = config.ExpireMillis <= 0 ? (long)TimeSpan.FromDays(30).TotalMilliseconds : config.ExpireMillis;
+
+                await _CacheProvider.SetAsync(head.Token, new CacheEntity()
                 {
                     UserId = entity.UserId,
                     Deadline = DateTime.Now.AddMilliseconds(expire),

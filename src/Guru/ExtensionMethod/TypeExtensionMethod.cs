@@ -7,6 +7,19 @@ namespace Guru.ExtensionMethod
     {
         public static object CreateInstance(this Type source, params object[] parameters)
         {
+            if (source.IsArray)
+            {
+                var elementType = source.GetElementType();
+                var array = Array.CreateInstance(elementType, parameters.HasLength() ? parameters.Length : 0);
+                if (parameters.HasLength())
+                {
+                    for (var i = 0; i < parameters.Length; i++)
+                    {
+                        array.SetValue(parameters[i], i);
+                    }
+                }
+                return array;
+            }
             return Activator.CreateInstance(source, parameters);
         }
 

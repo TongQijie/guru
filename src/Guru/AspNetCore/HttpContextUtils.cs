@@ -50,5 +50,8 @@ namespace Guru.AspNetCore
                 return default(T);
             }
         }
+
+        public static CallingContext CallingContext
+            => _HttpContextAccessor.HttpContext.Items.ContainsKey("CallingContext") ? _HttpContextAccessor.HttpContext.Items["CallingContext"] as CallingContext : null;
     }
 }
