@@ -16,16 +16,16 @@ namespace Guru.AspNetCore.Implementation.Api
     {
         private readonly IApiProvider _ApiProvider;
 
-        private readonly IApiFormatters _ApiFormatters;
+        private readonly IApiFormatterProvider _ApiFormatterProvider;
 
         private readonly ILogger _DefaultLogger;
 
         private readonly IApiLogger _ApiLogger;
 
-        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatters apiFormaters, IFileLogger defaultLogger, IApiLogger apiLogger)
+        public DefaultApiHandler(IApiProvider apiHandler, IApiFormatterProvider apiFormaterProvider, IFileLogger defaultLogger, IApiLogger apiLogger)
         {
             _ApiProvider = apiHandler;
-            _ApiFormatters = apiFormaters;
+            _ApiFormatterProvider = apiFormaterProvider;
             _DefaultLogger = defaultLogger;
             _ApiLogger = apiLogger;
         }
@@ -82,11 +82,11 @@ namespace Guru.AspNetCore.Implementation.Api
                     AbstractApiFormatter apiFormatter = null;
                     if (executionResult.GetType() == typeof(string) || executionResult.GetType().GetTypeInfo().IsValueType)
                     {
-                        apiFormatter = _ApiFormatters.Text;
+                        apiFormatter = _ApiFormatterProvider.Text;
                     }
                     else
                     {
-                        apiFormatter = _ApiFormatters.Get(context);
+                        apiFormatter = _ApiFormatterProvider.Get(context);
                     }
 
                     context.SetOutputParameter(new ContextParameter()

@@ -2,27 +2,30 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Guru.AspNetCore.Abstractions;
 using Guru.AspNetCore.Attributes;
 using Guru.AspNetCore.Delegates;
+using Guru.AspNetCore.Implementation.Api.Definition;
 using Guru.DependencyInjection;
 using Guru.DependencyInjection.Attributes;
 using Guru.ExtensionMethod;
+using Guru.Foundation;
 using Guru.Logging;
 using Guru.Logging.Abstractions;
 
 namespace Guru.AspNetCore.Implementation.Api
 {
     [Injectable(typeof(IApiProvider), Lifetime.Singleton)]
-    public class DefaultApiProvider : IApiProvider
+    internal class DefaultApiProvider : IApiProvider
     {
-        private readonly IApiFormatters _ApiFormatters;
+        private readonly IApiFormatterProvider _ApiFormatters;
 
         private readonly IFileLogger _Logger;
 
-        public DefaultApiProvider(IApiFormatters apiFormatters, IFileLogger logger)
+        private readonly IgnoreCaseKeyValues<ApiServiceDefinition> _ApiServiceInfos = new IgnoreCaseKeyValues<ApiServiceDefinition>();
+
+        public DefaultApiProvider(IApiFormatterProvider apiFormatters, IFileLogger logger)
         {
             _ApiFormatters = apiFormatters;
             _Logger = logger;
@@ -39,12 +42,12 @@ namespace Guru.AspNetCore.Implementation.Api
             var key = string.Join("/", context.RouteData.Subset(0, 2).Select(x => x.ToLower()));
             if (!_ApiContextCaches.ContainsKey(key))
             {
-                if (!_ApiServiceInfos.ContainsKey(context.RouteData[0].ToLower()))
+                if (!_ApiServiceInfos.ContainsKey(context.RouteData[0]))
                 {
                     return null;
                 }
 
-                var apiServiceInfo = _ApiServiceInfos[context.RouteData[0].ToLower()];
+                var apiServiceInfo = _ApiServiceInfos.GetValue(context.RouteData[0]);
 
                 var apiMethodInfo = apiServiceInfo.MethodInfos.FirstOrDefault(x => 
                     (context.RouteData.Length == 1 && x.DefaultMethod) ||
@@ -146,7 +149,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 throw new Exception($"service type '{serviceType.FullName}' does not mark attribute 'ApiServiceAttribute'.");
             }
 
-            var apiServiceInfo = new ApiServiceInfo(serviceType, serviceAttribute.ServiceName.Alternate(serviceType.Name));
+            var apiServiceInfo = new ApiServiceDefinition(serviceType, serviceAttribute.ServiceName.Alternate(serviceType.Name));
 
             foreach (var methodInfo in serviceType.GetMethods())
             {
@@ -156,13 +159,13 @@ namespace Guru.AspNetCore.Implementation.Api
                     continue;
                 }
 
-                var apiMethodInfo = new ApiMethodInfo(methodInfo, methodAttribute.MethodName.Alternate(methodInfo.Name), methodAttribute.DefaultMethod);
+                var apiMethodInfo = new ApiMethodDefinition(methodInfo, methodAttribute.MethodName.Alternate(methodInfo.Name), methodAttribute.DefaultMethod);
 
                 foreach (var parameterInfo in methodInfo.GetParameters())
                 {
                     var parameterAttribute = parameterInfo.GetCustomAttribute<ApiParameterAttribute>();
 
-                    var apiParameterInfo = new ApiParameterInfo(parameterInfo, (parameterAttribute?.ParameterName).Alternate(parameterInfo.Name));
+                    var apiParameterInfo = new ApiParameterDefinition(parameterInfo, (parameterAttribute?.ParameterName).Alternate(parameterInfo.Name));
 
                     apiMethodInfo.Parameters = apiMethodInfo.Parameters.Append(apiParameterInfo);
                 }
@@ -172,164 +175,10 @@ namespace Guru.AspNetCore.Implementation.Api
 
             DependencyContainer.RegisterSingleton(serviceType, serviceType);
 
-            if (!_ApiServiceInfos.ContainsKey(apiServiceInfo.ServiceName.ToLower()))
+            if (!_ApiServiceInfos.ContainsKey(apiServiceInfo.ServiceName))
             {
-                _ApiServiceInfos.Add(apiServiceInfo.ServiceName.ToLower(), apiServiceInfo);
+                _ApiServiceInfos.Add(apiServiceInfo.ServiceName, apiServiceInfo);
             }
-        }
-
-        #endregion
-
-        #region Api Information
-
-        private readonly Dictionary<string, ApiServiceInfo> _ApiServiceInfos = new Dictionary<string, ApiServiceInfo>();
-
-        class ApiServiceInfo
-        {
-            public ApiServiceInfo(Type prototype, string serviceName)
-            {
-                ServiceName = serviceName;
-                Prototype = prototype;
-            }
-
-            public string ServiceName { get; set; }
-
-            public ApiMethodInfo[] MethodInfos { get; set; }
-
-            public Type Prototype { get; set; }
-        }
-
-        class ApiMethodInfo
-        {
-            private readonly bool _IsAsyncMethod;
-
-            private readonly Type[] _ReturnTypeGenericParameters;
-
-            private readonly HandlingBeforeAttribute _HandlingBefore;
-
-            private readonly HandlingAfterAttribute _HandlingAfter;
-            
-            public ApiMethodInfo(MethodInfo prototype, string methodName, bool defaultMethod)
-            {
-                Prototype = prototype;
-                MethodName = methodName;
-                DefaultMethod = defaultMethod;
-                _HandlingBefore = prototype.GetCustomAttribute<HandlingBeforeAttribute>();
-                _HandlingAfter = prototype.GetCustomAttribute<HandlingAfterAttribute>();
-
-                _IsAsyncMethod = prototype.IsDefined(typeof(AsyncStateMachineAttribute));
-                if (_IsAsyncMethod)
-                {
-                    if (!prototype.ReturnType.GetTypeInfo().IsGenericType)
-                    {
-                        _ReturnTypeGenericParameters = new Type[1] { typeof(void) };
-                    }
-                    else
-                    {
-                        _ReturnTypeGenericParameters = prototype.ReturnType.GetGenericArguments();
-                    }
-                }
-            }
-
-            public object Invoke(object instance, params object[] parameters)
-            {
-                var id = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
-
-                if (_HandlingBefore != null)
-                {
-                    var rst = _HandlingBefore.Handle(id, ReturnType, parameters);
-                    if (rst == null)
-                    {
-                        return null;
-                    }
-
-                    if (!rst.Succeeded)
-                    {
-                        return rst.ResultObject;
-                    }
-                }
-
-                object result;
-                if (!_IsAsyncMethod)
-                {
-                    result = Prototype.Invoke(instance, parameters);
-                }
-                else
-                {
-                    result = _HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters).Invoke(this, new object[] { Prototype.Invoke(instance, parameters) });
-                }
-
-                if (_HandlingAfter != null)
-                {
-                    var rst = _HandlingAfter.Handle(id, ReturnType, result);
-                    if (rst == null)
-                    {
-                        return null;
-                    }
-
-                    if (!rst.Succeeded)
-                    {
-                        return rst.ResultObject;
-                    }
-                }
-
-                return result;
-            }
-
-            static ApiMethodInfo()
-            {
-                _HandleAsyncMethod = typeof(ApiMethodInfo).GetMethod("HandleAsync", BindingFlags.Static | BindingFlags.NonPublic);
-            }
-
-            private static readonly MethodInfo _HandleAsyncMethod;
-
-            private static T HandleAsync<T>(Task task)
-            {
-                return ((Task<T>)task).GetAwaiter().GetResult();
-            }
-
-            public string MethodName { get; set; }
-
-            public bool DefaultMethod { get; set; }
-
-            public ApiParameterInfo[] Parameters { get; set; }
-
-            public MethodInfo Prototype { get; set; }
-
-            public Type ReturnType
-            {
-                get
-                {
-                    if (_IsAsyncMethod)
-                    {
-                        if (_ReturnTypeGenericParameters.HasLength())
-                        {
-                            return _ReturnTypeGenericParameters[0];
-                        }
-                        else
-                        {
-                            return typeof(void);
-                        }
-                    }
-                    else
-                    {
-                        return Prototype.ReturnType;
-                    }
-                }
-            }
-        }
-
-        class ApiParameterInfo
-        {
-            public ApiParameterInfo(ParameterInfo prototype, string parameterName)
-            {
-                Prototype = prototype;
-                ParameterName = parameterName;
-            }
-
-            public ParameterInfo Prototype { get; set; }
-
-            public string ParameterName { get; set; }
         }
 
         #endregion
@@ -342,7 +191,7 @@ namespace Guru.AspNetCore.Implementation.Api
         {
             public string Key { get; set; }
 
-            public ApiMethodInfo MethodInfo { get; set; }
+            public ApiMethodDefinition MethodInfo { get; set; }
 
             public ApiExecuteDelegate ApiExecute { get; set; }
         }

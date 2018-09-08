@@ -14,6 +14,9 @@ namespace Guru.AspNetCore.Configuration
 
         [JsonProperty("enableLog")]
         public bool EnableLog { get; set; }
+
+        [JsonProperty("enableMetadata")]
+        public bool EnableMetadata { get; set; }
         
         [JsonProperty("headers")]
         public HeaderConfiguration[] Headers { get; set; }

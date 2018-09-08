@@ -92,7 +92,11 @@ namespace Guru.Formatter.Json
                 valueType = underlyingType;
             }
 
-            if (valueType == typeof(DateTime))
+            if (valueType.IsEnum)
+            {
+                return CurrentEncoding.GetBytes('"' + value.ToString() + '"');
+            }
+            else if (valueType == typeof(DateTime))
             {
                 // convert to datetime format
                 if (!string.IsNullOrEmpty(_DateTimeFormat))

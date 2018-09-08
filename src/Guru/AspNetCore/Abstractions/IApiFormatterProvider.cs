@@ -2,7 +2,7 @@
 
 namespace Guru.AspNetCore.Abstractions
 {
-    public interface IApiFormatters
+    public interface IApiFormatterProvider
     {
         AbstractApiFormatter Get(CallingContext context);
 

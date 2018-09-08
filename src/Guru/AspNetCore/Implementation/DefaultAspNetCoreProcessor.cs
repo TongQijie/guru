@@ -13,10 +13,13 @@ namespace Guru.AspNetCore.Implementation
 
         private readonly IApiHandler _ApiHandler;
 
-        public DefaultAspNetCoreProcessor(IResourceHandler resourceHandler, IApiHandler apiHandler)
+        private readonly IApiMetadataHandler _ApiMetadataHandler;
+
+        public DefaultAspNetCoreProcessor(IResourceHandler resourceHandler, IApiHandler apiHandler, IApiMetadataHandler apiMetadataHandler)
         {
             _ResourceHandler = resourceHandler;
             _ApiHandler = apiHandler;
+            _ApiMetadataHandler = apiMetadataHandler;
         }
 
         public async Task Process(CallingContext context)
@@ -39,7 +42,15 @@ namespace Guru.AspNetCore.Implementation
             {
                 // Api Request
                 context.RouteData = context.RouteData.Subset(1);
-                await _ApiHandler.ProcessRequest(context);
+                if (context.RouteData.HasLength() && context.RouteData[0].EqualsIgnoreCase("_Metadata"))
+                {
+                    context.RouteData = context.RouteData.Subset(1);
+                    await _ApiMetadataHandler.ProcessRequest(context);
+                }
+                else
+                {
+                    await _ApiHandler.ProcessRequest(context);
+                }
                 return;
             }
 

@@ -7,10 +7,10 @@ using Guru.Formatter.Abstractions;
 
 namespace Guru.AspNetCore.Implementation.Api
 {
-    [Injectable(typeof(IApiFormatters), Lifetime.Singleton)]
-    internal class DefaultApiFormatters : IApiFormatters
+    [Injectable(typeof(IApiFormatterProvider), Lifetime.Singleton)]
+    internal class DefaultApiFormatterProvider : IApiFormatterProvider
     {
-        public DefaultApiFormatters()
+        public DefaultApiFormatterProvider()
         {
             Json = new JsonApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IJsonLightningFormatter>("JsonApiFormatter"));
             Xml = new XmlApiFormatter(DependencyContainer.ResolveOrDefault<ILightningFormatter, IXmlLightningFormatter>("XmlApiFormatter"));
