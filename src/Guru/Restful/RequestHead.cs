@@ -8,6 +8,9 @@ namespace Guru.Restful
         [JsonProperty("token")]
         public string Token { get; set; }
 
+        [JsonProperty("cid")]
+        public string ClientId { get; set; }
+
         [JsonProperty("extensions")]
         public Dictionary<string, string> Extensions { get; set; }
     }

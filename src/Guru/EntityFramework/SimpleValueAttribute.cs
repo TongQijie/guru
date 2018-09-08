@@ -5,6 +5,8 @@ namespace Guru.EntityFramework
     [AttributeUsage(AttributeTargets.Property)]
     public class SimpleValueAttribute : Attribute
     {
+        public SimpleValueAttribute() { }
+
         public SimpleValueAttribute(string name)
         {
             Name = name;

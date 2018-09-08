@@ -12,6 +12,7 @@ using Guru.AspNetCore.Abstractions;
 using Guru.DependencyInjection.Attributes;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using Guru.Formatter.Json;
 
 namespace Guru.AspNetCore.Implementation.Api
 {
@@ -59,6 +60,7 @@ namespace Guru.AspNetCore.Implementation.Api
             }
 
             var stringBuilder = new StringBuilder();
+            stringBuilder.Append("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body>");
             stringBuilder.Append($"<h3>{serviceName} - {methodName}</h3>");
             if (apiMethodMetadata.InputParameters.HasLength())
             {
@@ -68,6 +70,7 @@ namespace Guru.AspNetCore.Implementation.Api
                     apiMethodMetadata.InputParameters[0].ParameterType != typeof(string))
                 {
                     stringBuilder.Append($"<pre>{BuildSampleValue(apiMethodMetadata.InputParameters[0])}</pre>");
+                    BuildTypeAnnotation(stringBuilder, apiMethodMetadata.InputParameters[0].ParameterType);
                 }
                 else
                 {
@@ -84,8 +87,10 @@ namespace Guru.AspNetCore.Implementation.Api
                 {
                     stringBuilder.Append($"<h4>RESPONSE</h4>");
                     stringBuilder.Append($"<pre>{BuildSampleValue(apiMethodMetadata.OutputParameter)}</pre>");
+                    BuildTypeAnnotation(stringBuilder, apiMethodMetadata.OutputParameter.ParameterType);
                 }
             }
+            stringBuilder.Append("</body></html>");
             return stringBuilder.ToString();
         }
 
@@ -212,6 +217,51 @@ namespace Guru.AspNetCore.Implementation.Api
             return string.Empty;
         }
 
+        private void BuildTypeAnnotation(StringBuilder stringBuilder, Type type)
+        {
+            var annotationFields = new AnnotationParser().Parse(type);
+            if (annotationFields.HasLength())
+            {
+                stringBuilder.Append("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\"><thead><tr>");
+                var fieldCount = annotationFields.Max(x => x.TopLevel);
+                for (int i = 0; i < fieldCount; i++)
+                {
+                    stringBuilder.Append("<td>Field</td>");
+                }
+                stringBuilder.Append("<td>DataType</td>");
+                stringBuilder.Append("<td>Annotation</td>");
+                stringBuilder.Append("</tr></thead><tbody>");
+                foreach (var annotationField in annotationFields)
+                {
+                    BuildAnnotationField(stringBuilder, annotationField, 0, fieldCount);
+                }
+                stringBuilder.Append("</tbody></table>");
+            }
+        }
+
+        private void BuildAnnotationField(StringBuilder stringBuilder, AnnotationField annotationField, int startField, int fieldCount)
+        {
+            stringBuilder.Append("<tr>");
+            for (int i = 0; i < startField; i++)
+            {
+                stringBuilder.Append("<td></td>");
+            }
+            stringBuilder.Append($"<td>{annotationField.Name}</td>");
+            for (int i = startField + 1; i < fieldCount; i++)
+            {
+                stringBuilder.Append("<td></td>");
+            }
+            stringBuilder.Append($"<td>{annotationField.DataType}</td><td>{annotationField.Description}</td>");
+            stringBuilder.Append("</tr>");
+            if (annotationField.InnerAnnotationFields.HasLength())
+            {
+                foreach (var innerAnnotationField in annotationField.InnerAnnotationFields)
+                {
+                    BuildAnnotationField(stringBuilder, innerAnnotationField, startField + 1, fieldCount);
+                }
+            }
+        }
+
         class SampleValueBuilder
         {
             public SampleValueBuilder() { }
@@ -293,6 +343,147 @@ namespace Guru.AspNetCore.Implementation.Api
                 {
                     return type.GetDefaultValue();
                 }
+            }
+        }
+
+        class AnnotationField
+        {
+            public string Name { get; set; }
+
+            public string Description { get; set; }
+
+            public bool IsCollection { get; set; }
+
+            public string DataType { get; set; }
+
+            public AnnotationField[] InnerAnnotationFields { get; set; }
+
+            public int TopLevel
+            {
+                get
+                {
+                    if (InnerAnnotationFields.HasLength())
+                    {
+                        return InnerAnnotationFields.Max(x => x.TopLevel) + 1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+            }
+        }
+
+        class AnnotationParser
+        {
+            public AnnotationParser() { }
+
+            public AnnotationParser(List<Type> refs)
+            {
+                Refs.AddRange(refs);
+            }
+
+            private readonly List<Type> Refs = new List<Type>();
+
+            private bool CheckIfLoopRef(Type type)
+            {
+                if (type.IsValueType || type == typeof(string))
+                {
+                    return false;
+                }
+                else
+                {
+                    return Refs.Contains(type);
+                }
+            }
+
+            private bool CheckIfSupportParsing(Type type)
+            {
+                if (type.IsClass && type != typeof(string))
+                {
+                    if (type.IsArray ||
+                        typeof(IDictionary).GetTypeInfo().IsAssignableFrom(type) ||
+                        typeof(ICollection).GetTypeInfo().IsAssignableFrom(type))
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            public AnnotationField[] Parse(Type type)
+            {
+                if (!CheckIfSupportParsing(type))
+                {
+                    return null;
+                }
+
+                if (CheckIfLoopRef(type))
+                {
+                    return null;
+                }
+
+                Refs.Add(type);
+
+                var annotationFields = new AnnotationField[0];
+                foreach (var property in type.GetProperties())
+                {
+                    var annotationAttr = property.GetCustomAttribute<AnnotationAttribute>();
+                    if (annotationAttr != null && annotationAttr.Hidden)
+                    {
+                        continue;
+                    }
+
+                    var jsonPropertyAttr = property.GetCustomAttribute<JsonPropertyAttribute>();
+
+                    var annotationField = new AnnotationField()
+                    {
+                        Name = jsonPropertyAttr?.Alias.Alternate(property.Name),
+                        Description = annotationAttr?.Description ?? string.Empty,
+                        IsCollection = property.PropertyType.IsArray || typeof(ICollection).GetTypeInfo().IsAssignableFrom(property.PropertyType),
+                    };
+
+                    if (property.PropertyType.IsArray)
+                    {
+                        annotationField.DataType = "list";
+                        var elementType = property.PropertyType.GetElementType();
+                        annotationField.InnerAnnotationFields = new AnnotationParser(Refs).Parse(elementType);
+                    }
+                    else if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(property.PropertyType))
+                    {
+                        annotationField.DataType = "dictionary";
+                    }
+                    else if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(property.PropertyType))
+                    {
+                        annotationField.DataType = "list";
+                        var elementType = property.PropertyType.GetGenericArguments().FirstOrDefault();
+                        if (elementType != null)
+                        {
+                            annotationField.InnerAnnotationFields = new AnnotationParser(Refs).Parse(elementType);
+                        }
+                    }
+                    else if (property.PropertyType != typeof(string) && property.PropertyType.IsClass)
+                    {
+                        annotationField.DataType = "object";
+                        annotationField.InnerAnnotationFields = new AnnotationParser(Refs).Parse(property.PropertyType);
+                    }
+                    else if (property.PropertyType.IsEnum)
+                    {
+                        annotationField.DataType = "string";
+                    }
+                    else
+                    {
+                        annotationField.DataType = property.PropertyType.Name.ToLower();
+                    }
+
+                    annotationFields = annotationFields.Append(annotationField);
+                }
+
+                return annotationFields;
             }
         }
     }
