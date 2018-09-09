@@ -293,7 +293,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 }
                 else if (type == typeof(string))
                 {
-                    return string.Empty;
+                    return "String";
                 }
                 else if (type.IsArray)
                 {
