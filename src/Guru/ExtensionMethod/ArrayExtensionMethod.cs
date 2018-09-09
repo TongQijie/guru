@@ -9,6 +9,11 @@ namespace Guru.ExtensionMethod
             return source != null && source.Length > 0;
         }
 
+        public static bool LengthEqual<T>(this T[] source, int length)
+        {
+            return source != null && source.Length == length;
+        }
+
         public static T[] Append<T>(this T[] source, T element)
         {
             T[] buffer;

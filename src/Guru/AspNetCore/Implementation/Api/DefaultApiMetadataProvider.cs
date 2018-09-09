@@ -61,7 +61,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
             var stringBuilder = new StringBuilder();
             stringBuilder.Append("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body>");
-            stringBuilder.Append($"<h3>{serviceName} - {methodName}</h3>");
+            stringBuilder.Append($"<h3>{serviceName}/{methodName}</h3>");
             if (apiMethodMetadata.InputParameters.HasLength())
             {
                 stringBuilder.Append($"<h4>REQUEST</h4>");
@@ -449,17 +449,37 @@ namespace Guru.AspNetCore.Implementation.Api
 
                     if (property.PropertyType.IsArray)
                     {
-                        annotationField.DataType = "list";
                         var elementType = property.PropertyType.GetElementType();
                         annotationField.InnerAnnotationFields = new AnnotationParser(Refs).Parse(elementType);
                     }
-                    else if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(property.PropertyType))
+                    else if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(property.PropertyType))
                     {
-                        annotationField.DataType = "dictionary";
+                        var arguments = property.PropertyType.GetGenericArguments();
+                        if (arguments.LengthEqual(2))
+                        {
+                            
+
+                            var keyType = arguments[0];
+                            annotationField.InnerAnnotationFields = annotationField.InnerAnnotationFields.Append(new AnnotationField()
+                            {
+                                Name = "key",
+                                DataType = GetDataType(keyType),
+                                Description = (annotationAttr as AnnotationDictionaryAttribute)?.Key ?? string.Empty,
+                                InnerAnnotationFields = new AnnotationParser(Refs).Parse(keyType),
+                            });
+
+                            var valueType = arguments[1];
+                            annotationField.InnerAnnotationFields = annotationField.InnerAnnotationFields.Append(new AnnotationField()
+                            {
+                                Name = "value",
+                                DataType = GetDataType(valueType),
+                                Description = (annotationAttr as AnnotationDictionaryAttribute)?.Value ?? string.Empty,
+                                InnerAnnotationFields = new AnnotationParser(Refs).Parse(valueType),
+                            });
+                        }
                     }
                     else if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(property.PropertyType))
                     {
-                        annotationField.DataType = "list";
                         var elementType = property.PropertyType.GetGenericArguments().FirstOrDefault();
                         if (elementType != null)
                         {
@@ -468,22 +488,46 @@ namespace Guru.AspNetCore.Implementation.Api
                     }
                     else if (property.PropertyType != typeof(string) && property.PropertyType.IsClass)
                     {
-                        annotationField.DataType = "object";
                         annotationField.InnerAnnotationFields = new AnnotationParser(Refs).Parse(property.PropertyType);
-                    }
-                    else if (property.PropertyType.IsEnum)
-                    {
-                        annotationField.DataType = "string";
                     }
                     else
                     {
                         annotationField.DataType = property.PropertyType.Name.ToLower();
                     }
 
+                    annotationField.DataType = GetDataType(property.PropertyType);
                     annotationFields = annotationFields.Append(annotationField);
                 }
 
                 return annotationFields;
+            }
+
+            private string GetDataType(Type type)
+            {
+                if (type.IsArray)
+                {
+                    return "list";
+                }
+                else if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(type))
+                {
+                    return "dictionary";
+                }
+                else if (typeof(ICollection).GetTypeInfo().IsAssignableFrom(type))
+                {
+                    return "list";
+                }
+                else if (type != typeof(string) && type.IsClass)
+                {
+                    return "object";
+                }
+                else if (type.IsEnum)
+                {
+                    return "string";
+                }
+                else
+                {
+                    return type.Name.ToLower();
+                }
             }
         }
     }
