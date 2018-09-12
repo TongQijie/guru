@@ -87,16 +87,18 @@ namespace Guru.DependencyInjection.Implementation.StaticFile
                                     {
                                         _SingletonObject = decorator.ImplementationType.CreateInstance();
                                     }
-
-                                    using (var inputStream = new FileStream(decorator.Path.FullPath(), FileMode.Open, FileAccess.Read))
+                                    else
                                     {
-                                        if (decorator.Format == StaticFileDependencyDescriptor.StaticFileFormat.Hjson)
+                                        using (var inputStream = new FileStream(decorator.Path.FullPath(), FileMode.Open, FileAccess.Read))
                                         {
-                                            _SingletonObject = _Formatter.ReadObject(decorator.ImplementationType, HjsonUtils.ToJson(inputStream));
-                                        }
-                                        else
-                                        {
-                                            _SingletonObject = _Formatter.ReadObject(decorator.ImplementationType, inputStream);
+                                            if (decorator.Format == StaticFileDependencyDescriptor.StaticFileFormat.Hjson)
+                                            {
+                                                _SingletonObject = _Formatter.ReadObject(decorator.ImplementationType, HjsonUtils.ToJson(inputStream));
+                                            }
+                                            else
+                                            {
+                                                _SingletonObject = _Formatter.ReadObject(decorator.ImplementationType, inputStream);
+                                            }
                                         }
                                     }
                                 }
