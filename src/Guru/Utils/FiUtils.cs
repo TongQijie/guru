@@ -17,5 +17,19 @@ namespace Guru.Utils
             }
             return doc.OuterXml;
         }
+
+        public static byte[] Write(string xml)
+        {
+            var doc = new XmlDocument();
+            doc.LoadXml(xml);
+            using (var outputStream = new MemoryStream())
+            {
+                var fiWriter = XmlWriter.Create(new FIWriter(outputStream));
+                doc.WriteTo(fiWriter);
+                fiWriter.Close();
+
+                return outputStream.ToArray();
+            }
+        }
     }
 }
