@@ -321,6 +321,13 @@ namespace Guru.AspNetCore.Implementation.Api
                     instance.Add(key, value);
                     return instance;
                 }
+                else if (typeof(IList).GetTypeInfo().IsAssignableFrom(type))
+                {
+                    var elementType = type.GetGenericArguments().FirstOrDefault() ?? (type.BaseType.GetGenericArguments().FirstOrDefault() ?? typeof(object));
+                    var instance = Activator.CreateInstance(type) as IList;
+                    instance.Add(new SampleValueBuilder(Refs).Build(elementType));
+                    return instance;
+                }
                 else if (type.IsClass)
                 {
                     Refs.Add(type);
