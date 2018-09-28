@@ -1,6 +1,7 @@
 ﻿using Guru.AspNetCore.Attributes;
 using Guru.ExtensionMethod;
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -36,6 +37,14 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
                 {
                     _ReturnTypeGenericParameters = prototype.ReturnType.GetGenericArguments();
                 }
+
+                _InvokeExpression = CreateInvokeExpression(prototype);
+
+                _AsyncInvokeExpression = CreateStaticMethodInvokeExpression(_HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters));
+            }
+            else
+            {
+                _InvokeExpression = CreateInvokeExpression(prototype);
             }
         }
 
@@ -60,11 +69,11 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
             object result;
             if (!_IsAsyncMethod)
             {
-                result = Prototype.Invoke(instance, parameters);
+                result = _InvokeExpression(instance, parameters);
             }
             else
             {
-                result = _HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters).Invoke(this, new object[] { Prototype.Invoke(instance, parameters) });
+                result = _AsyncInvokeExpression(this, new object[] { _InvokeExpression(instance, parameters) });
             }
 
             if (_HandlingAfter != null)
@@ -104,6 +113,10 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
 
         public MethodInfo Prototype { get; set; }
 
+        private Func<object, object[], object> _InvokeExpression = null;
+
+        private Func<object, object[], object> _AsyncInvokeExpression = null;
+
         public Type ReturnType
         {
             get
@@ -124,6 +137,55 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
                     return Prototype.ReturnType;
                 }
             }
+        }
+
+        private Func<object, object[], object> CreateInvokeExpression(MethodInfo method)
+        {
+            ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "target");
+            ParameterExpression argumentsParameter = Expression.Parameter(typeof(object[]), "arguments");
+
+            MethodCallExpression call = Expression.Call(
+                Expression.Convert(instanceParameter, method.DeclaringType),
+                method,
+                CreateParameterExpressions(method, argumentsParameter));
+
+            var lambda = Expression.Lambda<Func<object, object[], object>>(
+                Expression.Convert(call, typeof(object)),
+                instanceParameter,
+                argumentsParameter);
+
+            return lambda.Compile();
+        }
+
+        private Func<object, object[], object> CreateStaticMethodInvokeExpression(MethodInfo method)
+        {
+            ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "target");
+            ParameterExpression argumentsParameter = Expression.Parameter(typeof(object[]), "arguments");
+
+            MethodCallExpression call = Expression.Call(
+                //Expression.Convert(instanceParameter, method.DeclaringType),
+                method,
+                CreateParameterExpressions(method, argumentsParameter));
+
+            var lambda = Expression.Lambda<Func<object, object[], object>>(
+                Expression.Convert(call, typeof(object)),
+                instanceParameter,
+                argumentsParameter);
+
+            return lambda.Compile();
+        }
+
+        private Expression[] CreateParameterExpressions(MethodInfo method, Expression argumentsParameter)
+        {
+            var methodParameters = method.GetParameters();
+            Expression[] paramExps = new Expression[methodParameters.Length];
+            for (int i = 0; i < methodParameters.Length; i++)
+            {
+                var valueObj = Expression.ArrayIndex(argumentsParameter, Expression.Constant(i));
+                var valueCast = Expression.Convert(valueObj, methodParameters[i].ParameterType);
+                paramExps[i] = valueCast;
+            }
+            return paramExps;
         }
     }
 }

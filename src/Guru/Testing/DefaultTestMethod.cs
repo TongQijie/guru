@@ -57,7 +57,11 @@ namespace Guru.Testing
             var parameterTypes = prototype.GetParameters().Select(x => x.ParameterType);
             foreach (var testInputAttribute in prototype.GetCustomAttributes<TestInputAttribute>())
             {
-                if (testInputAttribute.InputValues.HasLength() && parameterTypes.HasLength() && parameterTypes.Length == testInputAttribute.InputValues.Length)
+                if (!testInputAttribute.InputValues.HasLength() && !parameterTypes.HasLength())
+                {
+                    TestInputs = TestInputs.Append(new DefaultTestInput());
+                }
+                else if (testInputAttribute.InputValues.HasLength() && parameterTypes.HasLength() && parameterTypes.Length == testInputAttribute.InputValues.Length)
                 {
                     var parameterValues = new object[testInputAttribute.InputValues.Length];
                     for (int i = 0; i < testInputAttribute.InputValues.Length; i++)
