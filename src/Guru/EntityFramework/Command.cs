@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 
 using Guru.EntityFramework.Abstractions;
 using System.Threading.Tasks;
+using Guru.EntityFramework.Internal;
 
 namespace Guru.EntityFramework
 {
@@ -110,6 +111,29 @@ namespace Guru.EntityFramework
             }
 
             DbCommand.CommandText = Regex.Replace(DbCommand.CommandText, "\\x7b" + index + "\\x7d", string.Join(",", stringArgs));
+        }
+
+        public void SetBulkInsert(BulkInsertData data)
+        {
+            BulkInsertUtils.CheckIfValidataion(data);
+
+            DbCommand.CommandText = BulkInsertUtils.RebuildCommandText(DbCommand.CommandText, data);
+
+            for (int i = 0; i < data.Values.GetLength(0); i++)
+            {
+                for (int j = 0; j < data.Values.GetLength(1); j++)
+                {
+                    var parameterName = data.ParameterNames[j];
+                    var p = DbCommand.Parameters[parameterName];
+                    AddParameter(p.ParameterName + i, p.DbType, p.Direction, p.Size);
+                    SetParameterValue(p.ParameterName + i, data.Values[i, j]);
+                }
+            }
+
+            foreach (var parameterName in data.ParameterNames)
+            {
+                DbCommand.Parameters.Remove(DbCommand.Parameters[parameterName]);
+            }
         }
 
         public T GetScalar<T>()

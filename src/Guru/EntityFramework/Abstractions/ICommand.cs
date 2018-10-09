@@ -19,6 +19,8 @@ namespace Guru.EntityFramework.Abstractions
 
         void FormatCommandText(int index, params object[] args);
 
+        void SetBulkInsert(BulkInsertData data);
+
         object GetParameterValue(string parameterName);
 
         T GetScalar<T>();
