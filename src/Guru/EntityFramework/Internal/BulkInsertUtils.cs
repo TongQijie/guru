@@ -33,7 +33,7 @@ namespace Guru.EntityFramework.Internal
         public static string RebuildCommandText(string commandText, BulkInsertData data)
         {
             var match = Regex.Match(commandText,
-                $"(^|\\s+)INSERT\\s+(INTO\\s+)?{data.TableName}\\s*.*?\\s*VALUES\\s+\\(\\s?(?<parameters>.+?)\\s?\\)\\s*(;|$)+",
+                $"(^|\\s+)INSERT\\s+(INTO\\s+)?{data.TableName}\\s*.*?\\s*VALUES\\s*\\(\\s?(?<parameters>.+?)\\s?\\)\\s*(;|$)+",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
             if (!match.Success)
             {
@@ -49,7 +49,7 @@ namespace Guru.EntityFramework.Internal
             }
 
             return Regex.Replace(commandText,
-                $"(?<header>(^|\\s+)INSERT\\s+(INTO\\s+)?{data.TableName}\\s*.*?\\s*VALUES\\s+)(?<parameters>\\(\\s?.+?\\s?\\))(?<footer>\\s*(;|$)+)",
+                $"(?<header>(^|\\s+)INSERT\\s+(INTO\\s+)?{data.TableName}\\s*.*?\\s*VALUES\\s*)(?<parameters>\\(\\s?.+?\\s?\\))(?<footer>\\s*(;|$)+)",
                 m => m.Groups["header"].Captures[0].Value + stringBuilder.ToString().TrimEnd(',') + m.Groups["footer"].Captures[0].Value,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
         }
