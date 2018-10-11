@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Guru.EntityFramework.Internal;
 using Guru.EntityFramework.Abstractions;
 using System.Threading.Tasks;
+using Guru.ExtensionMethod;
 
 namespace Guru.EntityFramework
 {
@@ -164,7 +165,7 @@ namespace Guru.EntityFramework
 
         public T GetScalar<T>(ICommand command)
         {
-            return (T)CreateDbCommnad(command).ExecuteScalar();
+            return CreateDbCommnad(command).ExecuteScalar().ConvertTo<T>();
         }
 
         public void Dispose()
@@ -181,7 +182,7 @@ namespace Guru.EntityFramework
 
         public async Task<T> GetScalarAsync<T>(ICommand command)
         {
-            return (T)(await (await CreateDbCommnadAsync(command)).ExecuteScalarAsync());
+            return (await (await CreateDbCommnadAsync(command)).ExecuteScalarAsync()).ConvertTo<T>();
         }
 
         public async Task<List<T>> GetEntitiesAsync<T>(ICommand command) where T : class
