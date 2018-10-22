@@ -35,7 +35,7 @@ namespace Guru.DependencyInjection.Implementation
 
                 if (!_DependencyResolvers.TryGetValue(key, out resolver))
                 {
-                    Console.WriteLine($"Implementation '{key}' cannot be found.");
+                    //Console.WriteLine($"Implementation '{key}' cannot be found.");
                     return null;
                 }
             }
