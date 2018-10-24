@@ -18,6 +18,8 @@ namespace Guru.Formatter.Json
 
         public string Key { get { return Alias.HasValue() ? Alias : PropertyInfo.Name; } }
 
+        public bool CanWrite { get { return PropertyInfo != null && PropertyInfo.CanWrite; } }
+
         public PropertyInfo PropertyInfo { get; private set; }
 
         public JType JsonType { get; private set; }
