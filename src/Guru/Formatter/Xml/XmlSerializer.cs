@@ -62,11 +62,11 @@ namespace Guru.Formatter.Xml
                                 var attribute = propertyInfo.GetCustomAttribute<XmlPropertyAttribute>();
                                 if (attribute == null)
                                 {
-                                    xmlProperty = new XmlProperty(propertyInfo, null, false, false, null);
+                                    xmlProperty = new XmlProperty(propertyInfo, null, false, false, null, false);
                                 }
                                 else
                                 {
-                                    xmlProperty = new XmlProperty(propertyInfo, attribute.Alias, attribute.IsAttr, attribute.IsArrayElement, attribute.ArrayElementName);
+                                    xmlProperty = new XmlProperty(propertyInfo, attribute.Alias, attribute.IsAttr, attribute.IsArrayElement, attribute.ArrayElementName, attribute.IsCDATA);
                                 }
 
                                 XmlProperties.TryAdd(xmlProperty.Key, xmlProperty);
@@ -200,19 +200,21 @@ namespace Guru.Formatter.Xml
                 }
                 else if (xmlType == XType.Array)
                 {
-                    await InternalSerializeXmlArrayAsync(stream, value, property.IsArrayElement ? null : property.Key, property.ArrayElementName);
+                    await InternalSerializeXmlArrayAsync(stream, value, property);
                 }
                 else if (xmlType == XType.Value)
                 {
-                    await InternalSerializeXmlValueAsync(stream, value, property.Key);
+                    await InternalSerializeXmlValueAsync(stream, value, property.Key, property.IsCDATA);
                 }
             }
 
             await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"</{tagName}>"));
         }
 
-        private async Task InternalSerializeXmlArrayAsync(IWriterStream stream, object array, string outerTagName, string innerTagName)
+        private async Task InternalSerializeXmlArrayAsync(IWriterStream stream, object array, XmlProperty property)
         {
+            var outerTagName = property.IsArrayElement ? null : property.Key;
+            var innerTagName = property.ArrayElementName;
             if (outerTagName.HasValue())
             {
                 await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"<{outerTagName}>"));
@@ -230,7 +232,7 @@ namespace Guru.Formatter.Xml
                 }
                 else if (xmlType == XType.Value)
                 {
-                    await InternalSerializeXmlValueAsync(stream, element, innerTagName);
+                    await InternalSerializeXmlValueAsync(stream, element, innerTagName, property.IsCDATA);
                 }
             }
 
@@ -240,11 +242,11 @@ namespace Guru.Formatter.Xml
             }
         }
 
-        private async Task InternalSerializeXmlValueAsync(IWriterStream stream, object value, string tagName)
+        private async Task InternalSerializeXmlValueAsync(IWriterStream stream, object value, string tagName, bool isCData)
         {
             await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"<{tagName}>"));
 
-            await stream.WriteAsync(XmlSettings.SerializeValue(value));
+            await stream.WriteAsync(XmlSettings.SerializeValue(value, isCData));
 
             await stream.WriteAsync(XmlSettings.CurrentEncoding.GetBytes($"</{tagName}>"));
         }

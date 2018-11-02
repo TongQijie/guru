@@ -19,5 +19,7 @@ namespace Guru.Formatter.Xml
         public bool IsArrayElement { get; set; }
 
         public string ArrayElementName { get; set; }
+
+        public bool IsCDATA { get; set; }
     }
 }

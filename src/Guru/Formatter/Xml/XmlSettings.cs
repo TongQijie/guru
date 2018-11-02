@@ -26,7 +26,7 @@ namespace Guru.Formatter.Xml
 
         public bool OmitDefaultValue => _OmitDefaultValue;
 
-        public byte[] SerializeValue(object value)
+        public byte[] SerializeValue(object value, bool cdata)
         {
             var valueType = value.GetType();
 
@@ -44,7 +44,14 @@ namespace Guru.Formatter.Xml
             else if (valueType == typeof(string))
             {
                 // escape special characters
-                return CurrentEncoding.GetBytes(WebUtility.HtmlEncode(value.ToString()));
+                if (cdata)
+                {
+                    return CurrentEncoding.GetBytes("<![CDATA[" + value.ToString() + "]]>");
+                }
+                else
+                {
+                    return CurrentEncoding.GetBytes(WebUtility.HtmlEncode(value.ToString()));
+                }
             }
             else if (valueType == typeof(bool))
             {

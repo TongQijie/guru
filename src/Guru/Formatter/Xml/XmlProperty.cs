@@ -8,13 +8,14 @@ namespace Guru.Formatter.Xml
 {
     internal class XmlProperty
     {
-        public XmlProperty(PropertyInfo propertyInfo, string alias, bool isAttr, bool isArrayItem, string arrayItemName)
+        public XmlProperty(PropertyInfo propertyInfo, string alias, bool isAttr, bool isArrayItem, string arrayItemName, bool isCDATA)
         {
             PropertyInfo = propertyInfo;
             Alias = alias;
             IsAttr = isAttr;
             IsArrayElement = isArrayItem;
             ArrayElementName = arrayItemName;
+            IsCDATA = isCDATA;
 
             DefaultValue = propertyInfo.PropertyType.GetDefaultValue();
             XmlType = XmlUtility.GetXmlType(propertyInfo.PropertyType);
@@ -69,5 +70,7 @@ namespace Guru.Formatter.Xml
         public string ArrayElementName { get; private set; }
 
         public Type ArrayElementType { get; private set; }
+
+        public bool IsCDATA { get; private set; }
     }
 }
