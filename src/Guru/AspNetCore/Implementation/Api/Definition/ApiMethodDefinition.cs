@@ -31,7 +31,7 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
             {
                 if (!prototype.ReturnType.GetTypeInfo().IsGenericType)
                 {
-                    _ReturnTypeGenericParameters = new Type[1] { typeof(void) };
+                    _ReturnTypeGenericParameters = new Type[0];
                 }
                 else
                 {
@@ -40,7 +40,14 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
 
                 _InvokeExpression = CreateInvokeExpression(prototype);
 
-                _AsyncInvokeExpression = CreateStaticMethodInvokeExpression(_HandleAsyncMethod.MakeGenericMethod(_ReturnTypeGenericParameters));
+                if (_ReturnTypeGenericParameters.HasLength())
+                {
+                    _AsyncInvokeGenericExpression = CreateStaticGenericMethodInvokeExpression(_HandleAsyncGenericMethod.MakeGenericMethod(_ReturnTypeGenericParameters));
+                }
+                else
+                {
+                    _AsyncInvokeExpression = CreateStaticMethodInvokeExpression(_HandleAsyncMethod);
+                }
             }
             else
             {
@@ -71,9 +78,14 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
             {
                 result = _InvokeExpression(instance, parameters);
             }
+            else if (_ReturnTypeGenericParameters.HasLength())
+            {
+                result = _AsyncInvokeGenericExpression(this, new object[] { _InvokeExpression(instance, parameters) });
+            }
             else
             {
-                result = _AsyncInvokeExpression(this, new object[] { _InvokeExpression(instance, parameters) });
+                result = null;
+                _AsyncInvokeExpression(this, new object[] { _InvokeExpression(instance, parameters) });
             }
 
             if (_HandlingAfter != null)
@@ -95,14 +107,22 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
 
         static ApiMethodDefinition()
         {
+            _HandleAsyncGenericMethod = typeof(ApiMethodDefinition).GetMethod("HandleAsyncGeneric", BindingFlags.Static | BindingFlags.NonPublic);
             _HandleAsyncMethod = typeof(ApiMethodDefinition).GetMethod("HandleAsync", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
+        private static readonly MethodInfo _HandleAsyncGenericMethod;
+
         private static readonly MethodInfo _HandleAsyncMethod;
 
-        private static T HandleAsync<T>(Task task)
+        private static T HandleAsyncGeneric<T>(Task task)
         {
             return ((Task<T>)task).GetAwaiter().GetResult();
+        }
+
+        private static void HandleAsync(Task task)
+        {
+            task.GetAwaiter().GetResult();
         }
 
         public string MethodName { get; set; }
@@ -115,7 +135,9 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
 
         private Func<object, object[], object> _InvokeExpression = null;
 
-        private Func<object, object[], object> _AsyncInvokeExpression = null;
+        private readonly Func<object, object[], object> _AsyncInvokeGenericExpression = null;
+
+        private readonly Action<object, object[]> _AsyncInvokeExpression = null;
 
         public Type ReturnType
         {
@@ -157,7 +179,7 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
             return lambda.Compile();
         }
 
-        private Func<object, object[], object> CreateStaticMethodInvokeExpression(MethodInfo method)
+        private Func<object, object[], object> CreateStaticGenericMethodInvokeExpression(MethodInfo method)
         {
             ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "target");
             ParameterExpression argumentsParameter = Expression.Parameter(typeof(object[]), "arguments");
@@ -169,6 +191,24 @@ namespace Guru.AspNetCore.Implementation.Api.Definition
 
             var lambda = Expression.Lambda<Func<object, object[], object>>(
                 Expression.Convert(call, typeof(object)),
+                instanceParameter,
+                argumentsParameter);
+
+            return lambda.Compile();
+        }
+
+        private Action<object, object[]> CreateStaticMethodInvokeExpression(MethodInfo method)
+        {
+            ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "target");
+            ParameterExpression argumentsParameter = Expression.Parameter(typeof(object[]), "arguments");
+
+            MethodCallExpression call = Expression.Call(
+                //Expression.Convert(instanceParameter, method.DeclaringType),
+                method,
+                CreateParameterExpressions(method, argumentsParameter));
+
+            var lambda = Expression.Lambda<Action<object, object[]>>(
+                call,
                 instanceParameter,
                 argumentsParameter);
 

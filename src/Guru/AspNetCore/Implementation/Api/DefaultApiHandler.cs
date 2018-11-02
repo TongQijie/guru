@@ -49,8 +49,6 @@ namespace Guru.AspNetCore.Implementation.Api
             object executionResult = null;
             try
             {
-                executionResult = apiContext.ApiExecute(apiContext.Parameters);
-
                 context.SetOutputParameter(new ContextParameter()
                 {
                     Name = CallingContextConstants.HttpStatusCode,
@@ -77,6 +75,8 @@ namespace Guru.AspNetCore.Implementation.Api
                     }
                 }
 
+                executionResult = apiContext.ApiExecute(apiContext.Parameters);
+                
                 if (executionResult != null)
                 {
                     AbstractApiFormatter apiFormatter = null;
