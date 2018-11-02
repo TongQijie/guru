@@ -97,6 +97,10 @@ namespace Guru.AspNetCore.Implementation.Api
                             apiParameterInfo.Prototype.ParameterType != typeof(string) &&
                             apiParameterInfo.Prototype.ParameterType.GetTypeInfo().IsClass)
                         {
+                            if (apiParameterInfo.Formatter.HasValue())
+                            {
+                                context.RequestHeaderParameters.Add("Formatter", apiParameterInfo.Formatter);
+                            }
                             var apiFormatter = _ApiFormatters.Get(context);
                             parameterValues[i] = await apiFormatter.Read(apiParameterInfo.Prototype.ParameterType, context.InputStream);
                         }
@@ -165,7 +169,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 {
                     var parameterAttribute = parameterInfo.GetCustomAttribute<ApiParameterAttribute>();
 
-                    var apiParameterInfo = new ApiParameterDefinition(parameterInfo, (parameterAttribute?.ParameterName).Alternate(parameterInfo.Name));
+                    var apiParameterInfo = new ApiParameterDefinition(parameterInfo, (parameterAttribute?.ParameterName).Alternate(parameterInfo.Name), parameterAttribute?.Formatter ?? string.Empty);
 
                     apiMethodInfo.Parameters = apiMethodInfo.Parameters.Append(apiParameterInfo);
                 }
