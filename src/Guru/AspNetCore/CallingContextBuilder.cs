@@ -103,6 +103,10 @@ namespace Guru.AspNetCore
                 }
                 else if (p.Source == ContextParameterSource.Http)
                 {
+                    if (context.ResponseHttpParameters.ContainsKey(p.Name))
+                    {
+                        context.ResponseHttpParameters.Remove(p.Name);
+                    }
                     context.ResponseHttpParameters.Add(p.Name, p.Value);
                     if (p.Name.EqualsIgnoreCase(CallingContextConstants.HttpStatusCode))
                     {

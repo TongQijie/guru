@@ -52,5 +52,10 @@ namespace Guru.Foundation
         {
             return KeyValues.Exists(x => x.Key.EqualsIgnoreCase(key));
         }
+
+        public void Remove(string key)
+        {
+            KeyValues.RemoveAll(x => x.Key.EqualsIgnoreCase(key));
+        }
     }
 }
