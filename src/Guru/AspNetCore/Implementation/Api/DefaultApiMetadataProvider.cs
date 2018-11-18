@@ -116,7 +116,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                     var apiServiceMetadata = new ApiServiceMetadata()
                     {
-                        ServiceName = serviceAttribute.ServiceName.Alternate(serviceType.Name),
+                        ServiceName = serviceAttribute.ServiceName.HasValue() ? serviceAttribute.ServiceName : serviceType.Name,
                     };
 
                     foreach (var methodInfo in serviceType.GetMethods())
@@ -129,7 +129,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                         var apiMethodMetadata = new ApiMethodMetadata()
                         {
-                            MethodName = methodAttribute.MethodName.Alternate(methodInfo.Name),
+                            MethodName = methodAttribute.MethodName.HasValue() ? methodAttribute.MethodName : methodInfo.Name,
                         };
 
                         foreach (var parameterInfo in methodInfo.GetParameters())
@@ -138,7 +138,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                             var apiParameterMetadata = new ApiParameterMetadata()
                             {
-                                ParameterName = (parameterAttribute?.ParameterName).Alternate(parameterInfo.Name),
+                                ParameterName = (parameterAttribute != null && parameterAttribute.ParameterName.HasValue()) ? parameterAttribute.ParameterName : parameterInfo.Name,
                                 ParameterType = parameterInfo.ParameterType,
                             };
 
@@ -449,7 +449,7 @@ namespace Guru.AspNetCore.Implementation.Api
 
                     var annotationField = new AnnotationField()
                     {
-                        Name = jsonPropertyAttr?.Alias.Alternate(property.Name),
+                        Name = (jsonPropertyAttr != null && jsonPropertyAttr.Alias.HasValue()) ? jsonPropertyAttr.Alias : property.Name,
                         Description = annotationAttr?.Description ?? string.Empty,
                         IsCollection = property.PropertyType.IsArray || typeof(ICollection).GetTypeInfo().IsAssignableFrom(property.PropertyType),
                     };

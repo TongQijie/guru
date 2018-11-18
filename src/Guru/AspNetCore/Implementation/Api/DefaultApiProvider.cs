@@ -153,7 +153,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 throw new Exception($"service type '{serviceType.FullName}' does not mark attribute 'ApiServiceAttribute'.");
             }
 
-            var apiServiceInfo = new ApiServiceDefinition(serviceType, serviceAttribute.ServiceName.Alternate(serviceType.Name));
+            var apiServiceInfo = new ApiServiceDefinition(serviceType, serviceAttribute.ServiceName.HasValue() ? serviceAttribute.ServiceName : serviceType.Name);
 
             foreach (var methodInfo in serviceType.GetMethods())
             {
@@ -163,13 +163,13 @@ namespace Guru.AspNetCore.Implementation.Api
                     continue;
                 }
 
-                var apiMethodInfo = new ApiMethodDefinition(methodInfo, methodAttribute.MethodName.Alternate(methodInfo.Name), methodAttribute.DefaultMethod);
+                var apiMethodInfo = new ApiMethodDefinition(methodInfo, methodAttribute.MethodName.HasValue() ? methodAttribute.MethodName : methodInfo.Name, methodAttribute.DefaultMethod);
 
                 foreach (var parameterInfo in methodInfo.GetParameters())
                 {
                     var parameterAttribute = parameterInfo.GetCustomAttribute<ApiParameterAttribute>();
 
-                    var apiParameterInfo = new ApiParameterDefinition(parameterInfo, (parameterAttribute?.ParameterName).Alternate(parameterInfo.Name), parameterAttribute?.Formatter ?? string.Empty);
+                    var apiParameterInfo = new ApiParameterDefinition(parameterInfo, (parameterAttribute != null && parameterAttribute.ParameterName.HasValue()) ? parameterAttribute.ParameterName : parameterInfo.Name, parameterAttribute?.Formatter ?? string.Empty);
 
                     apiMethodInfo.Parameters = apiMethodInfo.Parameters.Append(apiParameterInfo);
                 }

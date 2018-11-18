@@ -173,18 +173,6 @@ namespace Guru.ExtensionMethod
             return stringValue.FullPath().EqualsWith(anotherPath.FullPath());
         }
 
-        public static string Alternate(this string stringValue, string alternate)
-        {
-            if (stringValue.HasValue())
-            {
-                return stringValue;
-            }
-            else
-            {
-                return alternate;
-            }
-        }
-
         public static string Md5(this string stringValue, bool lowercase = true)
         {
             return lowercase ? CryptoUtils.Md5(stringValue) : CryptoUtils.Md5(stringValue).ToUpper();
