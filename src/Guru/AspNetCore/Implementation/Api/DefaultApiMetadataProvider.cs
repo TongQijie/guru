@@ -69,7 +69,7 @@ namespace Guru.AspNetCore.Implementation.Api
                     apiMethodMetadata.InputParameters[0].ParameterType.IsClass &&
                     apiMethodMetadata.InputParameters[0].ParameterType != typeof(string))
                 {
-                    stringBuilder.Append($"<pre>{BuildSampleValue(apiMethodMetadata.InputParameters[0])}</pre>");
+                    stringBuilder.Append($"<pre style=\"white-space:pre-wrap;word-wrap:break-word;\">{BuildSampleValue(apiMethodMetadata.InputParameters[0])}</pre>");
                     BuildTypeAnnotation(stringBuilder, apiMethodMetadata.InputParameters[0].ParameterType);
                 }
                 else
@@ -77,7 +77,7 @@ namespace Guru.AspNetCore.Implementation.Api
                     foreach (var parameter in apiMethodMetadata.InputParameters)
                     {
                         stringBuilder.Append($"<h5>{parameter.ParameterName}</h5>");
-                        stringBuilder.Append($"<pre>{BuildSampleValue(parameter)}</pre>");
+                        stringBuilder.Append($"<pre style=\"white-space:pre-wrap;word-wrap:break-word;\">{BuildSampleValue(parameter)}</pre>");
                     }
                 }
             }
@@ -86,7 +86,7 @@ namespace Guru.AspNetCore.Implementation.Api
                 if (apiMethodMetadata.OutputParameter.ParameterType != typeof(void))
                 {
                     stringBuilder.Append($"<h4>RESPONSE</h4>");
-                    stringBuilder.Append($"<pre>{BuildSampleValue(apiMethodMetadata.OutputParameter)}</pre>");
+                    stringBuilder.Append($"<pre style=\"white-space:pre-wrap;word-wrap:break-word;\">{BuildSampleValue(apiMethodMetadata.OutputParameter)}</pre>");
                     BuildTypeAnnotation(stringBuilder, apiMethodMetadata.OutputParameter.ParameterType);
                 }
             }
