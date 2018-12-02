@@ -6,6 +6,11 @@
 
         public static T Ok<T>(this T response) where T : ResponseBase
         {
+            return response.Ok("Ok");
+        }
+
+        public static T Ok<T>(this T response, string message) where T : ResponseBase
+        {
             if (response == null)
             {
                 return response;
@@ -17,7 +22,7 @@
             }
 
             response.Head.Status = 0;
-            response.Head.Message = "Ok";
+            response.Head.Message = message;
 
             return response;
         }
